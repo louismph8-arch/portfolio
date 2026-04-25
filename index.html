@@ -1396,238 +1396,293 @@ else
 (function(){
   const canvas=document.getElementById('spine-canvas');
   const W=640,H=window.innerHeight;
+  // ── WIDER CANVAS FOR FULL SKELETON ──
+  canvas.style.width='720px';canvas.style.left='50%';canvas.style.transform='translateX(-50%)';
   const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
   renderer.setSize(W,H);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   renderer.setClearColor(0x000000,0);
-  // ── PBR pipeline ──
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.35;
+  renderer.toneMappingExposure=1.4;
   renderer.outputColorSpace=THREE.SRGBColorSpace;
 
   const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(34,W/H,.1,200);
-  camera.position.set(0,0,16);
+  const camera=new THREE.PerspectiveCamera(52,W/H,.1,300);
+  camera.position.set(0,0,27);
 
-  // ── CINEMATIC BONE LIGHTING ──
-  // Hemisphere: warm sky (ceiling light) + dark warm ground bounce
-  scene.add(new THREE.HemisphereLight(0xfff4d8,0x1a0e00,1.8));
-  // Directional key — sharp museum spotlight from top-front
-  const dKey=new THREE.DirectionalLight(0xfff8e8,4.5);
-  dKey.position.set(4,10,12);scene.add(dKey);
-  // Orbiting point — catches bone surface dynamically
-  const pOrbit=new THREE.PointLight(0xffeedd,5,30);scene.add(pOrbit);
-  // Cool rim from behind — depth separation
-  const pRim=new THREE.PointLight(0x99aaff,4.5,28);pRim.position.set(-7,-3,-6);scene.add(pRim);
-  // Warm fill from below — simulates reflected OR table light
-  const pFill=new THREE.PointLight(0xffcc88,2.5,25);pFill.position.set(1,-14,5);scene.add(pFill);
+  // ── CINEMATIC SKELETON LIGHTING ──
+  scene.add(new THREE.HemisphereLight(0xfff4d8,0x1a0e00,1.6));
+  const dKey=new THREE.DirectionalLight(0xfff8e8,5);
+  dKey.position.set(5,12,14);scene.add(dKey);
+  const pOrbit=new THREE.PointLight(0xffeedd,6,50);scene.add(pOrbit);
+  const pRim=new THREE.PointLight(0x99aaff,5,40);pRim.position.set(-8,-3,-7);scene.add(pRim);
+  const pFill=new THREE.PointLight(0xffcc88,3,45);pFill.position.set(2,-20,6);scene.add(pFill);
+  const pBlood=new THREE.PointLight(0xff1744,2,30);pBlood.position.set(0,-8,8);scene.add(pBlood);
 
-  // ── PBR BONE MATERIALS ──
-  // Cortical bone: ivory-white, slightly rough (like polished bone)
-  const boneMat=new THREE.MeshStandardMaterial({
-    color:0xf4eddf,roughness:.28,metalness:.0,
-    emissive:0x0a0806,emissiveIntensity:1,
-    transparent:true,opacity:.96
-  });
-  // Cartilage disc: warm amber-white, rougher surface
-  const discMat=new THREE.MeshStandardMaterial({
-    color:0xcbb86a,roughness:.72,metalness:.0,
-    emissive:0x080500,emissiveIntensity:1,
-    transparent:true,opacity:.85
-  });
-  // Processes: bright bone-white, very smooth (cortical surface)
-  const procMat=new THREE.MeshStandardMaterial({
-    color:0xeee8da,roughness:.22,metalness:.0,
-    emissive:0x080705,emissiveIntensity:1,
-    transparent:true,opacity:.93
-  });
-  // Spinal cord: warm neural yellow
-  const cordMat=new THREE.MeshStandardMaterial({
-    color:0xffc840,roughness:.55,metalness:.0,
-    emissive:0x3a1e00,emissiveIntensity:1.2,
-    transparent:true,opacity:.92
-  });
+  // ── PBR MATERIALS ──
+  const B=new THREE.MeshStandardMaterial({color:0xf4eddf,roughness:.28,metalness:0,emissive:new THREE.Color(0x080604),emissiveIntensity:1,transparent:true,opacity:0});
+  const D=new THREE.MeshStandardMaterial({color:0xcbb86a,roughness:.72,metalness:0,emissive:new THREE.Color(0x060400),emissiveIntensity:1,transparent:true,opacity:0});
+  const C=new THREE.MeshStandardMaterial({color:0xffc840,roughness:.55,metalness:0,emissive:new THREE.Color(0x3a1e00),emissiveIntensity:1.2,transparent:true,opacity:0});
+  const mb=()=>B.clone(), md=()=>D.clone(), mc=()=>C.clone();
 
-  const spineGroup=new THREE.Group();
-  const vertebraMeshes=[];
+  const skelGroup=new THREE.Group();
+  // Reveal groups [threshold 0-1, meshes[]]
+  const RG=[
+    {t:0.00,m:[]}, // 0 skull
+    {t:0.06,m:[]}, // 1 clavicles+scapulae
+    {t:0.14,m:[]}, // 2 upper ribs+sternum
+    {t:0.22,m:[]}, // 3 mid ribs
+    {t:0.30,m:[]}, // 4 lower ribs
+    {t:0.18,m:[]}, // 5 humerus
+    {t:0.30,m:[]}, // 6 forearms+hands
+    {t:0.62,m:[]}, // 7 pelvis
+    {t:0.70,m:[]}, // 8 femurs
+    {t:0.80,m:[]}, // 9 tibia+fibula
+    {t:0.90,m:[]}, // 10 feet
+  ];
+  function bm(geo,gi,mat){
+    const m=new THREE.Mesh(geo,mat||mb());
+    m.material.transparent=true; m.material.opacity=0;
+    skelGroup.add(m); RG[gi].m.push(m); return m;
+  }
 
-  // Anatomical S-curve — more pronounced for realism
+  // S-CURVE
   function sx(t){return Math.sin(t*Math.PI*2.4)*.42;}
-  function sz(t){
-    if(t<.28)return t*-1.1;            // cervical lordosis
-    if(t<.66)return -.308+(t-.28)*1.4; // thoracic kyphosis
-    return .224-(t-.66)*1.2;           // lumbar lordosis
-  }
+  function sz(t){if(t<.28)return t*-1.1;if(t<.66)return-.308+(t-.28)*1.4;return.224-(t-.66)*1.2;}
+  const VCOUNT=26,TH=12.5;
 
-  const VCOUNT=26;
-  const TH=12.5; // total height — taller spine
+  // ════ SPINAL CORD ════
+  const cPts=[];for(let i=0;i<=40;i++){const t=i/40;cPts.push(new THREE.Vector3(sx(t)*.6,TH/2-t*TH,sz(t)*.6));}
+  const cord=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(cPts),80,.07,10,false),mc());
+  skelGroup.add(cord);
 
-  // Spinal cord path
-  const cordPts=[];
-  for(let i=0;i<=40;i++){
-    const t=i/40;
-    cordPts.push(new THREE.Vector3(sx(t)*.6, TH/2-t*TH, sz(t)*.6));
-  }
-  const cordCurve=new THREE.CatmullRomCurve3(cordPts);
-  const cordGeo=new THREE.TubeGeometry(cordCurve,80,.07,10,false);
-  const cord=new THREE.Mesh(cordGeo,cordMat);
-  spineGroup.add(cord);
-
+  // ════ VERTEBRAE ════
+  const vMeshes=[];
   for(let i=0;i<VCOUNT;i++){
-    const t=i/(VCOUNT-1);
-    const y=TH/2-t*TH;
-    const x=sx(t), z=sz(t);
-    const vGroup=new THREE.Group();
-    vGroup.position.set(x,y,z);
-
-    // Size: cervical→thoracic→lumbar gradient
-    const r = t<.27 ? 0.30+t*.28 : t<.73 ? 0.42+t*.1 : 0.56+t*.08;
-
-    // ── Corpus vertebrae (body) — stacked cylinders give endplate detail ──
-    const bodyBot=new THREE.CylinderGeometry(r*1.02,r*1.08,.12,18);
-    const bodyMid=new THREE.CylinderGeometry(r*.96,r*1.02,.1,18);
-    const bodyTop=new THREE.CylinderGeometry(r*.98,r*.96,.12,18);
-    const bBot=new THREE.Mesh(bodyBot,boneMat); bBot.position.y=-.11;
-    const bMid=new THREE.Mesh(bodyMid,boneMat);
-    const bTop=new THREE.Mesh(bodyTop,boneMat); bTop.position.y=.11;
-    const body=bMid; // reference for glow
-    vGroup.add(bBot,bMid,bTop);
-
-    // ── Vertebral arch laminae (two flat plates forming the arch) ──
-    [-1,1].forEach(side=>{
-      const lamGeo=new THREE.BoxGeometry(.18,.3,.22);
-      const lam=new THREE.Mesh(lamGeo,procMat);
-      lam.position.set(side*r*.75,0,-.25);
-      lam.rotation.y=side*.3;
-      vGroup.add(lam);
+    const t=i/(VCOUNT-1),y=TH/2-t*TH,x=sx(t),z=sz(t);
+    const vG=new THREE.Group(); vG.position.set(x,y,z);
+    const r=t<.27?0.30+t*.28:t<.73?0.42+t*.1:0.56+t*.08;
+    const body=new THREE.Mesh(new THREE.CylinderGeometry(r,r*1.08,.28,16),mb()); vG.add(body);
+    [-.14,.14].forEach(yo=>{const ep=new THREE.Mesh(new THREE.CylinderGeometry(r*.98,r,.06,16),mb());ep.position.y=yo;vG.add(ep);});
+    [-1,1].forEach(s=>{
+      const lam=new THREE.Mesh(new THREE.BoxGeometry(.16,.28,.2),mb());lam.position.set(s*r*.75,0,-.24);lam.rotation.y=s*.3;vG.add(lam);
     });
-
-    // ── Spinous process — longer/angled on thoracic for anatomical accuracy ──
-    const spLen=t<.27?.42:t<.73?.65+t*.15:.44;
-    const spAngle=t<.27?.05:t<.73?.22:.08; // caudal tilt on thoracic
-    const spGeo=new THREE.ConeGeometry(.09,spLen,10);
-    const sp=new THREE.Mesh(spGeo,procMat);
-    sp.position.set(0,-spLen*.15,-r-.32);
-    sp.rotation.x=Math.PI/2+spAngle;
-    vGroup.add(sp);
-
-    // ── Transverse processes — bilateral wings ──
-    [-1,1].forEach(side=>{
-      const tpLen=t<.27?.36:t<.73?.58:.42;
-      const tpGeo=new THREE.ConeGeometry(.075,tpLen,10);
-      const tp=new THREE.Mesh(tpGeo,procMat);
-      tp.position.set(side*(r+tpLen*.5),0,-.14);
-      tp.rotation.z=-side*(Math.PI/2-.08);
-      vGroup.add(tp);
-
-      // Superior/inferior articular facets (small joints)
-      [-1,1].forEach(vy=>{
-        const facetGeo=new THREE.CylinderGeometry(.072,.072,.06,8);
-        const facet=new THREE.Mesh(facetGeo,boneMat);
-        facet.position.set(side*.32,vy*.2,-.28);
-        facet.rotation.x=Math.PI/2;
-        vGroup.add(facet);
-      });
+    const spL=t<.27?.42:t<.73?.62+t*.14:.44,spA=t<.27?.05:t<.73?.2:.08;
+    const sp=new THREE.Mesh(new THREE.ConeGeometry(.088,spL,10),mb());sp.position.set(0,-spL*.15,-r-.3);sp.rotation.x=Math.PI/2+spA;vG.add(sp);
+    [-1,1].forEach(s=>{
+      const tpL=t<.27?.34:t<.73?.56:.40;
+      const tp=new THREE.Mesh(new THREE.ConeGeometry(.072,tpL,10),mb());tp.position.set(s*(r+tpL*.5),0,-.13);tp.rotation.z=-s*(Math.PI/2-.08);vG.add(tp);
     });
-
-    // Tilt vGroup to follow curve
-    if(i<VCOUNT-1){
-      const t2=(i+1)/(VCOUNT-1);
-      const dir=new THREE.Vector3(sx(t2)-x, (TH/2-t2*TH)-y, sz(t2)-z).normalize();
-      vGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir);
-    }
-
-    // Start invisible — will be revealed by scroll
-    vGroup.traverse(m=>{if(m.isMesh)m.material=m.material.clone();});
-    vGroup.traverse(m=>{if(m.isMesh){m.material.transparent=true;m.material.opacity=0;}});
-    spineGroup.add(vGroup);
-    vertebraMeshes.push({group:vGroup,body,t,origEmissive:new THREE.Color(0x004466)});
-
-    // Intervertebral disc
-    if(i<VCOUNT-1){
-      const t2=(i+1)/(VCOUNT-1);
-      const y2=TH/2-t2*TH, x2=sx(t2), z2=sz(t2);
-      const dGeo=new THREE.CylinderGeometry(r*.9,r*.9,.1,12);
-      const disc=new THREE.Mesh(dGeo,discMat);
-      disc.position.set((x+x2)/2,(y+y2)/2,(z+z2)/2);
-      spineGroup.add(disc);
-    }
+    if(i<VCOUNT-1){const t2=(i+1)/(VCOUNT-1);vG.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(sx(t2)-x,(TH/2-t2*TH)-y,sz(t2)-z).normalize());}
+    vG.traverse(m=>{if(m.isMesh){m.material=m.material.clone();m.material.transparent=true;m.material.opacity=0;}});
+    skelGroup.add(vG); vMeshes.push({g:vG,b:body,t});
+    if(i<VCOUNT-1){const t2=(i+1)/(VCOUNT-1),y2=TH/2-t2*TH,x2=sx(t2),z2=sz(t2);const disc=new THREE.Mesh(new THREE.CylinderGeometry(r*.88,r*.88,.1,12),md());disc.position.set((x+x2)/2,(y+y2)/2,(z+z2)/2);disc.material.opacity=0;skelGroup.add(disc);vMeshes[vMeshes.length-1].disc=disc;}
   }
 
-  // ── Sacrum (5 fused vertebrae — wider triangular bone) ──
-  const sacGeo=new THREE.CylinderGeometry(.62,.38,.95,12);
-  const sac=new THREE.Mesh(sacGeo,boneMat);
-  sac.position.set(sx(1),-TH/2-.42,sz(1));
-  spineGroup.add(sac);
-  // Sacral wings (alae)
-  [-1,1].forEach(side=>{
-    const alaGeo=new THREE.CylinderGeometry(.18,.1,.3,8);
-    const ala=new THREE.Mesh(alaGeo,boneMat);
-    ala.position.set(sx(1)+side*.65,-TH/2-.28,sz(1));
-    ala.rotation.z=side*.45;
-    spineGroup.add(ala);
+  // ════ SACRUM + COCCYX (pelvis group) ════
+  const sac=bm(new THREE.CylinderGeometry(.62,.38,.95,12),7);sac.position.set(sx(1),-TH/2-.42,sz(1));
+  [-1,1].forEach(s=>{const a=bm(new THREE.CylinderGeometry(.18,.1,.3,8),7);a.position.set(sx(1)+s*.62,-TH/2-.28,sz(1));a.rotation.z=s*.45;});
+  const cox=bm(new THREE.ConeGeometry(.2,.55,10),7);cox.position.set(sx(1),-TH/2-1.05,sz(1));
+
+  // ════ SKULL ════
+  const SY=TH/2+1.95;
+  const cran=bm(new THREE.SphereGeometry(1.1,18,14),0);cran.scale.set(.95,1.06,.91);cran.position.set(0,SY,.1);
+  // Frontal bone
+  const fron=bm(new THREE.SphereGeometry(.72,14,10),0);fron.scale.set(1,.55,.7);fron.position.set(0,SY-.75,.78);
+  // Occipital
+  const occ=bm(new THREE.SphereGeometry(.38,10,8),0);occ.scale.set(1.1,.6,1);occ.position.set(0,SY-.35,-.82);
+  // Zygomatic arches (cheekbones)
+  [-1,1].forEach(s=>{
+    const zy=bm(new THREE.SphereGeometry(.2,10,8),0);zy.scale.set(1.6,.65,1);zy.position.set(s*.82,SY-.68,.78);
+    // Temporal (side of skull)
+    const tmp=bm(new THREE.SphereGeometry(.55,12,10),0);tmp.scale.set(.6,.9,.75);tmp.position.set(s*.92,SY-.1,-.1);
   });
-  // ── Coccyx (tailbone — pointed tip) ──
-  const coxGeo=new THREE.ConeGeometry(.2,.55,10);
-  const cox=new THREE.Mesh(coxGeo,boneMat);
-  cox.position.set(sx(1),-TH/2-1.05,sz(1));
-  spineGroup.add(cox);
+  // Nasal bone
+  bm(new THREE.BoxGeometry(.2,.3,.12),0).position.set(0,SY-.72,.92);
+  // Eye sockets (orbital rings)
+  [-1,1].forEach(s=>{
+    const orb=bm(new THREE.TorusGeometry(.22,.055,8,16),0);orb.position.set(s*.44,SY-.56,.82);orb.rotation.x=.15;orb.rotation.y=s*.18;
+  });
+  // Mandible
+  const mPath=new THREE.CatmullRomCurve3([new THREE.Vector3(-.7,SY-1.28,.52),new THREE.Vector3(-.38,SY-1.5,.92),new THREE.Vector3(0,SY-1.55,1.02),new THREE.Vector3(.38,SY-1.5,.92),new THREE.Vector3(.7,SY-1.28,.52)]);
+  bm(new THREE.TubeGeometry(mPath,16,.09,8,false),0);
+  [-1,1].forEach(s=>{const ram=bm(new THREE.BoxGeometry(.1,.44,.12),0);ram.position.set(s*.7,SY-1.08,.48);ram.rotation.y=s*.28;});
+  // Upper teeth ridge
+  const uTR=bm(new THREE.TorusGeometry(.5,.048,5,14,Math.PI),0);uTR.position.set(0,SY-1.18,.9);uTR.rotation.x=Math.PI/2;
+  const lTR=bm(new THREE.TorusGeometry(.48,.042,5,14,Math.PI),0);lTR.position.set(0,SY-1.46,.88);lTR.rotation.x=Math.PI/2;
 
-  spineGroup.position.set(0,.8,0);
-  scene.add(spineGroup);
+  // ════ CLAVICLES + SCAPULAE ════
+  const T1Y=TH/2-(1/(VCOUNT-1))*TH;
+  [-1,1].forEach(s=>{
+    // Clavicle
+    const cP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*.32,T1Y+.12,1.1),new THREE.Vector3(s*1.75,T1Y+.22,.42),new THREE.Vector3(s*3.0,T1Y-.08,-.12)]);
+    bm(new THREE.TubeGeometry(cP,14,.1,8,false),1);
+    // Scapula (shoulder blade)
+    const sc=bm(new THREE.CylinderGeometry(.12,.92,.1,5),1);sc.scale.set(1,1,1.55);sc.position.set(s*2.6,T1Y-1.85,-.68);sc.rotation.z=s*.12;
+    // Spine of scapula
+    const sP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*1.8,T1Y-.88,-.48),new THREE.Vector3(s*2.78,T1Y-.98,-.58),new THREE.Vector3(s*3.38,T1Y-1.18,-.32)]);
+    bm(new THREE.TubeGeometry(sP,10,.08,7,false),1);
+    // Acromion
+    const ac=bm(new THREE.SphereGeometry(.2,10,8),1);ac.position.set(s*3.18,T1Y-.28,-.18);
+    // Coracoid process
+    const co=bm(new THREE.ConeGeometry(.1,.3,8),1);co.position.set(s*2.85,T1Y-.15,.25);co.rotation.z=s*1.2;
+  });
 
-  // Scroll state
-  let scrollRatio=0,scrollY=0,targetRotY=0;
-  window.addEventListener('scroll',()=>{
-    scrollY=window.scrollY;
-    scrollRatio=scrollY/(document.body.scrollHeight-window.innerHeight);
-  },{passive:true});
+  // ════ RIBCAGE ════
+  // Sternum
+  const stern=bm(new THREE.BoxGeometry(.22,4.0,.38),2);stern.position.set(0,T1Y-2.0,2.0);
+  const manu=bm(new THREE.BoxGeometry(.3,.38,.3),2);manu.position.set(0,T1Y-.08,1.88);
+  // 12 rib pairs
+  for(let ri=1;ri<=12;ri++){
+    const tR=ri/(VCOUNT-1),yR=TH/2-tR*TH;
+    const floating=ri>=11,gi=ri<=4?2:ri<=8?3:4;
+    [-1,1].forEach(s=>{
+      const rW=0.25+ri*.16,rD=0.28+ri*.045;
+      const sZ=floating?1.1:2.0,sY=floating?yR-.1:T1Y-.48-ri*.33;
+      const pts=[
+        new THREE.Vector3(s*.5,yR,sz(tR)*.5),
+        new THREE.Vector3(s*(1.35+rW*.5),yR-.12,sz(tR)*.35+.52),
+        new THREE.Vector3(s*(1.85+rW),yR-rD*.4,sz(tR)*.2+1.08),
+        new THREE.Vector3(s*(1.55+rW*.55),yR-rD*.72,sz(tR)*.1+1.55),
+      ];
+      if(!floating)pts.push(new THREE.Vector3(s*.3,sY,sZ));
+      bm(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),floating?8:14,.068,8,false),gi);
+    });
+  }
+
+  // ════ ARMS ════
+  [-1,1].forEach(s=>{
+    const shX=s*3.05,shY=T1Y-.5;
+    // Humeral head
+    const hh=bm(new THREE.SphereGeometry(.32,12,10),5);hh.position.set(shX,shY,-.1);
+    // Humerus shaft
+    const hP=new THREE.CatmullRomCurve3([new THREE.Vector3(shX,shY,0),new THREE.Vector3(s*3.45,shY-1.8,.18),new THREE.Vector3(s*3.65,shY-3.55,.12),new THREE.Vector3(s*3.55,shY-4.82,.04)]);
+    bm(new THREE.TubeGeometry(hP,18,.17,10,false),5);
+    [-1,1].forEach(ec=>{const cn=bm(new THREE.SphereGeometry(.16,8,7),5);cn.position.set(s*3.52+ec*.18,shY-4.88,.04);});
+    // Elbow+forearm
+    const elY=shY-4.92;
+    const olea=bm(new THREE.SphereGeometry(.15,8,7),6);olea.position.set(s*3.55,elY,-.2);
+    const rP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*3.5,elY,.04),new THREE.Vector3(s*3.38,elY-1.7,.22),new THREE.Vector3(s*3.22,elY-3.6,.16),new THREE.Vector3(s*3.05,elY-4.55,.08)]);
+    bm(new THREE.TubeGeometry(rP,14,.1,8,false),6);
+    const uP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*3.58,elY,-.16),new THREE.Vector3(s*3.5,elY-1.6,-.1),new THREE.Vector3(s*3.38,elY-3.5,-.04),new THREE.Vector3(s*3.22,elY-4.42,0)]);
+    bm(new THREE.TubeGeometry(uP,14,.08,8,false),6);
+    // Hand (palm + 5 fingers)
+    const wX=s*3.05,wY=elY-4.62;
+    const palm=bm(new THREE.BoxGeometry(.52,.55,.14),6);palm.position.set(wX,wY-.3,.08);
+    for(let fi=0;fi<5;fi++){
+      const fX=wX+s*(fi-2)*.1;
+      const fP=new THREE.CatmullRomCurve3([new THREE.Vector3(fX,wY-.58,.08),new THREE.Vector3(fX,wY-1.0,.06),new THREE.Vector3(fX*(fi===0?.92:1),wY-1.32,.04)]);
+      bm(new THREE.TubeGeometry(fP,6,.052+fi*.004,6,false),6);
+    }
+  });
+
+  // ════ PELVIS ════
+  const pelY=-TH/2+.5;
+  [-1,1].forEach(s=>{
+    // Ilium
+    const il=bm(new THREE.SphereGeometry(1.52,14,12),7);il.scale.set(.88,.58,.52);il.position.set(s*2.08,pelY+.42,.22);
+    // Iliac crest
+    const icP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*.6,pelY+.88,.48),new THREE.Vector3(s*1.82,pelY+.97,.32),new THREE.Vector3(s*2.82,pelY+.68,-.02),new THREE.Vector3(s*2.78,pelY+.08,-.52)]);
+    bm(new THREE.TubeGeometry(icP,14,.1,8,false),7);
+    // Acetabulum (hip socket)
+    const ace=bm(new THREE.SphereGeometry(.44,12,10),7);ace.position.set(s*2.12,pelY-.52,.42);
+    // Ischium
+    const isc=bm(new THREE.SphereGeometry(.36,10,8),7);isc.position.set(s*1.68,pelY-1.18,.18);
+    // Pubic ramus
+    const prP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*1.52,pelY-.88,.82),new THREE.Vector3(s*.5,pelY-.82,1.08),new THREE.Vector3(s*.1,pelY-.72,1.12)]);
+    bm(new THREE.TubeGeometry(prP,10,.1,7,false),7);
+  });
+  const ps=bm(new THREE.BoxGeometry(.22,.32,.22),7);ps.position.set(0,pelY-.75,1.12);
+
+  // ════ FEMURS ════
+  const fTop=pelY-.52;
+  [-1,1].forEach(s=>{
+    const fh=bm(new THREE.SphereGeometry(.42,12,10),8);fh.position.set(s*2.12,fTop,.42);
+    const fnP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*2.12,fTop,.42),new THREE.Vector3(s*2.28,fTop-.34,.18),new THREE.Vector3(s*2.38,fTop-.58,.04)]);
+    bm(new THREE.TubeGeometry(fnP,8,.2,10,false),8);
+    const gtr=bm(new THREE.SphereGeometry(.3,10,8),8);gtr.position.set(s*2.78,fTop-.38,-.08);
+    const fP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*2.38,fTop-.58,.04),new THREE.Vector3(s*2.32,fTop-2.0,0),new THREE.Vector3(s*2.22,fTop-4.0,-.14),new THREE.Vector3(s*2.12,fTop-5.25,-.04)]);
+    bm(new THREE.TubeGeometry(fP,20,.22,10,false),8);
+    [-1,1].forEach(cn=>{const c=bm(new THREE.SphereGeometry(.26,10,8),8);c.position.set(s*2.12+cn*.2,fTop-5.32,-.04);});
+    // Patella
+    const pat=bm(new THREE.SphereGeometry(.22,10,8),9);pat.scale.set(1,.78,.58);pat.position.set(s*2.12,fTop-5.4,.34);
+  });
+
+  // ════ TIBIA + FIBULA ════
+  const kY=fTop-5.42;
+  [-1,1].forEach(s=>{
+    const tibP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*2.08,kY-.08,.04),new THREE.Vector3(s*2.0,kY-2.0,.1),new THREE.Vector3(s*1.9,kY-4.0,.1),new THREE.Vector3(s*1.84,kY-4.85,.06)]);
+    bm(new THREE.TubeGeometry(tibP,18,.19,9,false),9);
+    const mmal=bm(new THREE.SphereGeometry(.17,8,7),9);mmal.position.set(s*1.52,kY-4.92,0);
+    const fibP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*2.42,kY-.32,-.08),new THREE.Vector3(s*2.35,kY-2.5,-.04),new THREE.Vector3(s*2.28,kY-4.5,0),new THREE.Vector3(s*2.22,kY-4.88,0)]);
+    bm(new THREE.TubeGeometry(fibP,14,.09,7,false),9);
+    const lmal=bm(new THREE.SphereGeometry(.14,8,7),9);lmal.position.set(s*2.25,kY-4.94,0);
+  });
+
+  // ════ FEET ════
+  const aY=kY-4.96;
+  [-1,1].forEach(s=>{
+    const calc=bm(new THREE.SphereGeometry(.3,10,8),10);calc.scale.set(1,.78,1.42);calc.position.set(s*1.88,aY-.26,-.42);
+    const talus=bm(new THREE.SphereGeometry(.24,10,8),10);talus.position.set(s*1.88,aY-.1,.15);
+    const nav=bm(new THREE.BoxGeometry(.3,.17,.28),10);nav.position.set(s*1.88,aY-.28,.55);
+    for(let mt=0;mt<5;mt++){
+      const mx=s*(1.62+mt*.16);
+      const mtP=new THREE.CatmullRomCurve3([new THREE.Vector3(mx,aY-.32,.82+mt*.03),new THREE.Vector3(mx,aY-.4,1.38+mt*.04),new THREE.Vector3(mx,aY-.46,1.78+mt*.04)]);
+      bm(new THREE.TubeGeometry(mtP,6,.07,6,false),10);
+      const tP=new THREE.CatmullRomCurve3([new THREE.Vector3(mx,aY-.46,1.78+mt*.04),new THREE.Vector3(mx,aY-.5,2.05+mt*.03)]);
+      bm(new THREE.TubeGeometry(tP,4,.055,5,false),10);
+    }
+  });
+
+  skelGroup.position.set(0,5,0);
+  scene.add(skelGroup);
+
+  let skelScrollRatio=0;
+  window.addEventListener('scroll',()=>{skelScrollRatio=window.scrollY/(document.body.scrollHeight-window.innerHeight);},{passive:true});
 
   let spT=0;
-  (function animSpine(){
-    spT+=.0025;
+  (function animSkeleton(){
+    spT+=.0022;
 
-    // Slow elegant Y rotation — like a museum display
-    const baseRot=spT*.6;
-    const scrollNudge=scrollRatio*Math.PI*.5;
-    spineGroup.rotation.y+=(baseRot+scrollNudge-spineGroup.rotation.y)*.035;
+    // Gentle drift + elegant slow rotation
+    const tY=5-skelScrollRatio*3;
+    skelGroup.position.y+=(tY-skelGroup.position.y)*.04;
+    skelGroup.rotation.y+=(.7*spT-skelGroup.rotation.y)*.032;
+    skelGroup.rotation.z=Math.sin(spT*.38)*.028;
+    skelGroup.rotation.x=Math.sin(spT*.22)*.014;
 
-    // Descend with scroll
-    const targetY=.8-scrollRatio*9;
-    spineGroup.position.y+=(targetY-spineGroup.position.y)*.04;
+    // Orbiting key light — bone surface flickers
+    pOrbit.position.set(Math.sin(spT*.45)*9+3,Math.cos(spT*.2)*6,Math.cos(spT*.45)*7+9);
+    // Red pulse from below (eerie effect)
+    pBlood.intensity=1.2+Math.sin(spT*4)*.8;
 
-    // Subtle breathing sway
-    spineGroup.rotation.z=Math.sin(spT*.4)*.04;
-    spineGroup.rotation.x=Math.sin(spT*.25)*.018;
-
-    // Orbiting point light — bone surface catches light dynamically
-    pOrbit.position.set(Math.sin(spT*.5)*6+2, Math.cos(spT*.22)*4, Math.cos(spT*.5)*5+8);
-
-    // Scroll-draw: first 4 vertebrae visible by default, rest reveal on scroll
-    const BASE=4;
-    const revealCount=BASE+Math.floor(scrollRatio*(VCOUNT-BASE));
-    vertebraMeshes.forEach((v,i)=>{
-      const targetOp=i<revealCount?0.95:0;
-      v.group.traverse(m=>{
-        if(m.isMesh)m.material.opacity+=(targetOp-m.material.opacity)*.1;
-      });
-      // Warm bone flash on freshly-revealed vertebra (PBR emissive)
-      if(i<revealCount){
-        const dist=Math.abs(i-(revealCount-1));
-        const glow=Math.max(0,1-dist/3);
-        v.body.material.emissive.setRGB(glow*.5,glow*.38,glow*.18);
-        v.body.material.emissiveIntensity=1+glow*2;
+    // Vertebrae reveal top-to-bottom
+    const BASE=3,revC=BASE+Math.floor(Math.min(1,skelScrollRatio*1.25)*(VCOUNT-BASE));
+    vMeshes.forEach((v,i)=>{
+      const tOp=i<revC?.95:0;
+      v.g.traverse(m=>{if(m.isMesh)m.material.opacity+=(tOp-m.material.opacity)*.1;});
+      if(v.disc){const dOp=i<revC?.85:0;v.disc.material.opacity+=(dOp-v.disc.material.opacity)*.1;}
+      if(i<revC){
+        const dist=Math.abs(i-(revC-1)),glow=Math.max(0,1-dist/3);
+        v.b.material.emissive.setRGB(glow*.5,glow*.38,glow*.18);
+        v.b.material.emissiveIntensity=1+glow*2.2;
       }
     });
 
-    // Spinal cord: fades in with scroll + neural pulse
-    const cordOpacity=Math.min(1,scrollRatio*3);
-    cord.material.opacity=cordOpacity*.92;
+    // Spinal cord neural pulse
+    const cordOp=Math.min(1,skelScrollRatio*3);
+    cord.material.opacity=cordOp*.9;
     const pulse=.4+Math.sin(spT*3.5)*.2;
     cord.material.emissive.setRGB(pulse*.85,pulse*.5,0);
     cord.material.emissiveIntensity=.9+pulse*.7;
 
+    // Reveal groups (skull, ribs, arms, pelvis, legs, feet)
+    RG.forEach(g=>{
+      const tOp=skelScrollRatio>=g.t?.95:0;
+      g.m.forEach(m=>m.material.opacity+=(tOp-m.material.opacity)*.07);
+    });
+
     renderer.render(scene,camera);
-    requestAnimationFrame(animSpine);
+    requestAnimationFrame(animSkeleton);
   })();
 })();
 
