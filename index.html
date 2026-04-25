@@ -1402,10 +1402,11 @@ else
   renderer.setSize(W,H);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   renderer.setClearColor(0x000000,0);
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.4;
+  renderer.toneMappingExposure=1.6;
   renderer.outputColorSpace=THREE.SRGBColorSpace;
 
   const scene=new THREE.Scene();
+  scene.fog=new THREE.FogExp2(0x00010a,.012);
   const camera=new THREE.PerspectiveCamera(52,W/H,.1,300);
   camera.position.set(0,0,27);
 
@@ -1636,8 +1637,62 @@ else
   skelGroup.position.set(0,5,0);
   scene.add(skelGroup);
 
+  // ══ BIO PARTICLE FIELD ══
+  const PC=320;
+  const pGeo=new THREE.BufferGeometry();
+  const pPos=new Float32Array(PC*3), pVel=new Float32Array(PC*3), pCol=new Float32Array(PC*3);
+  const palC=[[0,.9,1],[0,1,.53],[.6,0,1],[1,.42,0]]; // neural,bio,vein,syn
+  for(let i=0;i<PC;i++){
+    pPos[i*3]=(Math.random()-.5)*16; pPos[i*3+1]=(Math.random()-.5)*28; pPos[i*3+2]=(Math.random()-.5)*6-2;
+    pVel[i*3]=(Math.random()-.5)*.007; pVel[i*3+1]=(Math.random()-.5)*.01; pVel[i*3+2]=(Math.random()-.5)*.004;
+    const c=palC[i%4]; pCol[i*3]=c[0]; pCol[i*3+1]=c[1]; pCol[i*3+2]=c[2];
+  }
+  pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+  pGeo.setAttribute('color',new THREE.BufferAttribute(pCol,3));
+  const pMat=new THREE.PointsMaterial({size:.09,vertexColors:true,transparent:true,opacity:.65,sizeAttenuation:true,blending:THREE.AdditiveBlending,depthWrite:false});
+  scene.add(new THREE.Points(pGeo,pMat));
+
+  // ══ ELECTRIC ARC LINES ══
+  const arcDefs=[
+    {a:new THREE.Vector3(0,TH/2+2.8,0),   b:new THREE.Vector3(0,TH/2+.5,0)},   // skull cap
+    {a:new THREE.Vector3(-2.8,TH/2-1.6,0),b:new THREE.Vector3(2.8,TH/2-1.6,0)},// clavicle
+    {a:new THREE.Vector3(-1.8,TH/2-5,0),  b:new THREE.Vector3(-4.2,TH/2-8.5,0)},// L humerus
+    {a:new THREE.Vector3(1.8,TH/2-5,0),   b:new THREE.Vector3(4.2,TH/2-8.5,0)}, // R humerus
+    {a:new THREE.Vector3(-2.6,TH/2-8.8,0),b:new THREE.Vector3(2.6,TH/2-8.8,0)},// pelvis
+    {a:new THREE.Vector3(-2.1,TH/2-9.2,0),b:new THREE.Vector3(-2.0,TH/2-14.0,0)},// L femur
+    {a:new THREE.Vector3(2.1,TH/2-9.2,0), b:new THREE.Vector3(2.0,TH/2-14.0,0)},// R femur
+    {a:new THREE.Vector3(-1.9,TH/2-14.0,0),b:new THREE.Vector3(-1.85,TH/2-18.5,0)},// L tibia
+    {a:new THREE.Vector3(1.9,TH/2-14.0,0), b:new THREE.Vector3(1.85,TH/2-18.5,0)},// R tibia
+  ];
+  const arcLines=arcDefs.map(def=>{
+    const pts=[]; for(let k=0;k<=10;k++)pts.push(def.a.clone().lerp(def.b,k/10));
+    const geo=new THREE.BufferGeometry().setFromPoints(pts);
+    const mat=new THREE.LineBasicMaterial({color:0x00e5ff,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false});
+    const line=new THREE.Line(geo,mat);
+    skelGroup.add(line);
+    return {line,a:def.a,b:def.b,timer:Math.random()*2,cooldown:0};
+  });
+
+  // ══ X-RAY SCAN PLANE ══
+  const scanMat=new THREE.MeshBasicMaterial({color:0x00e5ff,transparent:true,opacity:0,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false});
+  const scanPlane=new THREE.Mesh(new THREE.PlaneGeometry(18,0.08),scanMat);
+  scene.add(scanPlane);
+  // Scan line glow ring
+  const scanRingMat=new THREE.MeshBasicMaterial({color:0x00ffff,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,wireframe:true});
+  const scanRing=new THREE.Mesh(new THREE.TorusGeometry(7,.04,4,32),scanRingMat);
+  scene.add(scanRing);
+
+  // ══ REVEAL FLASH TRACKER ══
+  const RGprev=new Array(RG.length).fill(0);
+  const flashQ=[];
+
   let skelScrollRatio=0;
   window.addEventListener('scroll',()=>{skelScrollRatio=window.scrollY/(document.body.scrollHeight-window.innerHeight);},{passive:true});
+
+  // Extra cyan point light for arc flashes
+  const pArc=new THREE.PointLight(0x00e5ff,0,22); scene.add(pArc);
+  // Green rim from side for X-ray look
+  const pXray=new THREE.PointLight(0x00ff88,2.5,55); pXray.position.set(-14,0,10); scene.add(pXray);
 
   let spT=0;
   (function animSkeleton(){
@@ -1654,6 +1709,48 @@ else
     pOrbit.position.set(Math.sin(spT*.45)*9+3,Math.cos(spT*.2)*6,Math.cos(spT*.45)*7+9);
     // Red pulse from below (eerie effect)
     pBlood.intensity=1.2+Math.sin(spT*4)*.8;
+    // Green X-ray side breathe
+    pXray.intensity=2+Math.sin(spT*1.3)*.8;
+
+    // ── Animate particles ──
+    const pp=pGeo.attributes.position.array;
+    for(let i=0;i<PC;i++){
+      pp[i*3]+=pVel[i*3]; pp[i*3+1]+=pVel[i*3+1]; pp[i*3+2]+=pVel[i*3+2];
+      if(Math.abs(pp[i*3])>8.5){pVel[i*3]*=-1;}
+      if(Math.abs(pp[i*3+1])>14.5){pVel[i*3+1]*=-1;}
+      if(Math.abs(pp[i*3+2])>3.5){pVel[i*3+2]*=-1;}
+    }
+    pGeo.attributes.position.needsUpdate=true;
+    pMat.opacity=.45+skelScrollRatio*.25;
+
+    // ── Electric arcs ──
+    arcLines.forEach(arc=>{
+      arc.timer+=.016;
+      if(arc.timer>(1.2+Math.random()*.8)){
+        arc.timer=0;
+        const pts=[];
+        for(let k=0;k<=10;k++){
+          const p=arc.a.clone().lerp(arc.b,k/10);
+          if(k>0&&k<10){p.x+=(Math.random()-.5)*.35; p.y+=(Math.random()-.5)*.18; p.z+=(Math.random()-.5)*.2;}
+          pts.push(p);
+        }
+        arc.line.geometry.setFromPoints(pts);
+        arc.line.geometry.attributes.position.needsUpdate=true;
+        arc.line.material.opacity=.8+Math.random()*.2;
+        pArc.position.copy(arc.a.clone().add(arc.b).multiplyScalar(.5)).add(skelGroup.position);
+        pArc.intensity=5;
+        setTimeout(()=>{arc.line.material.opacity=0; pArc.intensity=0;},50+Math.random()*70);
+      }
+    });
+
+    // ── X-ray scan plane follows scroll ──
+    const scanWorldY=(TH/2+3.5)-skelScrollRatio*(TH+7)+skelGroup.position.y;
+    scanPlane.position.set(0,scanWorldY,.5);
+    scanRing.position.set(0,scanWorldY,.5);
+    scanRing.rotation.x=Math.PI/2;
+    const scanAlpha=.05+Math.sin(spT*2.8)*.03;
+    scanMat.opacity=scanAlpha*(skelScrollRatio>.02?.9:0);
+    scanRingMat.opacity=scanAlpha*.6*(skelScrollRatio>.02?.9:0);
 
     // Vertebrae reveal top-to-bottom
     const BASE=3,revC=BASE+Math.floor(Math.min(1,skelScrollRatio*1.25)*(VCOUNT-BASE));
@@ -1675,10 +1772,29 @@ else
     cord.material.emissive.setRGB(pulse*.85,pulse*.5,0);
     cord.material.emissiveIntensity=.9+pulse*.7;
 
-    // Reveal groups (skull, ribs, arms, pelvis, legs, feet)
-    RG.forEach(g=>{
+    // ── Reveal groups with FLASH effect ──
+    RG.forEach((g,gi)=>{
       const tOp=skelScrollRatio>=g.t?.95:0;
-      g.m.forEach(m=>m.material.opacity+=(tOp-m.material.opacity)*.07);
+      let justRevealed=false;
+      g.m.forEach(m=>{
+        const prev=m.material.opacity;
+        m.material.opacity+=(tOp-m.material.opacity)*.07;
+        if(RGprev[gi]<0.45&&m.material.opacity>=0.45)justRevealed=true;
+      });
+      RGprev[gi]=tOp>0?Math.max(RGprev[gi],...g.m.map(m=>m.material.opacity)):0;
+      if(justRevealed){
+        // FLASH: bones burst cyan-white then settle
+        g.m.forEach(m=>{m.material.emissive.setRGB(.05,.85,.7); m.material.emissiveIntensity=5;});
+        setTimeout(()=>g.m.forEach(m=>{m.material.emissive.setRGB(.04,.28,.22); m.material.emissiveIntensity=1.4;}),80);
+        setTimeout(()=>g.m.forEach(m=>{m.material.emissive.setRGB(.03,.025,.015); m.material.emissiveIntensity=.8;}),260);
+        // Burst arc light near the just-revealed group
+        const rep=g.m[0];
+        if(rep){
+          const wp=new THREE.Vector3(); rep.getWorldPosition(wp);
+          pArc.position.copy(wp); pArc.intensity=12;
+          setTimeout(()=>pArc.intensity=0,120);
+        }
+      }
     });
 
     renderer.render(scene,camera);
