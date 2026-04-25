@@ -50,13 +50,29 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 ::-webkit-scrollbar-thumb{background:linear-gradient(#9900ff,#00e5ff)}
 
 /* ── CURSOR ── */
-#cur{position:fixed;width:8px;height:8px;background:var(--neural);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 12px var(--neural),0 0 24px rgba(0,229,255,.4);transition:width .2s,height .2s,background .2s}
-#cur.big{width:44px;height:44px;background:transparent;border:1px solid rgba(0,229,255,.5);box-shadow:0 0 20px rgba(0,229,255,.3)}
-#cur-follow{position:fixed;width:36px;height:36px;border:1px solid rgba(0,229,255,.18);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%)}
-/* nucleus orbiting ring */
-#cur-orbit{position:fixed;width:60px;height:60px;border-radius:50%;pointer-events:none;z-index:9997;transform:translate(-50%,-50%);opacity:.4}
-#cur-orbit::after{content:'';position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(0,255,136,.35);animation:orbitSpin 3s linear infinite}
-@keyframes orbitSpin{to{transform:rotate(360deg)}}
+*{cursor:none!important}
+#c-dot{position:fixed;width:6px;height:6px;background:var(--neural);border-radius:50%;pointer-events:none;z-index:10001;transform:translate(-50%,-50%);box-shadow:0 0 8px var(--neural),0 0 22px rgba(0,229,255,.5);transition:opacity .18s,background .18s,box-shadow .18s,transform .12s}
+#c-ring{position:fixed;width:38px;height:38px;border:1.5px solid rgba(0,229,255,.45);border-radius:50%;pointer-events:none;z-index:10000;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;transition:width .28s cubic-bezier(.4,0,.2,1),height .28s cubic-bezier(.4,0,.2,1),border-color .28s,border-radius .28s,background .28s,transform .28s}
+#c-label{font-family:var(--fc);font-size:.34rem;letter-spacing:.2em;color:var(--neural);text-transform:uppercase;opacity:0;transition:opacity .18s;white-space:nowrap;text-shadow:0 0 8px var(--neural);pointer-events:none}
+#c-cross-h,#c-cross-v{position:fixed;background:var(--bio);pointer-events:none;z-index:10000;transform:translate(-50%,-50%);opacity:0;transition:opacity .2s;box-shadow:0 0 6px var(--bio)}
+#c-cross-h{width:20px;height:1.5px}
+#c-cross-v{width:1.5px;height:20px}
+/* LINK state */
+body.cur-link #c-ring{width:58px;height:58px;border-color:rgba(0,229,255,.7);background:rgba(0,229,255,.04)}
+body.cur-link #c-label{opacity:1}
+body.cur-link #c-dot{transform:translate(-50%,-50%) scale(.45);opacity:.35}
+/* CARD state */
+body.cur-card #c-ring{width:72px;height:72px;border-color:rgba(153,0,255,.75);background:rgba(153,0,255,.05)}
+body.cur-card #c-label{opacity:1;color:var(--vein);text-shadow:0 0 8px var(--vein)}
+body.cur-card #c-dot{background:var(--vein);box-shadow:0 0 8px var(--vein)}
+/* SCAN state (skeleton) */
+body.cur-scan #c-ring{width:54px;height:54px;border-color:rgba(0,255,136,.65);border-radius:4px;background:rgba(0,255,136,.03);transform:translate(-50%,-50%) rotate(45deg)}
+body.cur-scan #c-cross-h,body.cur-scan #c-cross-v{opacity:.85}
+body.cur-scan #c-label{opacity:1;color:var(--bio);text-shadow:0 0 8px var(--bio)}
+body.cur-scan #c-dot{background:var(--bio);box-shadow:0 0 8px var(--bio)}
+/* TEXT state */
+body.cur-txt #c-ring{width:3px;height:26px;border-radius:2px;border-color:rgba(0,229,255,.6)}
+body.cur-txt #c-dot{opacity:0}
 
 /* ── PROGRESS ── */
 #prog{position:fixed;top:0;left:0;height:1px;width:0%;z-index:10000;background:var(--grad);background-size:200%;animation:gradShift 3s linear infinite;box-shadow:0 0 8px var(--neural)}
@@ -435,9 +451,10 @@ footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:fl
 <canvas id="spine-canvas"></canvas>
 
 <!-- CURSOR -->
-<div id="cur"></div>
-<div id="cur-follow"></div>
-<div id="cur-orbit"></div>
+<div id="c-dot"></div>
+<div id="c-ring"><span id="c-label"></span></div>
+<div id="c-cross-h"></div>
+<div id="c-cross-v"></div>
 <div id="prog"></div>
 <div id="glitch"></div>
 
@@ -992,18 +1009,56 @@ setInterval(()=>{
 },2000);
 
 /* ══════════════════════ CURSOR ══════════════════════ */
-const cur=document.getElementById('cur'),cf=document.getElementById('cur-follow'),co=document.getElementById('cur-orbit');
-let mx=innerWidth/2,my=innerHeight/2,fx=mx,fy=my,ox=mx,oy=my;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
-(function moveCF(){
-  fx+=(mx-fx)*.12;fy+=(my-fy)*.12;cf.style.left=fx+'px';cf.style.top=fy+'px';
-  ox+=(mx-ox)*.06;oy+=(my-oy)*.06;co.style.left=ox+'px';co.style.top=oy+'px';
-  requestAnimationFrame(moveCF);
+(function(){
+  const dot=document.getElementById('c-dot');
+  const ring=document.getElementById('c-ring');
+  const label=document.getElementById('c-label');
+  const crossH=document.getElementById('c-cross-h');
+  const crossV=document.getElementById('c-cross-v');
+
+  let mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my;
+
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX; my=e.clientY;
+    dot.style.left=mx+'px'; dot.style.top=my+'px';
+    crossH.style.left=mx+'px'; crossH.style.top=my+'px';
+    crossV.style.left=mx+'px'; crossV.style.top=my+'px';
+  },{passive:true});
+
+  (function animRing(){
+    rx+=(mx-rx)*.1; ry+=(my-ry)*.1;
+    ring.style.left=rx+'px'; ring.style.top=ry+'px';
+    requestAnimationFrame(animRing);
+  })();
+
+  function setState(s,lbl=''){
+    document.body.classList.remove('cur-link','cur-card','cur-scan','cur-txt');
+    if(s)document.body.classList.add('cur-'+s);
+    label.textContent=lbl;
+  }
+
+  // Link / button
+  document.querySelectorAll('a,button,#snd-btn,.sv,.pill,.sk-badge,.ab-stat,.sn,.ci').forEach(el=>{
+    el.addEventListener('mouseenter',()=>setState('link','OPEN'));
+    el.addEventListener('mouseleave',()=>setState(''));
+  });
+  // Flip cards
+  document.querySelectorAll('.proj-card').forEach(el=>{
+    el.addEventListener('mouseenter',()=>setState('card','FLIP'));
+    el.addEventListener('mouseleave',()=>setState(''));
+  });
+  // Skeleton canvas → SCAN mode (medical cross)
+  const sc=document.getElementById('spine-canvas');
+  if(sc){
+    sc.addEventListener('mouseenter',()=>setState('scan','SCAN'));
+    sc.addEventListener('mouseleave',()=>setState(''));
+  }
+  // Text paragraphs → I-beam
+  document.querySelectorAll('p,.ab-bio,.ab-para').forEach(el=>{
+    el.addEventListener('mouseenter',()=>setState('txt'));
+    el.addEventListener('mouseleave',()=>setState(''));
+  });
 })();
-document.querySelectorAll('a,button,.proj,.sv,.pill,.sk-badge,.ab-stat').forEach(el=>{
-  el.addEventListener('mouseenter',()=>cur.classList.add('big'));
-  el.addEventListener('mouseleave',()=>cur.classList.remove('big'));
-});
 
 /* ══════════════════════ VEIN DIVIDERS ══════════════════════ */
 ['ekg1','ekg2','ekg3'].forEach(id=>{
