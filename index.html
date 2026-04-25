@@ -83,10 +83,12 @@ body.cur-txt #c-dot{opacity:0}
 @keyframes gradShift{to{background-position:200%}}
 
 /* ── LOADER ── */
-#loader{position:fixed;inset:0;z-index:9990;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2.5rem}
+#loader{position:fixed;inset:0;z-index:9990;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.8rem}
 .ld-name{font-family:var(--ff);font-size:clamp(1.5rem,5vw,3rem);font-weight:800;letter-spacing:.35em;color:transparent;-webkit-text-stroke:1px rgba(0,229,255,.6);opacity:0}
-.ld-dna{width:min(420px,85vw);height:90px;opacity:0}
-#dna-canvas{width:100%;height:100%}
+.ld-skull{width:220px;height:260px;opacity:0;position:relative}
+#skull-canvas{width:100%;height:100%;display:block}
+.ld-scan-bar{position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--neural),transparent);box-shadow:0 0 12px var(--neural),0 0 28px rgba(0,229,255,.4);animation:ldScan 1.8s linear infinite;opacity:0;pointer-events:none}
+@keyframes ldScan{0%{top:0;opacity:0}5%{opacity:1}95%{opacity:1}100%{top:100%;opacity:0}}
 .ld-data{display:flex;gap:3rem;opacity:0}
 .ld-metric{display:flex;flex-direction:column;align-items:center;gap:.25rem}
 .ld-mlbl{font-family:var(--fc);font-size:.5rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
@@ -472,8 +474,9 @@ footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:fl
 <!-- LOADER -->
 <div id="loader">
   <div class="ld-name">TESTAROSSA</div>
-  <div class="ld-dna">
-    <canvas id="dna-canvas"></canvas>
+  <div class="ld-skull">
+    <canvas id="skull-canvas"></canvas>
+    <div class="ld-scan-bar" id="ld-scan-bar"></div>
   </div>
   <div id="ld-pct">0%</div>
   <div class="ld-data">
@@ -872,66 +875,155 @@ const BPMS=['42 BPM','58 BPM','64 BPM','70 BPM','72 BPM','76 BPM'];
 let pct=0,si=0;
 
 gsap.to('.ld-name',{opacity:1,duration:.8,ease:'power3.out',delay:.2});
-gsap.to('.ld-dna',{opacity:1,duration:.5,delay:.5});
-gsap.to('.ld-data',{opacity:1,duration:.5,delay:.8});
+gsap.to('.ld-skull',{opacity:1,duration:.6,delay:.4});
+gsap.to('.ld-data',{opacity:1,duration:.5,delay:.7});
 
-// DNA helix canvas
+// ── SKULL LOADER 3D ──
 (function(){
-  const c=document.getElementById('dna-canvas');
-  if(!c)return;
-  const W=c.offsetWidth||420, H=c.offsetHeight||90;
-  c.width=W; c.height=H;
-  const ctx=c.getContext('2d');
-  const cx=W/2, amp=W*.28, rungs=14;
-  let dnaT=0, dnaRaf;
-  function drawDNA(){
-    dnaT+=.045;
-    ctx.clearRect(0,0,W,H);
-    // Strands
-    for(let s=0;s<2;s++){
-      const off=s*Math.PI;
-      ctx.beginPath();
-      for(let i=0;i<=80;i++){
-        const x=(i/80)*W;
-        const phase=dnaT+(i/80)*Math.PI*4+off;
-        const y=H/2+Math.sin(phase)*amp*.42;
-        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-      }
-      ctx.strokeStyle=s===0?'rgba(0,229,255,.75)':'rgba(153,0,255,.75)';
-      ctx.lineWidth=2;
-      ctx.shadowBlur=8;
-      ctx.shadowColor=s===0?'#00e5ff':'#9900ff';
-      ctx.stroke();
-      ctx.shadowBlur=0;
-    }
-    // Rungs (base pairs)
-    for(let i=0;i<rungs;i++){
-      const x=((i+.5)/rungs)*W;
-      const frac=(i+.5)/rungs;
-      const phase=dnaT+frac*Math.PI*4;
-      const y1=H/2+Math.sin(phase)*amp*.42;
-      const y2=H/2+Math.sin(phase+Math.PI)*amp*.42;
-      const vis=Math.abs(Math.cos(phase));
-      const alpha=.15+vis*.55;
-      ctx.beginPath();
-      ctx.moveTo(x,y1); ctx.lineTo(x,y2);
-      ctx.strokeStyle=`rgba(0,255,136,${alpha})`;
-      ctx.lineWidth=1.2;
-      ctx.stroke();
-      // dots
-      [[y1,'#00e5ff'],[y2,'#9900ff']].forEach(([y,col])=>{
-        ctx.beginPath();
-        ctx.arc(x,y,2.5,0,Math.PI*2);
-        ctx.fillStyle=col;
-        ctx.shadowBlur=6; ctx.shadowColor=col;
-        ctx.fill(); ctx.shadowBlur=0;
-      });
-    }
-    dnaRaf=requestAnimationFrame(drawDNA);
+  const cv=document.getElementById('skull-canvas');
+  if(!cv)return;
+  const W=220,H=260;
+  cv.width=W;cv.height=H;
+
+  const rdr=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
+  rdr.setSize(W,H);rdr.setClearColor(0x000000,0);
+  rdr.toneMapping=THREE.ACESFilmicToneMapping;rdr.toneMappingExposure=1.7;
+  rdr.outputColorSpace=THREE.SRGBColorSpace;
+
+  const sc=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(44,W/H,.1,50);
+  cam.position.set(0,.15,5.2);cam.lookAt(0,0,0);
+
+  sc.add(new THREE.HemisphereLight(0xfff4d8,0x1a0e00,1.8));
+  const dKey=new THREE.DirectionalLight(0xfff8e8,6);dKey.position.set(4,8,10);sc.add(dKey);
+  const pOrb=new THREE.PointLight(0xffeedd,5,30);sc.add(pOrb);
+  const pRim=new THREE.PointLight(0x99aaff,4,25);pRim.position.set(-5,-2,-4);sc.add(pRim);
+  const pBld=new THREE.PointLight(0xff1744,1.5,15);pBld.position.set(0,-3,4);sc.add(pBld);
+  const pSc=new THREE.PointLight(0x00e5ff,0,8);sc.add(pSc);
+
+  const mb=()=>new THREE.MeshStandardMaterial({color:0xf4eddf,roughness:.28,metalness:0,emissive:new THREE.Color(0x080604),emissiveIntensity:.8,transparent:true,opacity:0});
+  const grp=new THREE.Group();sc.add(grp);
+  const bones=[];
+  function ab(geo,at,mat){const m=new THREE.Mesh(geo,mat||mb());grp.add(m);bones.push({m,at});return m;}
+
+  // Cranium
+  const cr=ab(new THREE.SphereGeometry(.9,24,18),.0);cr.scale.set(.97,1.08,.93);
+  // Parietal bumps
+  [-1,1].forEach(s=>{const p=ab(new THREE.SphereGeometry(.42,12,8),.12);p.scale.set(.9,.6,.72);p.position.set(s*.44,.32,-.15);});
+  // Frontal
+  const fr=ab(new THREE.SphereGeometry(.62,16,10),.18);fr.scale.set(1,.5,.7);fr.position.set(0,-.58,.7);
+  // Temporals + mastoids
+  [-1,1].forEach(s=>{
+    const t=ab(new THREE.SphereGeometry(.44,12,8),.26);t.scale.set(.52,.84,.78);t.position.set(s*.78,-.1,-.08);
+    const mP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*.8,-.7,-.24),new THREE.Vector3(s*.86,-.92,-.14),new THREE.Vector3(s*.82,-1.08,-.06)]);
+    ab(new THREE.TubeGeometry(mP,5,.065,6,false),.30);
+  });
+  // Occipital
+  const oc=ab(new THREE.SphereGeometry(.36,12,8),.32);oc.scale.set(1.1,.62,1.06);oc.position.set(0,-.3,-.72);
+  // Supraorbital ridges
+  [-1,1].forEach(s=>{
+    const srP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*.08,-.3,.88),new THREE.Vector3(s*.28,-.28,.9),new THREE.Vector3(s*.46,-.34,.84)]);
+    ab(new THREE.TubeGeometry(srP,5,.038,5,false),.40);
+  });
+  // ORBITAL RINGS — the iconic skull moment
+  [-1,1].forEach(s=>{
+    const orb=ab(new THREE.TorusGeometry(.195,.056,8,20),.46);
+    orb.position.set(s*.36,-.42,.72);orb.rotation.x=.14;orb.rotation.y=s*.2;
+    const dep=ab(new THREE.CylinderGeometry(.16,.13,.18,8),.48);
+    dep.rotation.x=Math.PI/2+.14;dep.position.set(s*.36,-.44,.62);
+  });
+  // Zygomatic arches
+  [-1,1].forEach(s=>{
+    const zP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*.42,-.4,.74),new THREE.Vector3(s*.72,-.48,.6),new THREE.Vector3(s*.88,-.56,.34),new THREE.Vector3(s*.92,-.68,.05)]);
+    ab(new THREE.TubeGeometry(zP,8,.048,6,false),.55);
+  });
+  // Nasal
+  const nas=ab(new THREE.BoxGeometry(.14,.24,.08),.62);nas.position.set(0,-.54,.82);
+  // Nasal bridge
+  const nbP=new THREE.CatmullRomCurve3([new THREE.Vector3(0,-.42,.86),new THREE.Vector3(0,-.6,.88),new THREE.Vector3(0,-.76,.86)]);
+  ab(new THREE.TubeGeometry(nbP,5,.032,4,false),.64);
+  // Mandible body
+  const mP=new THREE.CatmullRomCurve3([new THREE.Vector3(-.66,-1.0,.38),new THREE.Vector3(-.36,-1.18,.72),new THREE.Vector3(0,-1.24,.84),new THREE.Vector3(.36,-1.18,.72),new THREE.Vector3(.66,-1.0,.38)]);
+  ab(new THREE.TubeGeometry(mP,14,.074,7,false),.72);
+  // Mandible rami + condyles
+  [-1,1].forEach(s=>{
+    const rP=new THREE.CatmullRomCurve3([new THREE.Vector3(s*.66,-1.0,.38),new THREE.Vector3(s*.82,-.78,.22),new THREE.Vector3(s*.84,-.46,.1)]);
+    ab(new THREE.TubeGeometry(rP,6,.07,6,false),.76);
+    const cond=ab(new THREE.SphereGeometry(.08,8,6),.78);cond.position.set(s*.84,-.4,.08);
+  });
+  // Chin
+  const chin=ab(new THREE.SphereGeometry(.14,8,6),.80);chin.scale.set(1.3,.62,.72);chin.position.set(0,-1.26,.86);
+  // Teeth ridges + individual teeth
+  const uTR=ab(new THREE.TorusGeometry(.42,.042,5,14,Math.PI),.82);uTR.position.set(0,-.94,.74);uTR.rotation.x=Math.PI/2;
+  const lTR=ab(new THREE.TorusGeometry(.4,.036,5,14,Math.PI),.84);lTR.position.set(0,-1.18,.72);lTR.rotation.x=Math.PI/2;
+  for(let ti=-2;ti<=2;ti++){
+    const ut=ab(new THREE.CylinderGeometry(.034,.04,.13,5),.86+ti*.005);ut.position.set(ti*.12,-.94,.8);
+    const lt=ab(new THREE.CylinderGeometry(.028,.034,.11,5),.88+ti*.005);lt.position.set(ti*.115,-1.18,.74);
   }
-  drawDNA();
-  // stop when loader hides
-  window._stopDNA=()=>cancelAnimationFrame(dnaRaf);
+
+  // Scan plane in 3D scene
+  const scMat=new THREE.MeshBasicMaterial({color:0x00e5ff,transparent:true,opacity:0,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false});
+  const scPlane=new THREE.Mesh(new THREE.PlaneGeometry(3,.05),scMat);sc.add(scPlane);
+
+  // Particle burst
+  const PCOUNT=80;
+  const pPos=new Float32Array(PCOUNT*3);
+  const pVel=[];
+  for(let i=0;i<PCOUNT;i++){
+    const a=Math.random()*Math.PI*2,e=(Math.random()-.5)*Math.PI,sp=.06+Math.random()*.14;
+    pPos[i*3]=pPos[i*3+1]=pPos[i*3+2]=0;
+    pVel.push({x:Math.cos(a)*Math.cos(e)*sp,y:Math.sin(e)*sp+.04,z:Math.sin(a)*Math.cos(e)*sp*.5});
+  }
+  const pGeo=new THREE.BufferGeometry();pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+  const pMat=new THREE.PointsMaterial({color:0x00e5ff,size:.065,transparent:true,opacity:0,blending:THREE.AdditiveBlending,sizeAttenuation:true});
+  const pts=new THREE.Points(pGeo,pMat);sc.add(pts);
+  let burstActive=false,burstDone=false;
+
+  let t=0,ldRaf;
+  // Activate scan bar CSS animation at 50%
+  const scanBar=document.getElementById('ld-scan-bar');
+  let scanBarOn=false;
+
+  (function tick(){
+    t+=.008;
+    grp.rotation.y=Math.sin(t*.8)*.28;grp.rotation.x=Math.sin(t*.5)*.07;
+    pOrb.position.set(Math.sin(t*.9)*3+1.5,Math.cos(t*.5)*2,Math.cos(t*.9)*3+3);
+    pBld.intensity=1.1+Math.sin(t*5)*.5;
+
+    const p=pct/100;
+    bones.forEach(b=>{
+      const tOp=p>=b.at?.95:0;
+      b.m.material.opacity+=(tOp-b.m.material.opacity)*.1;
+      // Glow on freshly-revealed front
+      if(p>=b.at&&p<b.at+.08){const g=1-(p-b.at)/.08;b.m.material.emissive.setRGB(g*.04,g*.75,g*.6);b.m.material.emissiveIntensity=2+g*3;}
+      else{b.m.material.emissive.setRGB(.03,.02,.01);b.m.material.emissiveIntensity=.6;}
+    });
+
+    // Scan plane in 3D
+    if(p>=.48){
+      const sy=1.2-((p-.48)/.52)*3.2;
+      scPlane.position.set(0,sy,.8);
+      scMat.opacity=.055+Math.sin(t*5)*.028;
+      pSc.position.set(0,sy,1.2);pSc.intensity=1.2+Math.sin(t*5)*.4;
+    }
+
+    // CSS scan bar activates at 50%
+    if(p>=.5&&!scanBarOn&&scanBar){scanBarOn=true;scanBar.style.opacity='1';}
+
+    // Burst at 100%
+    if(p>=1&&!burstActive){burstActive=true;pMat.opacity=1;}
+    if(burstActive&&!burstDone){
+      const pp=pGeo.attributes.position.array;
+      for(let i=0;i<PCOUNT;i++){pp[i*3]+=pVel[i].x;pp[i*3+1]+=pVel[i].y;pp[i*3+2]+=pVel[i].z;pVel[i].y-=.0025;}
+      pGeo.attributes.position.needsUpdate=true;
+      pMat.opacity*=.97;
+      if(pMat.opacity<.04)burstDone=true;
+    }
+
+    rdr.render(sc,cam);
+    ldRaf=requestAnimationFrame(tick);
+  })();
+  window._stopSkullLoader=()=>cancelAnimationFrame(ldRaf);
 })();
 
 const sigInt=setInterval(()=>{
@@ -949,14 +1041,15 @@ const pctInt=setInterval(()=>{
     document.getElementById('lm-sta').textContent='LIVE';
     document.getElementById('lm-sig').textContent='RDY';
     document.getElementById('ld-pct').textContent='100%';
-    setTimeout(bootDone,500);
+    setTimeout(bootDone,600);
   }
 },55);
 
 function bootDone(){
-  gsap.to('#loader',{opacity:0,duration:.8,ease:'power2.inOut',onComplete:()=>{
+  // Disassemble: bones fade bottom-to-top quickly
+  gsap.to('#loader',{opacity:0,duration:.9,delay:.3,ease:'power2.inOut',onComplete:()=>{
     document.getElementById('loader').style.display='none';
-    if(window._stopDNA)window._stopDNA();
+    if(window._stopSkullLoader)window._stopSkullLoader();
     heroIn();
   }});
 }
