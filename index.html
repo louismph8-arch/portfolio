@@ -1399,47 +1399,52 @@ else
   const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
   renderer.setSize(W,H);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   renderer.setClearColor(0x000000,0);
-  renderer.shadowMap.enabled=true;
+  // ── PBR pipeline ──
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=1.35;
+  renderer.outputColorSpace=THREE.SRGBColorSpace;
 
   const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(36,W/H,.1,200);
-  camera.position.set(0,0,17);
+  const camera=new THREE.PerspectiveCamera(34,W/H,.1,200);
+  camera.position.set(0,0,16);
 
-  // Anatomical bone lighting — warm key + cool rim + fill
-  scene.add(new THREE.AmbientLight(0x111008,2.5));
-  // Key light — warm front-top (like a surgery lamp)
-  const pKey=new THREE.PointLight(0xfff8e8,9,50);pKey.position.set(3,8,10);scene.add(pKey);
-  // Rim light — cool blue-white from behind
-  const pRim=new THREE.PointLight(0xaabbff,5,35);pRim.position.set(-6,-2,-5);scene.add(pRim);
-  // Fill — soft warm from below (reflected light)
-  const pFill=new THREE.PointLight(0xffe4c0,3,30);pFill.position.set(2,-12,6);scene.add(pFill);
-  // Side accent — gives depth to the processes
-  const pSide=new THREE.PointLight(0xffffff,2.5,20);pSide.position.set(9,0,3);scene.add(pSide);
+  // ── CINEMATIC BONE LIGHTING ──
+  // Hemisphere: warm sky (ceiling light) + dark warm ground bounce
+  scene.add(new THREE.HemisphereLight(0xfff4d8,0x1a0e00,1.8));
+  // Directional key — sharp museum spotlight from top-front
+  const dKey=new THREE.DirectionalLight(0xfff8e8,4.5);
+  dKey.position.set(4,10,12);scene.add(dKey);
+  // Orbiting point — catches bone surface dynamically
+  const pOrbit=new THREE.PointLight(0xffeedd,5,30);scene.add(pOrbit);
+  // Cool rim from behind — depth separation
+  const pRim=new THREE.PointLight(0x99aaff,4.5,28);pRim.position.set(-7,-3,-6);scene.add(pRim);
+  // Warm fill from below — simulates reflected OR table light
+  const pFill=new THREE.PointLight(0xffcc88,2.5,25);pFill.position.set(1,-14,5);scene.add(pFill);
 
-  // ── BONE MATERIALS — ivory white like real skeleton ──
-  // Cortical bone (hard outer shell): near-white ivory
-  const boneMat=new THREE.MeshPhongMaterial({
-    color:0xf2ece0,emissive:0x0c0a06,
-    specular:0xffffff,shininess:220,
-    transparent:true,opacity:.95
+  // ── PBR BONE MATERIALS ──
+  // Cortical bone: ivory-white, slightly rough (like polished bone)
+  const boneMat=new THREE.MeshStandardMaterial({
+    color:0xf4eddf,roughness:.28,metalness:.0,
+    emissive:0x0a0806,emissiveIntensity:1,
+    transparent:true,opacity:.96
   });
-  // Intervertebral disc (cartilage): warm yellowish-white
-  const discMat=new THREE.MeshPhongMaterial({
-    color:0xd4c88a,emissive:0x080602,
-    specular:0xffeebb,shininess:55,
-    transparent:true,opacity:.88
+  // Cartilage disc: warm amber-white, rougher surface
+  const discMat=new THREE.MeshStandardMaterial({
+    color:0xcbb86a,roughness:.72,metalness:.0,
+    emissive:0x080500,emissiveIntensity:1,
+    transparent:true,opacity:.85
   });
-  // Processes (spinous/transverse): slightly cooler bone white
-  const procMat=new THREE.MeshPhongMaterial({
-    color:0xeee8d8,emissive:0x0a0906,
-    specular:0xffffff,shininess:180,
+  // Processes: bright bone-white, very smooth (cortical surface)
+  const procMat=new THREE.MeshStandardMaterial({
+    color:0xeee8da,roughness:.22,metalness:.0,
+    emissive:0x080705,emissiveIntensity:1,
+    transparent:true,opacity:.93
+  });
+  // Spinal cord: warm neural yellow
+  const cordMat=new THREE.MeshStandardMaterial({
+    color:0xffc840,roughness:.55,metalness:.0,
+    emissive:0x3a1e00,emissiveIntensity:1.2,
     transparent:true,opacity:.92
-  });
-  // Spinal cord: warm yellow (nerve tissue)
-  const cordMat=new THREE.MeshPhongMaterial({
-    color:0xffd966,emissive:0x4a2800,
-    specular:0xffeeaa,shininess:180,
-    transparent:true,opacity:.9
   });
 
   const spineGroup=new THREE.Group();
@@ -1463,7 +1468,7 @@ else
     cordPts.push(new THREE.Vector3(sx(t)*.6, TH/2-t*TH, sz(t)*.6));
   }
   const cordCurve=new THREE.CatmullRomCurve3(cordPts);
-  const cordGeo=new THREE.TubeGeometry(cordCurve,60,.055,8,false);
+  const cordGeo=new THREE.TubeGeometry(cordCurve,80,.07,10,false);
   const cord=new THREE.Mesh(cordGeo,cordMat);
   spineGroup.add(cord);
 
@@ -1474,46 +1479,54 @@ else
     const vGroup=new THREE.Group();
     vGroup.position.set(x,y,z);
 
-    // Size varies: cervical small → thoracic med → lumbar large
-    const r = t<.27 ? 0.32+t*.25 : t<.73 ? 0.40+t*.08 : 0.52+t*.1;
+    // Size: cervical→thoracic→lumbar gradient
+    const r = t<.27 ? 0.30+t*.28 : t<.73 ? 0.42+t*.1 : 0.56+t*.08;
 
-    // Vertebra body (corpus vertebrae) — flat cylinder
-    const bodyGeo=new THREE.CylinderGeometry(r,r*1.08,.3,16);
-    const body=new THREE.Mesh(bodyGeo,boneMat);
-    vGroup.add(body);
+    // ── Corpus vertebrae (body) — stacked cylinders give endplate detail ──
+    const bodyBot=new THREE.CylinderGeometry(r*1.02,r*1.08,.12,18);
+    const bodyMid=new THREE.CylinderGeometry(r*.96,r*1.02,.1,18);
+    const bodyTop=new THREE.CylinderGeometry(r*.98,r*.96,.12,18);
+    const bBot=new THREE.Mesh(bodyBot,boneMat); bBot.position.y=-.11;
+    const bMid=new THREE.Mesh(bodyMid,boneMat);
+    const bTop=new THREE.Mesh(bodyTop,boneMat); bTop.position.y=.11;
+    const body=bMid; // reference for glow
+    vGroup.add(bBot,bMid,bTop);
 
-    // Vertebral arch — pedicles (two pillars)
+    // ── Vertebral arch laminae (two flat plates forming the arch) ──
     [-1,1].forEach(side=>{
-      const pedGeo=new THREE.BoxGeometry(.14,.28,.18);
-      const ped=new THREE.Mesh(pedGeo,procMat);
-      ped.position.set(side*r*.72,0,-.22);
-      vGroup.add(ped);
+      const lamGeo=new THREE.BoxGeometry(.18,.3,.22);
+      const lam=new THREE.Mesh(lamGeo,procMat);
+      lam.position.set(side*r*.75,0,-.25);
+      lam.rotation.y=side*.3;
+      vGroup.add(lam);
     });
 
-    // Spinous process (dorsal spike) — longer on thoracic
-    const spLen=t<.27?.4:t<.73?.58+t*.12:.38;
-    const spGeo=new THREE.ConeGeometry(.085,spLen,8);
+    // ── Spinous process — longer/angled on thoracic for anatomical accuracy ──
+    const spLen=t<.27?.42:t<.73?.65+t*.15:.44;
+    const spAngle=t<.27?.05:t<.73?.22:.08; // caudal tilt on thoracic
+    const spGeo=new THREE.ConeGeometry(.09,spLen,10);
     const sp=new THREE.Mesh(spGeo,procMat);
-    sp.position.set(0,0,-r-.28);
-    sp.rotation.x=Math.PI/2;
+    sp.position.set(0,-spLen*.15,-r-.32);
+    sp.rotation.x=Math.PI/2+spAngle;
     vGroup.add(sp);
 
-    // Transverse processes (bilateral wings) — wider on thoracic
+    // ── Transverse processes — bilateral wings ──
     [-1,1].forEach(side=>{
-      const tpLen=t<.27?.32:t<.73?.52:.38;
-      const tpGeo=new THREE.ConeGeometry(.068,tpLen,8);
+      const tpLen=t<.27?.36:t<.73?.58:.42;
+      const tpGeo=new THREE.ConeGeometry(.075,tpLen,10);
       const tp=new THREE.Mesh(tpGeo,procMat);
-      tp.position.set(side*(r+tpLen*.48),0,-.12);
-      tp.rotation.z=-side*Math.PI/2;
+      tp.position.set(side*(r+tpLen*.5),0,-.14);
+      tp.rotation.z=-side*(Math.PI/2-.08);
       vGroup.add(tp);
 
-      // Articular facets
-      if(i>0){
-        const facetGeo=new THREE.BoxGeometry(.12,.1,.12);
+      // Superior/inferior articular facets (small joints)
+      [-1,1].forEach(vy=>{
+        const facetGeo=new THREE.CylinderGeometry(.072,.072,.06,8);
         const facet=new THREE.Mesh(facetGeo,boneMat);
-        facet.position.set(side*.3,.2,-.24);
+        facet.position.set(side*.32,vy*.2,-.28);
+        facet.rotation.x=Math.PI/2;
         vGroup.add(facet);
-      }
+      });
     });
 
     // Tilt vGroup to follow curve
@@ -1540,16 +1553,23 @@ else
     }
   }
 
-  // Sacrum (fused base)
-  const sacGeo=new THREE.CylinderGeometry(.55,.35,.8,10);
+  // ── Sacrum (5 fused vertebrae — wider triangular bone) ──
+  const sacGeo=new THREE.CylinderGeometry(.62,.38,.95,12);
   const sac=new THREE.Mesh(sacGeo,boneMat);
-  sac.position.set(sx(1),-TH/2-.35,sz(1));
+  sac.position.set(sx(1),-TH/2-.42,sz(1));
   spineGroup.add(sac);
-
-  // Coccyx (tailbone)
-  const coxGeo=new THREE.ConeGeometry(.18,.4,8);
+  // Sacral wings (alae)
+  [-1,1].forEach(side=>{
+    const alaGeo=new THREE.CylinderGeometry(.18,.1,.3,8);
+    const ala=new THREE.Mesh(alaGeo,boneMat);
+    ala.position.set(sx(1)+side*.65,-TH/2-.28,sz(1));
+    ala.rotation.z=side*.45;
+    spineGroup.add(ala);
+  });
+  // ── Coccyx (tailbone — pointed tip) ──
+  const coxGeo=new THREE.ConeGeometry(.2,.55,10);
   const cox=new THREE.Mesh(coxGeo,boneMat);
-  cox.position.set(sx(1),-TH/2-.85,sz(1));
+  cox.position.set(sx(1),-TH/2-1.05,sz(1));
   spineGroup.add(cox);
 
   spineGroup.position.set(0,.8,0);
@@ -1579,9 +1599,8 @@ else
     spineGroup.rotation.z=Math.sin(spT*.4)*.04;
     spineGroup.rotation.x=Math.sin(spT*.25)*.018;
 
-    // Key light orbits slowly — gives the "bone catching light" effect
-    pKey.position.x=Math.sin(spT*.5)*5+2;
-    pKey.position.z=Math.cos(spT*.5)*5+8;
+    // Orbiting point light — bone surface catches light dynamically
+    pOrbit.position.set(Math.sin(spT*.5)*6+2, Math.cos(spT*.22)*4, Math.cos(spT*.5)*5+8);
 
     // Scroll-draw: first 4 vertebrae visible by default, rest reveal on scroll
     const BASE=4;
@@ -1591,20 +1610,21 @@ else
       v.group.traverse(m=>{
         if(m.isMesh)m.material.opacity+=(targetOp-m.material.opacity)*.1;
       });
-      // Warm white flash on freshly-revealed vertebra
+      // Warm bone flash on freshly-revealed vertebra (PBR emissive)
       if(i<revealCount){
         const dist=Math.abs(i-(revealCount-1));
         const glow=Math.max(0,1-dist/3);
-        v.body.material.emissive.setRGB(glow*.55,glow*.45,glow*.25);
-        v.body.material.emissiveIntensity=glow*1.2;
+        v.body.material.emissive.setRGB(glow*.5,glow*.38,glow*.18);
+        v.body.material.emissiveIntensity=1+glow*2;
       }
     });
 
-    // Spinal cord: quasi-invisible at top, fades in with scroll
+    // Spinal cord: fades in with scroll + neural pulse
     const cordOpacity=Math.min(1,scrollRatio*3);
-    cord.material.opacity=cordOpacity*.9;
-    const pulse=.3+Math.sin(spT*3.5)*.15;
-    cord.material.emissive.setRGB(pulse*.9,pulse*.6,pulse*.1);
+    cord.material.opacity=cordOpacity*.92;
+    const pulse=.4+Math.sin(spT*3.5)*.2;
+    cord.material.emissive.setRGB(pulse*.85,pulse*.5,0);
+    cord.material.emissiveIntensity=.9+pulse*.7;
 
     renderer.render(scene,camera);
     requestAnimationFrame(animSpine);
