@@ -1583,14 +1583,15 @@ else
     pKey.position.x=Math.sin(spT*.5)*5+2;
     pKey.position.z=Math.cos(spT*.5)*5+8;
 
-    // Scroll-draw: reveal vertebrae one by one
-    const revealCount=Math.floor(scrollRatio*(VCOUNT-1))+1;
+    // Scroll-draw: first 4 vertebrae visible by default, rest reveal on scroll
+    const BASE=4;
+    const revealCount=BASE+Math.floor(scrollRatio*(VCOUNT-BASE));
     vertebraMeshes.forEach((v,i)=>{
       const targetOp=i<revealCount?0.95:0;
       v.group.traverse(m=>{
         if(m.isMesh)m.material.opacity+=(targetOp-m.material.opacity)*.1;
       });
-      // Bone glow on the freshly-revealed vertebra (warm white flash)
+      // Warm white flash on freshly-revealed vertebra
       if(i<revealCount){
         const dist=Math.abs(i-(revealCount-1));
         const glow=Math.max(0,1-dist/3);
@@ -1599,7 +1600,9 @@ else
       }
     });
 
-    // Spinal cord warm pulse
+    // Spinal cord: quasi-invisible at top, fades in with scroll
+    const cordOpacity=Math.min(1,scrollRatio*3);
+    cord.material.opacity=cordOpacity*.9;
     const pulse=.3+Math.sin(spT*3.5)*.15;
     cord.material.emissive.setRGB(pulse*.9,pulse*.6,pulse*.1);
 
