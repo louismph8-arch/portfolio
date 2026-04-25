@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Testarossa — Developer & Designer</title>
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://louismph8-arch.github.io/portfolio/">
+<meta property="og:title" content="Testarossa — Dev Discord · Web · Mobile">
+<meta property="og:description" content="Développeur freelance à Montréal — bots Discord, apps mobiles, sites web & bios HTML sur mesure.">
+<meta property="og:image" content="https://louismph8-arch.github.io/portfolio/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Testarossa — Dev Discord · Web · Mobile">
+<meta name="twitter:description" content="Développeur freelance à Montréal — bots Discord, apps mobiles, sites web & bios HTML sur mesure.">
+<meta name="twitter:image" content="https://louismph8-arch.github.io/portfolio/preview.png">
+<meta name="theme-color" content="#00010a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -54,9 +65,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 /* ── LOADER ── */
 #loader{position:fixed;inset:0;z-index:9990;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2.5rem}
 .ld-name{font-family:var(--ff);font-size:clamp(1.5rem,5vw,3rem);font-weight:800;letter-spacing:.35em;color:transparent;-webkit-text-stroke:1px rgba(0,229,255,.6);opacity:0}
-.ld-ekg{width:min(500px,85vw);height:60px;overflow:hidden;opacity:0}
-.ld-ekg svg{width:100%;height:100%}
-.ekg-p{stroke:var(--neural);stroke-width:1.5;fill:none;stroke-dasharray:1200;stroke-dashoffset:1200;filter:drop-shadow(0 0 4px rgba(0,229,255,.8))}
+.ld-dna{width:min(420px,85vw);height:90px;opacity:0}
+#dna-canvas{width:100%;height:100%}
 .ld-data{display:flex;gap:3rem;opacity:0}
 .ld-metric{display:flex;flex-direction:column;align-items:center;gap:.25rem}
 .ld-mlbl{font-family:var(--fc);font-size:.5rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
@@ -73,6 +83,10 @@ nav.scrolled{background:rgba(0,1,10,.88);backdrop-filter:blur(20px);border-botto
 .n-right{display:flex;align-items:center;gap:1.2rem}
 .n-status{display:flex;align-items:center;gap:.45rem;font-family:var(--fc);font-size:.55rem;letter-spacing:.1em;color:var(--muted)}
 .n-dot{width:6px;height:6px;border-radius:50%;background:var(--bio);box-shadow:0 0 8px var(--bio);animation:heartbeat 1.2s ease infinite}
+/* DISPO BADGE */
+.dispo-badge{display:flex;align-items:center;gap:.4rem;padding:.22rem .65rem;border-radius:20px;border:1px solid rgba(0,255,136,.25);background:rgba(0,255,136,.06);font-family:var(--fc);font-size:.5rem;letter-spacing:.12em;color:var(--bio);text-transform:uppercase;animation:dispoPulse 2.5s ease-in-out infinite;white-space:nowrap}
+.dispo-dot{width:5px;height:5px;border-radius:50%;background:var(--bio);box-shadow:0 0 6px var(--bio);animation:heartbeat 1s ease infinite}
+@keyframes dispoPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,.2)}50%{box-shadow:0 0 0 6px rgba(0,255,136,0)}}
 @keyframes heartbeat{0%,100%{transform:scale(1);opacity:1}14%{transform:scale(1.4)}28%{transform:scale(1)}42%{transform:scale(1.2)}70%{transform:scale(1)}}
 #snd-btn{font-family:var(--fc);font-size:.55rem;letter-spacing:.12em;background:transparent;border:1px solid var(--border);color:var(--muted);padding:.28rem .7rem;border-radius:4px;cursor:none;transition:all .2s}
 #snd-btn:hover{color:var(--neural);border-color:rgba(0,229,255,.3);box-shadow:0 0 10px rgba(0,229,255,.15)}
@@ -94,12 +108,15 @@ section{padding:9rem 0;position:relative}
 .s-h span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200%;animation:gradShift 4s linear infinite}
 .rev{opacity:0;transform:translateY(28px)}
 
-/* EKG DIVIDER */
-.ekg-divider{width:100%;height:50px;overflow:hidden;margin:0;pointer-events:none;opacity:.5}
-.ekg-divider svg{width:100%;height:100%}
-.edp{stroke:var(--neural);stroke-width:1;fill:none;stroke-dasharray:2000;stroke-dashoffset:2000;filter:drop-shadow(0 0 3px rgba(0,229,255,.7))}
-.ekg-divider.vis .edp{animation:ekgDraw 3.5s ease-out forwards}
-@keyframes ekgDraw{0%{stroke-dashoffset:2000;opacity:1}70%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:.3}}
+/* VEIN DIVIDER */
+.vein-div{width:100%;height:60px;overflow:visible;margin:0;pointer-events:none;opacity:.6}
+.vein-div svg{width:100%;height:100%;overflow:visible}
+.vp{fill:none;stroke-linecap:round;stroke-dasharray:2400;stroke-dashoffset:2400}
+.vp1{stroke:var(--neural);stroke-width:1.2;filter:drop-shadow(0 0 4px rgba(0,229,255,.8))}
+.vp2{stroke:var(--vein);stroke-width:.7;filter:drop-shadow(0 0 3px rgba(153,0,255,.7))}
+.vein-div.vis .vp{animation:veinGrow 2.8s ease-out forwards}
+.vein-div.vis .vp2{animation:veinGrow 2.8s ease-out .4s forwards}
+@keyframes veinGrow{0%{stroke-dashoffset:2400;opacity:0}10%{opacity:1}80%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:.45}}
 
 /* ══════════════════════════
    HERO
@@ -202,6 +219,34 @@ section{padding:9rem 0;position:relative}
 .proj-feats li{font-family:var(--fc);font-size:.58rem;letter-spacing:.06em;padding:.2rem .55rem;border-radius:3px;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15);color:rgba(0,229,255,.7)}
 .proj-link{font-family:var(--fc);font-size:.58rem;letter-spacing:.12em;color:var(--muted);text-decoration:none;margin-top:.8rem;display:inline-flex;align-items:center;gap:.4rem;transition:color .2s}
 .proj-link:hover{color:var(--neural)}
+
+/* ══════════════════════════
+   FLIP CARDS
+══════════════════════════ */
+.proj-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3.5rem}
+.proj-card{perspective:1000px;height:320px;cursor:none}
+.card-inner{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
+.proj-card.flipped .card-inner{transform:rotateY(180deg)}
+.card-face,.card-back{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;-webkit-backface-visibility:hidden;padding:2rem;display:flex;flex-direction:column;border:1px solid rgba(0,229,255,.1);background:var(--card)}
+.card-face{background:linear-gradient(135deg,rgba(0,229,255,.04),rgba(153,0,255,.04))}
+.card-back{transform:rotateY(180deg);background:linear-gradient(135deg,rgba(153,0,255,.06),rgba(0,229,255,.04));border-color:rgba(153,0,255,.2)}
+.proj-card:hover .card-face{border-color:rgba(0,229,255,.3);box-shadow:0 0 30px rgba(0,229,255,.08)}
+.proj-card.flipped:hover .card-back{border-color:rgba(153,0,255,.4);box-shadow:0 0 30px rgba(153,0,255,.1)}
+.cf-num{font-family:var(--fc);font-size:.52rem;letter-spacing:.25em;color:rgba(0,229,255,.35)}
+.cf-ico{font-size:2.4rem;margin:auto 0 .8rem}
+.cf-name{font-family:var(--ff);font-size:1.2rem;font-weight:800;margin-bottom:.5rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200%;animation:gradShift 4s linear infinite}
+.cf-desc{font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem}
+.cf-tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:auto}
+.cf-hint{font-family:var(--fc);font-size:.46rem;letter-spacing:.15em;color:rgba(0,229,255,.22);margin-top:.6rem;text-align:right}
+.cb-title{font-family:var(--ff);font-size:.9rem;font-weight:700;color:var(--neural);margin-bottom:.9rem}
+.cb-feats{list-style:none;flex:1;display:flex;flex-direction:column;gap:.45rem;margin-bottom:1rem}
+.cb-feats li{font-size:.76rem;color:var(--dim);display:flex;align-items:flex-start;gap:.5rem;line-height:1.5}
+.cb-feats li::before{content:'›';color:var(--neural);flex-shrink:0}
+.cb-link{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--fc);font-size:.58rem;letter-spacing:.1em;color:var(--neural);text-decoration:none;border:1px solid rgba(0,229,255,.2);padding:.3rem .8rem;border-radius:4px;transition:all .2s;margin-top:auto;width:fit-content}
+.cb-link:hover{background:rgba(0,229,255,.08);border-color:rgba(0,229,255,.5)}
+.cb-back-btn{font-family:var(--fc);font-size:.46rem;letter-spacing:.15em;color:rgba(153,0,255,.4);margin-top:.4rem;text-align:right}
+@media(max-width:900px){.proj-cards{grid-template-columns:1fr 1fr}}
+@media(max-width:580px){.proj-cards{grid-template-columns:1fr}.proj-card{height:280px}}
 
 /* ══════════════════════════
    SKILLS
@@ -315,6 +360,24 @@ footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:fl
 #glitch.on{animation:gl .45s steps(1) forwards}
 @keyframes gl{0%{opacity:0}8%{opacity:1;filter:hue-rotate(180deg) saturate(5) brightness(1.5)}18%{opacity:0}28%{opacity:.7;filter:hue-rotate(270deg) saturate(4)}38%{opacity:0}50%{opacity:.4;filter:invert(1) hue-rotate(90deg)}60%,100%{opacity:0}}
 
+/* ── EN CE MOMENT ── */
+.now-block{margin-top:1.8rem;padding:1.2rem 1.5rem;border:1px solid rgba(0,229,255,.1);border-radius:12px;background:rgba(0,229,255,.025);display:flex;align-items:center;gap:1rem;transition:border-color .3s}
+.now-block:hover{border-color:rgba(0,229,255,.22)}
+.now-dot{width:8px;height:8px;border-radius:50%;background:var(--bio);box-shadow:0 0 8px var(--bio);flex-shrink:0;animation:heartbeat 1.2s ease infinite}
+.now-dot.away{background:var(--syn);box-shadow:0 0 8px var(--syn)}
+.now-dot.dnd{background:var(--blood);box-shadow:0 0 8px var(--blood)}
+.now-dot.off{background:rgba(100,110,140,.5);box-shadow:none;animation:none}
+.now-info{flex:1;min-width:0}
+.now-label{font-family:var(--fc);font-size:.46rem;letter-spacing:.2em;color:rgba(0,229,255,.4);text-transform:uppercase;margin-bottom:.28rem}
+.now-activity{font-family:var(--fc);font-size:.72rem;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.now-activity em{color:var(--neural);font-style:normal}
+.now-art{width:38px;height:38px;border-radius:6px;object-fit:cover;opacity:.85;flex-shrink:0;display:none}
+
+/* ── AUDIO VISUALIZER ── */
+#viz-wrap{position:fixed;bottom:0;left:0;right:0;height:48px;z-index:8000;pointer-events:none;opacity:0;transition:opacity .5s}
+#viz-wrap.on{opacity:1}
+#viz-canvas{width:100%;height:100%}
+
 /* ── SPINE ── */
 #spine-canvas{position:fixed;top:0;left:50%;transform:translateX(-50%);width:520px;height:100vh;pointer-events:none;z-index:1;opacity:.28;mix-blend-mode:screen}
 
@@ -322,6 +385,9 @@ footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:fl
 .heart-3d-wrap{display:flex;justify-content:center;margin:2.5rem auto 0;position:relative}
 #heart-canvas{width:300px;height:300px;filter:drop-shadow(0 0 40px rgba(255,23,68,.55));animation:heartPulseGlow 1.1s ease-in-out infinite}
 @keyframes heartPulseGlow{0%,100%{filter:drop-shadow(0 0 25px rgba(255,23,68,.4)) drop-shadow(0 0 60px rgba(255,23,68,.15))}50%{filter:drop-shadow(0 0 50px rgba(255,23,68,.8)) drop-shadow(0 0 100px rgba(255,23,68,.3))}}
+
+/* ── BLOOD TRAIL ── */
+.blood-drop{position:fixed;pointer-events:none;z-index:9996;border-radius:50% 50% 60% 60%;transform:translate(-50%,-50%);background:radial-gradient(ellipse at 40% 30%,#ff4466,#cc0022);box-shadow:0 0 6px rgba(255,23,68,.6);animation:none}
 
 /* ── FLOAT PARTICLES ── */
 .float-particle{position:fixed;border-radius:50%;pointer-events:none;z-index:2;animation:floatUp linear infinite}
@@ -351,10 +417,8 @@ footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:fl
 <!-- LOADER -->
 <div id="loader">
   <div class="ld-name">TESTAROSSA</div>
-  <div class="ld-ekg">
-    <svg viewBox="0 0 500 60" preserveAspectRatio="none">
-      <path class="ekg-p" d="M0,30 L80,30 L95,30 L105,8 L115,52 L125,12 L135,48 L145,30 L165,30 L240,30 L255,30 L265,8 L275,52 L285,12 L295,48 L305,30 L325,30 L400,30 L415,30 L425,8 L435,52 L445,12 L455,48 L465,30 L485,30 L500,30"/>
-    </svg>
+  <div class="ld-dna">
+    <canvas id="dna-canvas"></canvas>
   </div>
   <div id="ld-pct">0%</div>
   <div class="ld-data">
@@ -363,6 +427,9 @@ footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:fl
     <div class="ld-metric"><div class="ld-mlbl">Statut</div><div class="ld-mval" id="lm-sta">BOOT</div></div>
   </div>
 </div>
+
+<!-- AUDIO VISUALIZER -->
+<div id="viz-wrap"><canvas id="viz-canvas"></canvas></div>
 
 <!-- SPINE 3D -->
 <canvas id="spine-canvas"></canvas>
@@ -411,6 +478,7 @@ footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:fl
     <li><a href="#contact">Contact</a></li>
   </ul>
   <div class="n-right">
+    <div class="dispo-badge"><span class="dispo-dot"></span>Disponible</div>
     <div class="n-status"><span class="n-dot"></span><span id="stxt">En ligne</span></div>
     <button id="snd-btn">♪ OFF</button>
   </div>
@@ -487,80 +555,112 @@ footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:fl
           <div class="bio-pulse-label">Signal visiteurs</div>
           <div id="vct">—</div>
         </div>
+        <div class="now-block" id="now-block">
+          <span class="now-dot" id="now-dot"></span>
+          <div class="now-info">
+            <div class="now-label">En ce moment</div>
+            <div class="now-activity" id="now-activity">Chargement…</div>
+          </div>
+          <img class="now-art" id="now-art" alt="art">
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<div class="ekg-divider" id="ekg1"><svg viewBox="0 0 1200 50" preserveAspectRatio="none"><path class="edp" d="M0,25 L150,25 L175,25 L188,5 L200,45 L212,8 L224,42 L236,25 L260,25 L400,25 L425,25 L438,5 L450,45 L462,8 L474,42 L486,25 L510,25 L650,25 L675,25 L688,5 L700,45 L712,8 L724,42 L736,25 L760,25 L900,25 L925,25 L938,5 L950,45 L962,8 L974,42 L986,25 L1010,25 L1200,25"/></svg></div>
+<div class="vein-div" id="ekg1"><svg viewBox="0 0 1200 60" preserveAspectRatio="none">
+  <path class="vp vp1" d="M0,30 C80,30 120,10 200,30 C240,42 260,18 320,30 C380,42 400,15 480,28 C540,38 560,22 640,30 C700,38 720,18 800,30 C860,40 880,15 960,28 C1020,38 1060,22 1120,30 L1200,30"/>
+  <path class="vp vp2" d="M0,38 C60,38 100,50 180,38 C240,28 280,48 360,40 C420,32 460,50 540,38 C600,28 640,46 720,38 C780,30 820,48 900,40 C960,32 1000,48 1080,38 L1200,38"/>
+</svg></div>
 
 <!-- ═══ PROJECTS ═══ -->
 <section id="projects">
   <div class="wrap">
     <div class="rev"><div class="s-tag"><i>◈</i> Organes Vitaux</div><h2 class="s-h">Ce que je <span>crée</span></h2></div>
-    <div class="proj-list rev" id="proj-list">
-      <div class="proj" data-i="0">
-        <div class="proj-num">01</div>
-        <div class="proj-info">
-          <div class="proj-name">Bots Discord</div>
-          <div class="proj-desc">Bots complets — sécurité, modération, utilitaires avancés.</div>
-        </div>
-        <div class="proj-tags"><span class="ptg">Node.js</span><span class="ptg">Discord.js</span><span class="ptg">MongoDB</span></div>
-        <div class="proj-arrow">↗</div>
-        <div class="proj-expand">
-          <ul class="proj-feats">
-            <li>Modération avancée (ban, kick, mute, warn)</li>
-            <li>Commandes slash avec autocomplétion</li>
-            <li>Système de tickets et support</li>
-            <li>Anti-spam et protection anti-raid</li>
-            <li>Logs détaillés de toutes les actions</li>
-          </ul>
-          <a href="https://github.com/louismph8-arch" target="_blank" class="proj-link">→ Voir sur GitHub</a>
-        </div>
-      </div>
-      <div class="proj" data-i="1">
-        <div class="proj-num">02</div>
-        <div class="proj-info">
-          <div class="proj-name">App Mobile Football</div>
-          <div class="proj-desc">Application mobile pour une équipe de foot — joueurs, matchs, stats.</div>
-        </div>
-        <div class="proj-tags"><span class="ptg">React Native</span><span class="ptg">Firebase</span><span class="ptg">Expo</span></div>
-        <div class="proj-arrow">↗</div>
-        <div class="proj-expand">
-          <ul class="proj-feats">
-            <li>Gestion des joueurs et profils</li>
-            <li>Calendrier des matchs</li>
-            <li>Statistiques en temps réel</li>
-            <li>Messagerie interne d'équipe</li>
-            <li>Compatible iOS &amp; Android</li>
-          </ul>
-          <a href="https://github.com/louismph8-arch" target="_blank" class="proj-link">→ Voir sur GitHub</a>
+    <div class="proj-cards rev">
+      <!-- CARD 1 -->
+      <div class="proj-card" id="pc0">
+        <div class="card-inner">
+          <div class="card-face">
+            <div class="cf-num">01 / 03</div>
+            <div class="cf-ico">🤖</div>
+            <div class="cf-name">Bots Discord</div>
+            <div class="cf-desc">Bots complets — sécurité, modération, utilitaires avancés.</div>
+            <div class="cf-tags"><span class="ptg">Node.js</span><span class="ptg">Discord.js</span><span class="ptg">MongoDB</span></div>
+            <div class="cf-hint">Cliquer pour détails →</div>
+          </div>
+          <div class="card-back">
+            <div class="cb-title">⚡ Fonctionnalités</div>
+            <ul class="cb-feats">
+              <li>Modération avancée (ban, kick, mute, warn)</li>
+              <li>Commandes slash avec autocomplétion</li>
+              <li>Système de tickets et support</li>
+              <li>Anti-spam &amp; protection anti-raid</li>
+              <li>Logs détaillés de toutes les actions</li>
+            </ul>
+            <a href="https://github.com/louismph8-arch" target="_blank" class="cb-link">→ GitHub</a>
+            <div class="cb-back-btn">← Retourner</div>
+          </div>
         </div>
       </div>
-      <div class="proj" data-i="2">
-        <div class="proj-num">03</div>
-        <div class="proj-info">
-          <div class="proj-name">Bios Discord HTML</div>
-          <div class="proj-desc">Profils Discord en HTML sur mesure — identité visuelle unique.</div>
+      <!-- CARD 2 -->
+      <div class="proj-card" id="pc1">
+        <div class="card-inner">
+          <div class="card-face">
+            <div class="cf-num">02 / 03</div>
+            <div class="cf-ico">📱</div>
+            <div class="cf-name">App Mobile Football</div>
+            <div class="cf-desc">Application mobile pour une équipe de foot — joueurs, matchs, stats.</div>
+            <div class="cf-tags"><span class="ptg">React Native</span><span class="ptg">Firebase</span><span class="ptg">Expo</span></div>
+            <div class="cf-hint">Cliquer pour détails →</div>
+          </div>
+          <div class="card-back">
+            <div class="cb-title">⚡ Fonctionnalités</div>
+            <ul class="cb-feats">
+              <li>Gestion des joueurs et profils</li>
+              <li>Calendrier des matchs</li>
+              <li>Statistiques en temps réel</li>
+              <li>Messagerie interne d'équipe</li>
+              <li>Compatible iOS &amp; Android</li>
+            </ul>
+            <a href="https://github.com/louismph8-arch" target="_blank" class="cb-link">→ GitHub</a>
+            <div class="cb-back-btn">← Retourner</div>
+          </div>
         </div>
-        <div class="proj-tags"><span class="ptg">HTML</span><span class="ptg">CSS</span><span class="ptg">Design</span></div>
-        <div class="proj-arrow">↗</div>
-        <div class="proj-expand">
-          <ul class="proj-feats">
-            <li>Design 100% unique et sur mesure</li>
-            <li>Animations CSS fluides</li>
-            <li>Thème personnalisé selon tes préférences</li>
-            <li>Effets visuels — néon, particules, étoiles</li>
-            <li>Livraison rapide 24–48h</li>
-          </ul>
-          <a href="https://discord.com/users/777495590049021972" target="_blank" class="proj-link">→ Commander sur Discord</a>
+      </div>
+      <!-- CARD 3 -->
+      <div class="proj-card" id="pc2">
+        <div class="card-inner">
+          <div class="card-face">
+            <div class="cf-num">03 / 03</div>
+            <div class="cf-ico">🌌</div>
+            <div class="cf-name">Bios Discord HTML</div>
+            <div class="cf-desc">Profils Discord en HTML sur mesure — identité visuelle unique.</div>
+            <div class="cf-tags"><span class="ptg">HTML</span><span class="ptg">CSS</span><span class="ptg">Design</span></div>
+            <div class="cf-hint">Cliquer pour détails →</div>
+          </div>
+          <div class="card-back">
+            <div class="cb-title">⚡ Fonctionnalités</div>
+            <ul class="cb-feats">
+              <li>Design 100% unique et sur mesure</li>
+              <li>Animations CSS fluides</li>
+              <li>Thème personnalisé selon tes préfs</li>
+              <li>Effets visuels — néon, particules</li>
+              <li>Livraison rapide 24–48h</li>
+            </ul>
+            <a href="https://discord.com/users/777495590049021972" target="_blank" class="cb-link">→ Commander Discord</a>
+            <div class="cb-back-btn">← Retourner</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<div class="ekg-divider" id="ekg2"><svg viewBox="0 0 1200 50" preserveAspectRatio="none"><path class="edp" d="M0,25 L120,25 L145,25 L158,5 L170,45 L182,8 L194,42 L206,25 L230,25 L380,25 L405,25 L418,5 L430,45 L442,8 L454,42 L466,25 L490,25 L640,25 L665,25 L678,5 L690,45 L702,8 L714,42 L726,25 L750,25 L900,25 L925,25 L938,5 L950,45 L962,8 L974,42 L986,25 L1010,25 L1200,25"/></svg></div>
+<div class="vein-div" id="ekg2"><svg viewBox="0 0 1200 60" preserveAspectRatio="none">
+  <path class="vp vp1" d="M0,28 C100,28 140,45 220,28 C280,15 320,42 400,30 C460,20 500,44 580,30 C640,18 680,44 760,30 C820,18 860,44 940,30 C1000,18 1060,40 1140,28 L1200,28"/>
+  <path class="vp vp2" d="M0,40 C80,40 120,22 200,38 C260,50 300,24 380,36 C440,46 480,22 560,36 C620,48 660,22 740,36 C800,48 840,24 920,36 C980,48 1040,26 1120,38 L1200,38"/>
+</svg></div>
 
 <!-- ═══ SKILLS ═══ -->
 <section id="skills">
@@ -594,7 +694,7 @@ footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:fl
     <div class="term rev">
       <div class="term-bar">
         <div class="tdts"><span class="tdt tdt-r"></span><span class="tdt tdt-y"></span><span class="tdt tdt-g"></span></div>
-        <div class="t-tit">louis@neural ~ — bash</div>
+        <div class="t-tit">testarossa@neural ~ — bash</div>
       </div>
       <div class="tbody" id="tbody">
         <div class="trow"><span class="tp">testarossa@neural:~$</span><span class="tc"> help</span></div>
@@ -622,7 +722,10 @@ footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:fl
   </div>
 </section>
 
-<div class="ekg-divider" id="ekg3"><svg viewBox="0 0 1200 50" preserveAspectRatio="none"><path class="edp" d="M0,25 L100,25 L125,25 L138,5 L150,45 L162,8 L174,42 L186,25 L210,25 L360,25 L385,25 L398,5 L410,45 L422,8 L434,42 L446,25 L470,25 L620,25 L645,25 L658,5 L670,45 L682,8 L694,42 L706,25 L730,25 L880,25 L905,25 L918,5 L930,45 L942,8 L954,42 L966,25 L990,25 L1200,25"/></svg></div>
+<div class="vein-div" id="ekg3"><svg viewBox="0 0 1200 60" preserveAspectRatio="none">
+  <path class="vp vp1" d="M0,32 C70,32 110,14 190,32 C250,46 290,16 370,30 C430,42 470,16 550,30 C610,42 650,16 730,30 C790,42 830,16 910,28 C970,38 1020,18 1100,30 L1200,30"/>
+  <path class="vp vp2" d="M0,22 C90,22 130,40 210,24 C270,12 310,40 390,26 C450,14 490,40 570,26 C630,14 670,38 750,26 C810,14 850,36 930,24 C990,14 1040,36 1120,22 L1200,22"/>
+</svg></div>
 
 <!-- ═══ SERVICES ═══ -->
 <section id="services">
@@ -709,12 +812,67 @@ const BPMS=['42 BPM','58 BPM','64 BPM','70 BPM','72 BPM','76 BPM'];
 let pct=0,si=0;
 
 gsap.to('.ld-name',{opacity:1,duration:.8,ease:'power3.out',delay:.2});
-gsap.to('.ld-ekg',{opacity:1,duration:.5,delay:.6});
+gsap.to('.ld-dna',{opacity:1,duration:.5,delay:.5});
 gsap.to('.ld-data',{opacity:1,duration:.5,delay:.8});
 
-// EKG path draw
-const ekgPath=document.querySelector('.ekg-p');
-gsap.to(ekgPath,{strokeDashoffset:0,duration:1.2,delay:.7,ease:'power2.inOut',repeat:-1,repeatDelay:.5});
+// DNA helix canvas
+(function(){
+  const c=document.getElementById('dna-canvas');
+  if(!c)return;
+  const W=c.offsetWidth||420, H=c.offsetHeight||90;
+  c.width=W; c.height=H;
+  const ctx=c.getContext('2d');
+  const cx=W/2, amp=W*.28, rungs=14;
+  let dnaT=0, dnaRaf;
+  function drawDNA(){
+    dnaT+=.045;
+    ctx.clearRect(0,0,W,H);
+    // Strands
+    for(let s=0;s<2;s++){
+      const off=s*Math.PI;
+      ctx.beginPath();
+      for(let i=0;i<=80;i++){
+        const x=(i/80)*W;
+        const phase=dnaT+(i/80)*Math.PI*4+off;
+        const y=H/2+Math.sin(phase)*amp*.42;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle=s===0?'rgba(0,229,255,.75)':'rgba(153,0,255,.75)';
+      ctx.lineWidth=2;
+      ctx.shadowBlur=8;
+      ctx.shadowColor=s===0?'#00e5ff':'#9900ff';
+      ctx.stroke();
+      ctx.shadowBlur=0;
+    }
+    // Rungs (base pairs)
+    for(let i=0;i<rungs;i++){
+      const x=((i+.5)/rungs)*W;
+      const frac=(i+.5)/rungs;
+      const phase=dnaT+frac*Math.PI*4;
+      const y1=H/2+Math.sin(phase)*amp*.42;
+      const y2=H/2+Math.sin(phase+Math.PI)*amp*.42;
+      const vis=Math.abs(Math.cos(phase));
+      const alpha=.15+vis*.55;
+      ctx.beginPath();
+      ctx.moveTo(x,y1); ctx.lineTo(x,y2);
+      ctx.strokeStyle=`rgba(0,255,136,${alpha})`;
+      ctx.lineWidth=1.2;
+      ctx.stroke();
+      // dots
+      [[y1,'#00e5ff'],[y2,'#9900ff']].forEach(([y,col])=>{
+        ctx.beginPath();
+        ctx.arc(x,y,2.5,0,Math.PI*2);
+        ctx.fillStyle=col;
+        ctx.shadowBlur=6; ctx.shadowColor=col;
+        ctx.fill(); ctx.shadowBlur=0;
+      });
+    }
+    dnaRaf=requestAnimationFrame(drawDNA);
+  }
+  drawDNA();
+  // stop when loader hides
+  window._stopDNA=()=>cancelAnimationFrame(dnaRaf);
+})();
 
 const sigInt=setInterval(()=>{
   document.getElementById('lm-sig').textContent=SIGNALS[Math.min(si,SIGNALS.length-1)];
@@ -738,6 +896,7 @@ const pctInt=setInterval(()=>{
 function bootDone(){
   gsap.to('#loader',{opacity:0,duration:.8,ease:'power2.inOut',onComplete:()=>{
     document.getElementById('loader').style.display='none';
+    if(window._stopDNA)window._stopDNA();
     heroIn();
   }});
 }
@@ -846,7 +1005,7 @@ document.querySelectorAll('a,button,.proj,.sv,.pill,.sk-badge,.ab-stat').forEach
   el.addEventListener('mouseleave',()=>cur.classList.remove('big'));
 });
 
-/* ══════════════════════ EKG DIVIDERS ══════════════════════ */
+/* ══════════════════════ VEIN DIVIDERS ══════════════════════ */
 ['ekg1','ekg2','ekg3'].forEach(id=>{
   const el=document.getElementById(id);
   if(!el)return;
@@ -951,7 +1110,7 @@ document.getElementById('hero').addEventListener('mouseleave',()=>{
   gsap.to(['#h-big','#h-pre','#h-sub'],{x:0,y:0,duration:.9,ease:'power3.out'});
 });
 
-/* ══════════════════════ MAGNETIC BTNS ══════════════════════ */
+/* ══════════════════════ MAGNETIC BTNS + TITLES ══════════════════════ */
 document.querySelectorAll('.btn').forEach(btn=>{
   btn.addEventListener('mousemove',e=>{
     const r=btn.getBoundingClientRect();
@@ -959,30 +1118,72 @@ document.querySelectorAll('.btn').forEach(btn=>{
   });
   btn.addEventListener('mouseleave',()=>gsap.to(btn,{x:0,y:0,duration:.5,ease:'back.out(1.7)'}));
 });
-
-/* ══════════════════════ PROJECTS ACCORDION ══════════════════════ */
-document.querySelectorAll('.proj').forEach(p=>{
-  p.addEventListener('click',()=>{
-    const wasOpen=p.classList.contains('open');
-    document.querySelectorAll('.proj').forEach(x=>x.classList.remove('open'));
-    if(!wasOpen)p.classList.add('open');
+document.querySelectorAll('.s-h').forEach(el=>{
+  el.addEventListener('mousemove',e=>{
+    const r=el.getBoundingClientRect();
+    gsap.to(el,{x:(e.clientX-r.left-r.width/2)*.1,y:(e.clientY-r.top-r.height/2)*.12,duration:.4,ease:'power2.out'});
   });
+  el.addEventListener('mouseleave',()=>gsap.to(el,{x:0,y:0,duration:.7,ease:'elastic.out(1,.5)'}));
 });
 
-/* ══════════════════════ DISCORD STATUS ══════════════════════ */
+/* ══════════════════════ FLIP CARDS ══════════════════════ */
+document.querySelectorAll('.proj-card').forEach(card=>{
+  card.addEventListener('click',()=>card.classList.toggle('flipped'));
+});
+// cursor big on card hover
+document.querySelectorAll('.proj-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cur.classList.add('big'));
+  el.addEventListener('mouseleave',()=>cur.classList.remove('big'));
+});
+
+/* ══════════════════════ DISCORD STATUS + EN CE MOMENT ══════════════════════ */
 function fetchStatus(){
   fetch('https://api.lanyard.rest/v1/users/777495590049021972')
     .then(r=>r.json()).then(d=>{
       if(!d.success)return;
-      const{discord_status:s}=d.data;
+      const data=d.data;
+      const s=data.discord_status;
+      // Nav status
       document.getElementById('stxt').textContent=s==='online'?'En ligne':s==='dnd'?'Ne pas déranger':s==='idle'?'Inactif':'Hors ligne';
       const dotColors={online:'var(--bio)',dnd:'var(--blood)',idle:'var(--syn)',offline:'rgba(100,100,130,.5)'};
-      const dot=document.querySelector('.n-dot');
-      dot.style.background=dotColors[s]||dotColors.offline;
-      dot.style.boxShadow=`0 0 8px ${dotColors[s]||dotColors.offline}`;
-    }).catch(()=>{});
+      const navDot=document.querySelector('.n-dot');
+      navDot.style.background=dotColors[s]||dotColors.offline;
+      navDot.style.boxShadow=`0 0 8px ${dotColors[s]||dotColors.offline}`;
+      // En ce moment block
+      const nowDot=document.getElementById('now-dot');
+      const nowAct=document.getElementById('now-activity');
+      const nowArt=document.getElementById('now-art');
+      nowDot.className='now-dot'+(s==='dnd'?' dnd':s==='idle'?' away':s==='offline'?' off':'');
+      // Spotify
+      if(data.spotify){
+        const sp=data.spotify;
+        nowAct.innerHTML=`🎵 <em>${sp.song}</em> — ${sp.artist}`;
+        if(sp.album_art_url){nowArt.src=sp.album_art_url;nowArt.style.display='block';}
+        return;
+      }
+      nowArt.style.display='none';
+      // Activities
+      const acts=(data.activities||[]).filter(a=>a.type!==4);
+      if(acts.length){
+        const a=acts[0];
+        if(a.name==='Visual Studio Code'){
+          const detail=a.details?` — <em>${a.details}</em>`:'';
+          nowAct.innerHTML=`💻 VS Code${detail}`;
+        } else {
+          nowAct.innerHTML=`🎮 <em>${a.name}</em>`;
+        }
+        return;
+      }
+      // Custom status fallback
+      const custom=(data.activities||[]).find(a=>a.type===4);
+      if(custom&&custom.state){nowAct.innerHTML=`✦ ${custom.state}`;return;}
+      nowAct.innerHTML=s==='offline'?'Hors ligne':'En ligne — rien en cours';
+    }).catch(()=>{
+      const nowAct=document.getElementById('now-activity');
+      if(nowAct)nowAct.textContent='Impossible de charger';
+    });
 }
-setInterval(fetchStatus,30000);
+setInterval(fetchStatus,20000);
 
 /* ══════════════════════ VISITOR COUNTER ══════════════════════ */
 function fetchCounter(){
@@ -991,18 +1192,60 @@ function fetchCounter(){
     .catch(()=>document.getElementById('vct').textContent='—');
 }
 
-/* ══════════════════════ AUDIO ══════════════════════ */
-let actx,son=false,nN,gN;
+/* ══════════════════════ AUDIO + VISUALIZER ══════════════════════ */
+let actx,son=false,nN,gN,analyser;
+const vizWrap=document.getElementById('viz-wrap');
+const vizC=document.getElementById('viz-canvas');
+const vizCtx=vizC.getContext('2d');
+let vizRaf;
+
+function resizeViz(){vizC.width=vizC.offsetWidth;vizC.height=vizC.offsetHeight;}
+resizeViz();window.addEventListener('resize',resizeViz);
+
+function drawViz(){
+  if(!analyser){vizRaf=requestAnimationFrame(drawViz);return;}
+  vizRaf=requestAnimationFrame(drawViz);
+  const W=vizC.width,H=vizC.height;
+  const bins=analyser.frequencyBinCount;
+  const data=new Uint8Array(bins);
+  analyser.getByteFrequencyData(data);
+  vizCtx.clearRect(0,0,W,H);
+  const bars=48,bw=Math.floor(W/bars)-1;
+  for(let i=0;i<bars;i++){
+    const v=data[Math.floor(i/bars*bins)]/255;
+    const bh=Math.max(2,v*H*.9);
+    const hue=180+i*(120/bars);
+    vizCtx.fillStyle=`hsla(${hue},100%,60%,${.4+v*.6})`;
+    vizCtx.shadowColor=`hsla(${hue},100%,70%,${v*.8})`;
+    vizCtx.shadowBlur=v*10;
+    vizCtx.fillRect(i*(bw+1),H-bh,bw,bh);
+  }
+  vizCtx.shadowBlur=0;
+}
+
 document.getElementById('snd-btn').onclick=function(){
   son=!son;this.textContent=son?'♪ ON':'♪ OFF';
-  if(son){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();
-    gN=actx.createGain();gN.gain.setValueAtTime(0,actx.currentTime);gN.gain.linearRampToValueAtTime(.035,actx.currentTime+2);
-    const buf=actx.createBuffer(1,actx.sampleRate*2,actx.sampleRate),data=buf.getChannelData(0);
-    for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*.5;
+  if(son){
+    if(!actx){
+      actx=new(window.AudioContext||window.webkitAudioContext)();
+      analyser=actx.createAnalyser();
+      analyser.fftSize=128;
+    }
+    gN=actx.createGain();gN.gain.setValueAtTime(0,actx.currentTime);
+    gN.gain.linearRampToValueAtTime(.035,actx.currentTime+2);
+    const buf=actx.createBuffer(1,actx.sampleRate*2,actx.sampleRate),bufData=buf.getChannelData(0);
+    for(let i=0;i<bufData.length;i++)bufData[i]=(Math.random()*2-1)*.5;
     nN=actx.createBufferSource();nN.buffer=buf;nN.loop=true;
     const f=actx.createBiquadFilter();f.type='bandpass';f.frequency.value=150;f.Q.value=.25;
-    nN.connect(f);f.connect(gN);gN.connect(actx.destination);nN.start();
-  }else{if(gN)gN.gain.linearRampToValueAtTime(0,actx.currentTime+1);setTimeout(()=>{if(nN)nN.stop()},1100);}
+    nN.connect(f);f.connect(analyser);analyser.connect(gN);gN.connect(actx.destination);nN.start();
+    vizWrap.classList.add('on');
+    drawViz();
+  } else {
+    if(gN)gN.gain.linearRampToValueAtTime(0,actx.currentTime+1);
+    setTimeout(()=>{if(nN)nN.stop();},1100);
+    vizWrap.classList.remove('on');
+    cancelAnimationFrame(vizRaf);
+  }
 };
 
 /* ══════════════════════ TERMINAL ══════════════════════ */
@@ -1147,6 +1390,9 @@ if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
 }
 
 /* ══════════════════════ 3D SPINE — REALISTIC ══════════════════════ */
+const isMobile=window.innerWidth<768||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+if(isMobile){document.getElementById('spine-canvas').style.display='none';}
+else
 (function(){
   const canvas=document.getElementById('spine-canvas');
   const W=520,H=window.innerHeight;
@@ -1251,6 +1497,9 @@ if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
       vGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir);
     }
 
+    // Start invisible — will be revealed by scroll
+    vGroup.traverse(m=>{if(m.isMesh)m.material=m.material.clone();});
+    vGroup.traverse(m=>{if(m.isMesh){m.material.transparent=true;m.material.opacity=0;}});
     spineGroup.add(vGroup);
     vertebraMeshes.push({group:vGroup,body,t,origEmissive:new THREE.Color(0x004466)});
 
@@ -1302,17 +1551,20 @@ if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
     // Sway on Z
     spineGroup.rotation.z=Math.sin(spT*.35)*.055;
 
-    // Scroll-driven neural pulse: light up vertebrae one by one
-    const newActive=Math.floor(scrollRatio*(VCOUNT-1));
-    if(newActive!==activeV){
-      activeV=newActive;
-      vertebraMeshes.forEach((v,i)=>{
-        const dist=Math.abs(i-activeV);
-        const glow=Math.max(0,1-dist/4);
-        v.body.material.emissive.setRGB(0,glow*.8,glow*.4+.1);
-        v.body.material.emissiveIntensity=glow;
+    // Scroll-draw: reveal vertebrae progressively + neural pulse
+    const revealCount=Math.floor(scrollRatio*(VCOUNT-1))+1;
+    vertebraMeshes.forEach((v,i)=>{
+      const targetOpacity=i<revealCount?0.9:0;
+      v.group.traverse(m=>{
+        if(m.isMesh){
+          m.material.opacity+=(targetOpacity-m.material.opacity)*.12;
+        }
       });
-    }
+      const dist=Math.abs(i-(revealCount-1));
+      const glow=Math.max(0,1-dist/4)*(i<revealCount?1:0);
+      v.body.material.emissive.setRGB(0,glow*.8,glow*.4+.1);
+      v.body.material.emissiveIntensity=glow;
+    });
 
     // Pulse the cord glow
     cord.material.emissive.setRGB(.4+Math.sin(spT*3)*.2, .2+Math.sin(spT*2)*.1, 0);
@@ -1323,6 +1575,7 @@ if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
 })();
 
 /* ══════════════════════ 3D HEART — REALISTIC ══════════════════════ */
+if(!isMobile)
 (function(){
   const canvas=document.getElementById('heart-canvas');
   if(!canvas)return;
@@ -1504,6 +1757,47 @@ if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
 
     renderer.render(scene,camera);
     requestAnimationFrame(animHeart);
+  })();
+})();
+
+/* ══════════════════════ BLOOD TRAIL ══════════════════════ */
+(function(){
+  const drops=[];
+  let lastX=0,lastY=0,lastSpawn=0;
+  const MAX=28;
+
+  document.addEventListener('mousemove',e=>{
+    const now=Date.now();
+    const dist=Math.hypot(e.clientX-lastX,e.clientY-lastY);
+    if(now-lastSpawn<45||dist<12)return;
+    lastSpawn=now; lastX=e.clientX; lastY=e.clientY;
+    if(drops.length>=MAX){
+      const old=drops.shift();
+      old.el.remove();
+    }
+    const sz=5+Math.random()*6;
+    const el=document.createElement('div');
+    el.className='blood-drop';
+    el.style.cssText=`left:${e.clientX}px;top:${e.clientY}px;width:${sz}px;height:${sz*1.35}px;opacity:.85`;
+    document.body.appendChild(el);
+    drops.push({el,x:e.clientX,y:e.clientY,vy:.8+Math.random()*1.2,age:0,maxAge:38+Math.random()*22,opacity:.85});
+  },{passive:true});
+
+  (function animDrops(){
+    for(let i=drops.length-1;i>=0;i--){
+      const d=drops[i];
+      d.vy+=.32;
+      d.y+=d.vy;
+      d.age++;
+      d.opacity=Math.max(0,(1-d.age/d.maxAge)*.85);
+      d.el.style.top=d.y+'px';
+      d.el.style.opacity=d.opacity;
+      // elongate as it falls
+      const stretch=1.35+d.vy*.08;
+      d.el.style.transform=`translate(-50%,-50%) scaleY(${Math.min(stretch,2.2)})`;
+      if(d.age>=d.maxAge){d.el.remove();drops.splice(i,1);}
+    }
+    requestAnimationFrame(animDrops);
   })();
 })();
 
