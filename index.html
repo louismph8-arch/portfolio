@@ -499,8 +499,6 @@ footer{border-top:1px solid rgba(220,50,90,.06);padding:1.5rem 3.5rem;display:fl
 #viz-wrap.on{opacity:1}
 #viz-canvas{width:100%;height:100%}
 
-/* ── SPINE ── */
-#spine-canvas{position:fixed;top:0;left:50%;transform:translateX(-50%);width:640px;height:100vh;pointer-events:none;z-index:1;opacity:.52;mix-blend-mode:screen}
 
 /* ── HEART 3D ── */
 .heart-3d-wrap{display:flex;justify-content:center;margin:2.5rem auto 0;position:relative}
@@ -556,8 +554,6 @@ footer{border-top:1px solid rgba(220,50,90,.06);padding:1.5rem 3.5rem;display:fl
 <!-- AUDIO VISUALIZER -->
 <div id="viz-wrap"><canvas id="viz-canvas"></canvas></div>
 
-<!-- SPINE 3D -->
-<canvas id="spine-canvas"></canvas>
 
 <!-- GRAIN + VIGNETTE -->
 <canvas id="grain"></canvas>
@@ -1308,11 +1304,6 @@ setInterval(()=>{
     el.addEventListener('mouseleave',()=>setState(''));
   });
   // Skeleton canvas → SCAN mode (medical cross)
-  const sc=document.getElementById('spine-canvas');
-  if(sc){
-    sc.addEventListener('mouseenter',()=>setState('scan','SCAN'));
-    sc.addEventListener('mouseleave',()=>setState(''));
-  }
   // Text paragraphs → I-beam
   document.querySelectorAll('p,.ab-bio,.ab-para').forEach(el=>{
     el.addEventListener('mouseenter',()=>setState('txt'));
@@ -2144,13 +2135,9 @@ if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
   };
 })();
 
-/* ══════════════════════ 3D ROSIER — BLOOMING ROSE BUSH ══════════════════════ */
 const isMobile=window.innerWidth<768||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-if(isMobile){document.getElementById('spine-canvas').style.display='none';}
-else
-/* ROSE_IIFE_START */
-(function(){
-  const canvas=document.getElementById('spine-canvas');
+if(false)(function(){
+  const canvas=null;
   const W=640,H=window.innerHeight;
   canvas.style.width='720px';canvas.style.left='50%';canvas.style.transform='translateX(-50%)';
 
@@ -3096,7 +3083,7 @@ if(!isMobile)
 
   /* ── Camera ── */
   const cam=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,0.1,200);
-  cam.position.set(0,-2,20);
+  cam.position.set(0,-2,26);
 
   window.addEventListener('resize',()=>{
     renderer.setSize(innerWidth,innerHeight);
@@ -3177,28 +3164,29 @@ if(!isMobile)
     return grp;
   }
 
-  /* ── Main trunk (single, center) ── */
+  /* ── Main trunk (single, center) — gros tronc ── */
   const trunkPts=[
-    new THREE.Vector3(0,-10,0),
-    new THREE.Vector3(0.4,-5,0.8),
-    new THREE.Vector3(-0.3, 0,0.5),
-    new THREE.Vector3(0.5, 5,-0.2),
-    new THREE.Vector3(0,10, 0),
+    new THREE.Vector3(0,-14,0),
+    new THREE.Vector3(0.8,-7,1.2),
+    new THREE.Vector3(-0.6,-1,0.8),
+    new THREE.Vector3(0.9, 6,-0.5),
+    new THREE.Vector3(0,14, 0),
   ];
   const trunkCurve=new THREE.CatmullRomCurve3(trunkPts);
-  const trunkGeo=new THREE.TubeGeometry(trunkCurve,60,0.42,12,false);
-  const trunkMat=new THREE.MeshPhongMaterial({color:0x3a0a12,shininess:18,transparent:true,opacity:.92});
+  const trunkGeo=new THREE.TubeGeometry(trunkCurve,80,0.72,14,false);
+  const trunkMat=new THREE.MeshPhongMaterial({color:0x2a0808,shininess:22,transparent:true,opacity:.96});
   scene.add(new THREE.Mesh(trunkGeo,trunkMat));
 
   /* ── Branches + roses ── */
   const branchCfgs=[
-    {t:0.08,s:-1,len:3.5,up:0.50,d:1.2},{t:0.15,s: 1,len:4.0,up:0.48,d:1.0},
-    {t:0.22,s:-1,len:4.5,up:0.55,d:1.3},{t:0.28,s: 1,len:3.8,up:0.52,d:1.1},
-    {t:0.36,s:-1,len:5.0,up:0.60,d:1.4},{t:0.43,s: 1,len:4.6,up:0.58,d:1.2},
-    {t:0.52,s:-1,len:4.8,up:0.65,d:1.3},{t:0.58,s: 1,len:5.2,up:0.62,d:1.1},
-    {t:0.66,s:-1,len:4.2,up:0.70,d:1.4},{t:0.73,s: 1,len:4.5,up:0.68,d:1.2},
-    {t:0.80,s:-1,len:3.5,up:0.75,d:1.3},{t:0.86,s: 1,len:3.2,up:0.72,d:1.1},
-    {t:0.91,s:-1,len:2.8,up:0.80,d:1.4},{t:0.95,s: 1,len:2.5,up:0.78,d:1.2},
+    {t:0.06,s:-1,len:5.5,up:0.45,d:1.5},{t:0.12,s: 1,len:6.0,up:0.42,d:1.3},
+    {t:0.20,s:-1,len:6.5,up:0.50,d:1.6},{t:0.26,s: 1,len:5.8,up:0.48,d:1.4},
+    {t:0.34,s:-1,len:7.0,up:0.55,d:1.7},{t:0.41,s: 1,len:6.5,up:0.52,d:1.5},
+    {t:0.50,s:-1,len:7.2,up:0.60,d:1.6},{t:0.57,s: 1,len:7.5,up:0.58,d:1.4},
+    {t:0.64,s:-1,len:6.5,up:0.65,d:1.7},{t:0.71,s: 1,len:6.8,up:0.62,d:1.5},
+    {t:0.78,s:-1,len:5.5,up:0.70,d:1.6},{t:0.84,s: 1,len:5.0,up:0.68,d:1.4},
+    {t:0.89,s:-1,len:4.2,up:0.75,d:1.7},{t:0.93,s: 1,len:3.8,up:0.72,d:1.5},
+    {t:0.97,s:-1,len:3.0,up:0.80,d:1.6},{t:0.99,s: 1,len:2.5,up:0.78,d:1.4},
   ];
 
   const branches3D=[];
@@ -3232,8 +3220,8 @@ if(!isMobile)
     scene.add(thorn);
     branches3D.push(thorn);
 
-    // Rose at tip
-    const rSz=0.85+(1-cfg.t)*0.35;
+    // Rose at tip — grosses roses
+    const rSz=1.30+(1-cfg.t)*0.55;
     const rose=mkRose(end.x,end.y,end.z,rSz);
     rose._revT=cfg.t+0.05;
     rose._phase=Math.random()*Math.PI*2;
