@@ -309,7 +309,11 @@ section{padding:9rem 0;position:relative}
    SKILLS
 ══════════════════════════ */
 #skills{padding:9rem 0}
-.sk-cols{display:grid;grid-template-columns:1fr 1fr;gap:5rem;margin-top:3.5rem;align-items:start}
+/* Orbital canvas */
+.sk-orbit-wrap{display:flex;justify-content:center;margin:3rem 0 2.5rem;position:relative}
+#sk-canvas{display:block;max-width:100%}
+/* Skill bars */
+.sk-cols{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
 .sk-list{display:flex;flex-direction:column;gap:1.6rem}
 .sk{display:flex;flex-direction:column;gap:.5rem}
 .sk-top{display:flex;justify-content:space-between;align-items:center}
@@ -729,22 +733,27 @@ footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:fl
 <section id="skills">
   <div class="wrap">
     <div class="rev"><div class="s-tag"><i>⚡</i> Système Nerveux</div><h2 class="s-h">Mon <span>arsenal</span></h2></div>
+    <!-- Orbital tech system -->
+    <div class="sk-orbit-wrap rev">
+      <canvas id="sk-canvas" width="560" height="380"></canvas>
+    </div>
+    <!-- Bars + categories -->
     <div class="sk-cols rev">
       <div class="sk-list" id="sk-list">
-        <div class="sk"><div class="sk-top"><span class="sk-name">Discord.js</span><span class="sk-pct">92%</span></div><div class="sk-track"><div class="sk-bar" data-w="92" style="background:linear-gradient(90deg,#9900ff,#00e5ff);--d:0s"></div></div></div>
-        <div class="sk"><div class="sk-top"><span class="sk-name">HTML / CSS</span><span class="sk-pct">90%</span></div><div class="sk-track"><div class="sk-bar" data-w="90" style="background:linear-gradient(90deg,#00e5ff,#00ff88);--d:.08s"></div></div></div>
-        <div class="sk"><div class="sk-top"><span class="sk-name">JavaScript</span><span class="sk-pct">88%</span></div><div class="sk-track"><div class="sk-bar" data-w="88" style="background:linear-gradient(90deg,#9900ff,#00e5ff);--d:.16s"></div></div></div>
-        <div class="sk"><div class="sk-top"><span class="sk-name">Node.js</span><span class="sk-pct">82%</span></div><div class="sk-track"><div class="sk-bar" data-w="82" style="background:linear-gradient(90deg,#00e5ff,#00ff88);--d:.24s"></div></div></div>
-        <div class="sk"><div class="sk-top"><span class="sk-name">UI Design</span><span class="sk-pct">78%</span></div><div class="sk-track"><div class="sk-bar" data-w="78" style="background:linear-gradient(90deg,#ff1744,#ffaa00);--d:.32s"></div></div></div>
-        <div class="sk"><div class="sk-top"><span class="sk-name">MongoDB</span><span class="sk-pct">72%</span></div><div class="sk-track"><div class="sk-bar" data-w="72" style="background:linear-gradient(90deg,#00ff88,#00e5ff);--d:.4s"></div></div></div>
-        <div class="sk"><div class="sk-top"><span class="sk-name">React Native</span><span class="sk-pct">70%</span></div><div class="sk-track"><div class="sk-bar" data-w="70" style="background:linear-gradient(90deg,#00e5ff,#9900ff);--d:.48s"></div></div></div>
-        <div class="sk"><div class="sk-top"><span class="sk-name">Python</span><span class="sk-pct">60%</span></div><div class="sk-track"><div class="sk-bar" data-w="60" style="background:linear-gradient(90deg,#ffaa00,#ff1744);--d:.56s"></div></div></div>
+        <div class="sk"><div class="sk-top"><span class="sk-name">Python</span><span class="sk-pct">90%</span></div><div class="sk-track"><div class="sk-bar" data-w="90" style="background:linear-gradient(90deg,#3776AB,#FFD43B);--d:0s"></div></div></div>
+        <div class="sk"><div class="sk-top"><span class="sk-name">Discord.py / Discord.js</span><span class="sk-pct">92%</span></div><div class="sk-track"><div class="sk-bar" data-w="92" style="background:linear-gradient(90deg,#5865F2,#9900ff);--d:.08s"></div></div></div>
+        <div class="sk"><div class="sk-top"><span class="sk-name">Firebase &amp; Firestore</span><span class="sk-pct">86%</span></div><div class="sk-track"><div class="sk-bar" data-w="86" style="background:linear-gradient(90deg,#FF6F00,#ffaa00);--d:.16s"></div></div></div>
+        <div class="sk"><div class="sk-top"><span class="sk-name">HTML / CSS</span><span class="sk-pct">88%</span></div><div class="sk-track"><div class="sk-bar" data-w="88" style="background:linear-gradient(90deg,#00e5ff,#00ff88);--d:.24s"></div></div></div>
+        <div class="sk"><div class="sk-top"><span class="sk-name">JavaScript / Node.js</span><span class="sk-pct">82%</span></div><div class="sk-track"><div class="sk-bar" data-w="82" style="background:linear-gradient(90deg,#F7DF1E,#339933);--d:.32s"></div></div></div>
+        <div class="sk"><div class="sk-top"><span class="sk-name">React Native</span><span class="sk-pct">72%</span></div><div class="sk-track"><div class="sk-bar" data-w="72" style="background:linear-gradient(90deg,#00e5ff,#9900ff);--d:.4s"></div></div></div>
+        <div class="sk"><div class="sk-top"><span class="sk-name">MongoDB</span><span class="sk-pct">68%</span></div><div class="sk-track"><div class="sk-bar" data-w="68" style="background:linear-gradient(90deg,#00ff88,#00e5ff);--d:.48s"></div></div></div>
       </div>
       <div class="sk-right">
-        <div class="sk-cat"><div class="sk-cat-title">Frontend</div><div class="sk-badges"><span class="sk-badge">HTML5</span><span class="sk-badge">CSS3</span><span class="sk-badge">JavaScript ES6+</span><span class="sk-badge">React Native</span><span class="sk-badge">Expo</span></div></div>
-        <div class="sk-cat"><div class="sk-cat-title">Backend</div><div class="sk-badges"><span class="sk-badge">Node.js</span><span class="sk-badge">Express</span><span class="sk-badge">Discord.js</span><span class="sk-badge">Python</span></div></div>
-        <div class="sk-cat"><div class="sk-cat-title">Base de données</div><div class="sk-badges"><span class="sk-badge">MongoDB</span><span class="sk-badge">Firebase</span><span class="sk-badge">Firestore</span></div></div>
-        <div class="sk-cat"><div class="sk-cat-title">Outils</div><div class="sk-badges"><span class="sk-badge">Git</span><span class="sk-badge">GitHub</span><span class="sk-badge">VS Code</span><span class="sk-badge">Figma</span></div></div>
+        <div class="sk-cat"><div class="sk-cat-title">Discord</div><div class="sk-badges"><span class="sk-badge">discord.py</span><span class="sk-badge">Discord.js</span><span class="sk-badge">Slash Commands</span><span class="sk-badge">Webhooks</span><span class="sk-badge">Bots</span></div></div>
+        <div class="sk-cat"><div class="sk-cat-title">Backend</div><div class="sk-badges"><span class="sk-badge">Python</span><span class="sk-badge">Node.js</span><span class="sk-badge">Express</span><span class="sk-badge">REST API</span></div></div>
+        <div class="sk-cat"><div class="sk-cat-title">Firebase</div><div class="sk-badges"><span class="sk-badge">Firestore</span><span class="sk-badge">Auth</span><span class="sk-badge">RTDB</span><span class="sk-badge">Cloud Functions</span><span class="sk-badge">Storage</span></div></div>
+        <div class="sk-cat"><div class="sk-cat-title">Frontend / Mobile</div><div class="sk-badges"><span class="sk-badge">HTML5</span><span class="sk-badge">CSS3</span><span class="sk-badge">React Native</span><span class="sk-badge">Expo</span></div></div>
+        <div class="sk-cat"><div class="sk-cat-title">Outils</div><div class="sk-badges"><span class="sk-badge">Git</span><span class="sk-badge">GitHub</span><span class="sk-badge">VS Code</span><span class="sk-badge">MongoDB</span></div></div>
       </div>
     </div>
   </div>
@@ -1632,6 +1641,112 @@ document.addEventListener('keydown',e=>{
     gsap.to('.hero-big,.s-h,.n-logo',{filter:'hue-rotate(360deg) brightness(1.4)',duration:3,ease:'linear',onComplete:()=>gsap.set('.hero-big,.s-h,.n-logo',{filter:'none'})});
   }
 });
+
+/* ══════════════════════ ORBITAL SKILLS ══════════════════════ */
+(function(){
+  const cv=document.getElementById('sk-canvas');
+  if(!cv)return;
+  const W=560,H=380,cx=W/2,cy=H/2;
+  const ctx=cv.getContext('2d');
+
+  // Tech data: name, display color, orbit radius, orbit speed, start angle, proficiency
+  const techs=[
+    // Inner — core stack
+    {n:'Python',   c:'#FFD43B', r:78,  spd:.0022, a:0},
+    {n:'Firebase', c:'#FFA000', r:78,  spd:.0022, a:Math.PI*2/3},
+    {n:'Discord',  c:'#7289DA', r:78,  spd:.0022, a:Math.PI*4/3},
+    // Middle
+    {n:'Node.js',  c:'#68A063', r:138, spd:.0013, a:.4},
+    {n:'JS',       c:'#F7DF1E', r:138, spd:.0013, a:Math.PI*.5+.4},
+    {n:'HTML/CSS', c:'#00e5ff', r:138, spd:.0013, a:Math.PI+.4},
+    {n:'MongoDB',  c:'#00ff88', r:138, spd:.0013, a:Math.PI*1.5+.4},
+    // Outer
+    {n:'React Native', c:'#61DAFB', r:198, spd:.0007, a:0},
+    {n:'Git',          c:'#ff6b6b', r:198, spd:.0007, a:Math.PI*2/3},
+    {n:'Expo',         c:'#9900ff', r:198, spd:.0007, a:Math.PI*4/3},
+  ];
+
+  let active=false, hovered=-1;
+  let mouseX=0,mouseY=0;
+
+  cv.addEventListener('mousemove',e=>{
+    const rect=cv.getBoundingClientRect();
+    mouseX=(e.clientX-rect.left)*(W/rect.width);
+    mouseY=(e.clientY-rect.top)*(H/rect.height);
+  });
+  cv.addEventListener('mouseleave',()=>{hovered=-1;});
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    if(!active){requestAnimationFrame(draw);return;}
+
+    // Orbit rings (dashed)
+    [78,138,198].forEach((r,i)=>{
+      ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(0,229,255,${.07-i*.018})`;
+      ctx.lineWidth=1;ctx.setLineDash([5,9]);ctx.stroke();ctx.restore();
+    });
+
+    // Nucleus
+    const ng=ctx.createRadialGradient(cx,cy,0,cx,cy,32);
+    ng.addColorStop(0,'rgba(0,229,255,.22)');ng.addColorStop(1,'rgba(0,229,255,0)');
+    ctx.beginPath();ctx.arc(cx,cy,32,0,Math.PI*2);ctx.fillStyle=ng;ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,20,0,Math.PI*2);
+    ctx.strokeStyle='rgba(0,229,255,.55)';ctx.lineWidth=1.5;ctx.stroke();
+    // Nucleus inner dot (orbits fast)
+    const nda=performance.now()*.002;
+    ctx.beginPath();ctx.arc(cx+Math.cos(nda)*9,cy+Math.sin(nda)*9,3,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,229,255,.9)';
+    ctx.shadowBlur=10;ctx.shadowColor='#00e5ff';ctx.fill();ctx.shadowBlur=0;
+    // Nucleus label
+    ctx.font='700 10px "JetBrains Mono",monospace';
+    ctx.fillStyle='rgba(0,229,255,.75)';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('STACK',cx,cy);
+
+    // Tech nodes
+    hovered=-1;
+    techs.forEach((t,i)=>{
+      t.a+=t.spd;
+      const x=cx+Math.cos(t.a)*t.r;
+      const y=cy+Math.sin(t.a)*t.r;
+      const dist=Math.hypot(mouseX-x,mouseY-y);
+      const isHov=dist<18;
+      if(isHov)hovered=i;
+      const scale=isHov?1.35:1;
+
+      // Connection thread
+      ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(x,y);
+      ctx.strokeStyle=isHov?`${t.c}28`:'rgba(0,229,255,.025)';
+      ctx.lineWidth=isHov?.8:.3;ctx.stroke();
+
+      // Glow halo
+      const haloR=isHov?22:14;
+      const g=ctx.createRadialGradient(x,y,0,x,y,haloR);
+      g.addColorStop(0,t.c+'55');g.addColorStop(1,t.c+'00');
+      ctx.beginPath();ctx.arc(x,y,haloR,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+
+      // Node dot
+      ctx.beginPath();ctx.arc(x,y,5.5*scale,0,Math.PI*2);
+      ctx.fillStyle=t.c;
+      ctx.shadowBlur=isHov?18:8;ctx.shadowColor=t.c;ctx.fill();ctx.shadowBlur=0;
+
+      // Label
+      const lx=x,ly=y+(y>cy?16:-(12))*scale;
+      ctx.font=`${isHov?'600':'400'} ${isHov?11:10}px Inter,sans-serif`;
+      ctx.fillStyle=isHov?'rgba(232,244,255,.95)':'rgba(232,244,255,.62)';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      if(isHov){
+        ctx.shadowBlur=10;ctx.shadowColor=t.c;
+      }
+      ctx.fillText(t.n,lx,ly);ctx.shadowBlur=0;
+    });
+    cv.style.cursor=hovered>=0?'none':'none';
+    requestAnimationFrame(draw);
+  }
+
+  ScrollTrigger.create({trigger:'#skills',start:'top 72%',once:true,onEnter:()=>{active=true;}});
+  draw();
+})();
 
 /* ══════════════════════ REDUCED MOTION ══════════════════════ */
 if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
