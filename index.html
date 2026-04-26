@@ -14,7 +14,15 @@
 <meta name="twitter:title" content="Testarossa — Dev Discord · Web · Mobile">
 <meta name="twitter:description" content="Développeur freelance à Montréal — bots Discord, apps mobiles, sites web & bios HTML sur mesure.">
 <meta name="twitter:image" content="https://louismph8-arch.github.io/portfolio/preview.png">
-<meta name="theme-color" content="#00010a">
+<meta name="theme-color" content="#00e5ff">
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Testarossa">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -448,6 +456,10 @@ section{padding:9rem 0;position:relative}
 @keyframes ghSkel{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @media(max-width:680px){.gh-repos-grid{grid-template-columns:1fr}.gh-pill{min-width:82px;padding:.65rem 1rem}}
 
+/* ── PWA INSTALL CHIP ── */
+#pwa-install{position:fixed;bottom:1.6rem;right:1.6rem;z-index:9001;display:none;align-items:center;gap:.55rem;padding:.55rem 1rem;border-radius:50px;border:1px solid rgba(0,229,255,.18);background:rgba(0,1,12,.94);font-family:var(--fc);font-size:.48rem;letter-spacing:.14em;color:var(--neural);cursor:none;opacity:0;transform:translateY(10px);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:border-color .2s,box-shadow .25s}
+#pwa-install:hover{border-color:rgba(0,229,255,.42);box-shadow:0 0 24px rgba(0,229,255,.1)}
+#pwa-install svg{width:13px;height:13px;flex-shrink:0;opacity:.75}
 /* ── FOOTER ── */
 footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:flex;align-items:center;justify-content:space-between}
 .ft-l{font-family:var(--fc);font-size:.52rem;letter-spacing:.12em;color:rgba(0,229,255,.25)}
@@ -961,6 +973,16 @@ footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:fl
   <div class="ft-l">◈ Testarossa · destinylouis · Montréal <span class="blink">_</span></div>
   <div class="ft-r">tape "louis" · konami · 5× clic · clic droit</div>
 </footer>
+
+<!-- PWA install chip (shown only when browser supports & page is installable) -->
+<button id="pwa-install" aria-label="Installer l'application">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+    <polyline points="7 10 12 15 17 10"/>
+    <line x1="12" y1="15" x2="12" y2="3"/>
+  </svg>
+  INSTALLER
+</button>
 
 <script>
 gsap.registerPlugin(ScrollTrigger);
@@ -3008,6 +3030,45 @@ if(!isMobile)
       document.body.appendChild(p);
     },i*200);
   }
+})();
+
+/* ══════════════════════ PWA — SERVICE WORKER + INSTALL PROMPT ══════════════════════ */
+(function(){
+  // ── Service Worker registration ──
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>{
+      navigator.serviceWorker.register('sw.js',{scope:'/portfolio/'})
+        .catch(()=>{}); // silent — SW is a progressive enhancement
+    });
+  }
+
+  // ── Install prompt chip ──
+  const btn=document.getElementById('pwa-install');
+  if(!btn)return;
+  let _deferredPrompt=null;
+
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();
+    _deferredPrompt=e;
+    btn.style.display='flex';
+    gsap.to(btn,{opacity:1,y:0,duration:.6,ease:'power2.out',delay:.5});
+  });
+
+  btn.addEventListener('click',async()=>{
+    if(!_deferredPrompt)return;
+    _deferredPrompt.prompt();
+    const {outcome}=await _deferredPrompt.userChoice;
+    _deferredPrompt=null;
+    if(outcome==='accepted'){
+      gsap.to(btn,{opacity:0,y:8,duration:.4,ease:'power2.in',
+        onComplete:()=>btn.style.display='none'});
+    }
+  });
+
+  window.addEventListener('appinstalled',()=>{
+    gsap.to(btn,{opacity:0,y:8,duration:.35,ease:'power2.in',
+      onComplete:()=>btn.style.display='none'});
+  });
 })();
 </script>
 </body>

@@ -1,0 +1,33 @@
+{
+  "name": "Testarossa · destinylouis",
+  "short_name": "Testarossa",
+  "description": "Portfolio de Louis — développeur Discord, bots, apps mobiles & sites web sur mesure. Montréal & Remote.",
+  "start_url": "/portfolio/",
+  "scope": "/portfolio/",
+  "display": "standalone",
+  "background_color": "#00010a",
+  "theme_color": "#00e5ff",
+  "orientation": "any",
+  "lang": "fr",
+  "categories": ["portfolio", "technology"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Projets",
+      "url": "/portfolio/#projects",
+      "description": "Voir les projets"
+    },
+    {
+      "name": "Contact",
+      "url": "/portfolio/#contact",
+      "description": "Me contacter"
+    }
+  ]
+}

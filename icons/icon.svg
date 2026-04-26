@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="60%">
+      <stop offset="0%" stop-color="#002840"/>
+      <stop offset="100%" stop-color="#00010a"/>
+    </radialGradient>
+    <filter id="gl" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+
+  <!-- Cranium -->
+  <ellipse cx="256" cy="196" rx="112" ry="104" fill="none" stroke="#00e5ff" stroke-width="11" opacity=".88" filter="url(#gl)"/>
+
+  <!-- Zygomatic arches -->
+  <path d="M144 202 Q134 156 168 134" fill="none" stroke="#00e5ff" stroke-width="7" opacity=".38"/>
+  <path d="M368 202 Q378 156 344 134" fill="none" stroke="#00e5ff" stroke-width="7" opacity=".38"/>
+
+  <!-- Eye sockets -->
+  <ellipse cx="215" cy="192" rx="27" ry="32" fill="#00010a" stroke="#00e5ff" stroke-width="9" opacity=".9"/>
+  <ellipse cx="297" cy="192" rx="27" ry="32" fill="#00010a" stroke="#00e5ff" stroke-width="9" opacity=".9"/>
+
+  <!-- Neural glow — eyes -->
+  <ellipse cx="215" cy="192" rx="11" ry="13" fill="#00e5ff" opacity=".72" filter="url(#gl)"/>
+  <ellipse cx="297" cy="192" rx="11" ry="13" fill="#00e5ff" opacity=".72" filter="url(#gl)"/>
+
+  <!-- Nasal aperture -->
+  <path d="M244 232 L256 218 L268 232" fill="none" stroke="#00e5ff" stroke-width="8" stroke-linejoin="round" opacity=".6"/>
+
+  <!-- Jaw -->
+  <path d="M152 272 Q152 316 256 316 Q360 316 360 272" fill="none" stroke="#00e5ff" stroke-width="10" opacity=".75"/>
+
+  <!-- Teeth -->
+  <rect x="180" y="272" width="26" height="26" rx="5" fill="none" stroke="#00e5ff" stroke-width="7" opacity=".65"/>
+  <rect x="212" y="272" width="26" height="26" rx="5" fill="none" stroke="#00e5ff" stroke-width="7" opacity=".65"/>
+  <rect x="244" y="272" width="26" height="26" rx="5" fill="none" stroke="#00e5ff" stroke-width="7" opacity=".65"/>
+  <rect x="276" y="272" width="26" height="26" rx="5" fill="none" stroke="#00e5ff" stroke-width="7" opacity=".65"/>
+  <rect x="308" y="272" width="26" height="26" rx="5" fill="none" stroke="#00e5ff" stroke-width="7" opacity=".65"/>
+
+  <!-- Spine vertebrae -->
+  <rect x="238" y="334" width="36" height="24" rx="6" fill="#00e5ff" opacity=".52"/>
+  <rect x="238" y="366" width="36" height="20" rx="5" fill="#00e5ff" opacity=".36"/>
+  <rect x="238" y="394" width="36" height="16" rx="4" fill="#00e5ff" opacity=".21"/>
+  <rect x="238" y="418" width="36" height="12" rx="3" fill="#00e5ff" opacity=".11"/>
+
+  <!-- Corner neural particles -->
+  <circle cx="80"  cy="80"  r="7" fill="#00e5ff" opacity=".28"/>
+  <circle cx="432" cy="80"  r="7" fill="#00e5ff" opacity=".28"/>
+  <circle cx="80"  cy="432" r="5" fill="#9900ff" opacity=".22"/>
+  <circle cx="432" cy="432" r="5" fill="#9900ff" opacity=".22"/>
+
+  <!-- Scan line accent -->
+  <line x1="96" y1="256" x2="416" y2="256" stroke="#00e5ff" stroke-width="1" opacity=".07"/>
+</svg>
