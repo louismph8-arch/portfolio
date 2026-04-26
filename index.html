@@ -74,6 +74,9 @@ body.cur-scan #c-ring{width:54px;height:54px;border-color:rgba(0,255,136,.65);bo
 body.cur-scan #c-cross-h,body.cur-scan #c-cross-v{opacity:.85}
 body.cur-scan #c-label{opacity:1;color:var(--bio);text-shadow:0 0 8px var(--bio)}
 body.cur-scan #c-dot{background:var(--bio);box-shadow:0 0 8px var(--bio)}
+/* Bone-name HUD tooltip */
+#bone-label{position:fixed;pointer-events:none;z-index:9010;font-family:var(--fc);font-size:.42rem;letter-spacing:.14em;color:var(--bio);text-shadow:0 0 8px var(--bio);padding:.2rem .55rem;border:1px solid rgba(0,255,136,.22);border-radius:4px;background:rgba(0,1,8,.7);opacity:0;transform:translateY(4px);transition:opacity .18s,transform .18s;white-space:nowrap}
+#bone-label.vis{opacity:1;transform:translateY(0)}
 /* TEXT state */
 body.cur-txt #c-ring{width:3px;height:26px;border-radius:2px;border-color:rgba(0,229,255,.6)}
 body.cur-txt #c-dot{opacity:0}
@@ -547,6 +550,7 @@ footer{border-top:1px solid rgba(0,229,255,.06);padding:1.5rem 3.5rem;display:fl
 <div id="c-ring"><span id="c-label"></span></div>
 <div id="c-cross-h"></div>
 <div id="c-cross-v"></div>
+<div id="bone-label"></div>
 <div id="prog"></div>
 <div id="glitch"></div>
 
@@ -2400,9 +2404,25 @@ else
   // Cold rim for depth
   const pCold=new THREE.PointLight(0x4466ff,3,60);pCold.position.set(12,8,-8);scene.add(pCold);
 
+  // ══ CURSOR × SKELETON RAYCASTER ══
+  const allSkelMeshes=[];
+  skelGroup.traverse(m=>{if(m.isMesh&&m.material.isMeshStandardMaterial)allSkelMeshes.push(m);});
+  // Cache base emissive per mesh so we can lerp back cleanly
+  allSkelMeshes.forEach(m=>{m.userData.bEm={r:m.material.emissive.r,g:m.material.emissive.g,b:m.material.emissive.b,i:m.material.emissiveIntensity};});
+  const raycaster=new THREE.Raycaster();
+  raycaster.firstHitOnly=true;
+  const pCursor=new THREE.PointLight(0x00e5ff,0,10);scene.add(pCursor);
+  const _wp=new THREE.Vector3();
+  let _hitPt=null,_rayF=0;
+
   // ══ MOUSE PARALLAX ══
   let mX=0,mY=0;
-  document.addEventListener('mousemove',e=>{mX=e.clientX/innerWidth-.5;mY=e.clientY/innerHeight-.5;},{passive:true});
+  const mouseNDC=new THREE.Vector2();
+  document.addEventListener('mousemove',e=>{
+    mX=e.clientX/innerWidth-.5;mY=e.clientY/innerHeight-.5;
+    mouseNDC.x=(e.clientX/innerWidth)*2-1;
+    mouseNDC.y=-((e.clientY/innerHeight)*2-1);
+  },{passive:true});
 
   let skelScrollRatio=0;
   window.addEventListener('scroll',()=>{skelScrollRatio=window.scrollY/(document.body.scrollHeight-window.innerHeight);},{passive:true});
@@ -2465,6 +2485,50 @@ else
       np.mesh.scale.setScalar(.65+flare*.85);
       np.mesh.material.color.setRGB(.08+flare*.04,.52+flare*.42,.78+flare*.22);
     });
+
+    // ── CURSOR × BONE GLOW ──
+    if(++_rayF%2===0){
+      raycaster.setFromCamera(mouseNDC,camera);
+      const hits=raycaster.intersectObjects(allSkelMeshes,false);
+      _hitPt=hits.length?hits[0].point.clone():null;
+    }
+    {
+      const GRAD=2.8; // world-unit radius of glow falloff
+      for(let _i=0;_i<allSkelMeshes.length;_i++){
+        const m=allSkelMeshes[_i];
+        if(m.material.opacity<.05)continue; // skip invisible bones
+        m.getWorldPosition(_wp);
+        const dist=_hitPt?_wp.distanceTo(_hitPt):99;
+        const g=_hitPt?Math.max(0,1-dist/GRAD)**2:0; // quadratic falloff
+        const {r:br,g:bg,b:bb,i:bi}=m.userData.bEm;
+        // Lerp emissive towards neural cyan when glow > 0
+        m.material.emissive.r+=(br+g*.02-m.material.emissive.r)*.13;
+        m.material.emissive.g+=(bg+g*.88-m.material.emissive.g)*.13;
+        m.material.emissive.b+=(bb+g*1.0 -m.material.emissive.b)*.13;
+        m.material.emissiveIntensity+=(bi+g*3.6-m.material.emissiveIntensity)*.13;
+      }
+      // Cursor point light tracks hit position
+      if(_hitPt){
+        pCursor.position.lerp(_hitPt,.22);
+        pCursor.intensity+=(11-pCursor.intensity)*.2;
+      }else{
+        pCursor.intensity*=.86;
+      }
+      // Bone-name HUD
+      const _bl=document.getElementById('bone-label');
+      if(_bl){
+        if(_hitPt){
+          const wy=_hitPt.y;
+          const _bn=wy>12?'CRÂNE':wy>9?'ÉPAULES':wy>5?'THORAX':wy>2?'CÔTES':wy>-2?'LOMBES':wy>-6?'BASSIN':wy>-11?'FÉMUR':'TIBIA';
+          _bl.textContent=_bn;
+          _bl.style.left=(((mX+.5)*innerWidth)+20)+'px';
+          _bl.style.top=(((mY+.5)*innerHeight)-14)+'px';
+          _bl.classList.add('vis');
+        }else{
+          _bl.classList.remove('vis');
+        }
+      }
+    }
 
     // ── PARTICLE FIELD ──
     const pp=pGeo.attributes.position.array;
