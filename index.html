@@ -3068,39 +3068,65 @@ if(!isMobile)
 })();
 
 /* ══════════════════════════════════════════════
-   ROSE 3D — single central trunk, 3D roses bloom on scroll
+   ROSE 3D v2 — cinematic bloom pipeline, scroll-driven intensity
 ══════════════════════════════════════════════ */
 (function(){
   if(!window.THREE)return;
   const rc=document.getElementById('rose-canvas');
 
-  /* ── Renderer ── */
-  const renderer=new THREE.WebGLRenderer({canvas:rc,alpha:true,antialias:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  /* ── Renderer + bloom pipeline ── */
+  const PR=Math.min(devicePixelRatio,1.5);
+  const renderer=new THREE.WebGLRenderer({canvas:rc,alpha:true,antialias:true,powerPreference:'high-performance'});
+  renderer.setPixelRatio(PR);
   renderer.setSize(innerWidth,innerHeight);
   renderer.setClearColor(0x000000,0);
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=1.2;
+  renderer.outputColorSpace=THREE.SRGBColorSpace;
+
+  /* ── Bloom render targets ── */
+  function mkRT(w,h){return new THREE.WebGLRenderTarget(w,h,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});}
+  let FW=Math.round(innerWidth*PR),FH=Math.round(innerHeight*PR);
+  let BW=Math.round(FW/3),BH=Math.round(FH/3);
+  let rtMain=mkRT(FW,FH),rtA=mkRT(BW,BH),rtB=mkRT(BW,BH);
+
+  window.addEventListener('resize',()=>{
+    renderer.setSize(innerWidth,innerHeight);
+    cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();
+    FW=Math.round(innerWidth*PR);FH=Math.round(innerHeight*PR);
+    BW=Math.round(FW/3);BH=Math.round(FH/3);
+    rtMain.setSize(FW,FH);rtA.setSize(BW,BH);rtB.setSize(BW,BH);
+  },{passive:true});
+
+  const _VS=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,1.);}`;
+  const brightMat=new THREE.ShaderMaterial({uniforms:{tDiffuse:{value:null},thresh:{value:.52}},vertexShader:_VS,
+    fragmentShader:`uniform sampler2D tDiffuse;uniform float thresh;varying vec2 vUv;
+      void main(){vec4 c=texture2D(tDiffuse,vUv);float br=dot(c.rgb,vec3(.299,.587,.114));
+        float w=smoothstep(thresh-.12,thresh+.18,br);gl_FragColor=vec4(c.rgb*w*2.,c.a);}`});
+  const blurMat=new THREE.ShaderMaterial({uniforms:{tDiffuse:{value:null},dir:{value:new THREE.Vector2(1./BW,0)}},vertexShader:_VS,
+    fragmentShader:`uniform sampler2D tDiffuse;uniform vec2 dir;varying vec2 vUv;
+      void main(){vec4 c=texture2D(tDiffuse,vUv)*.227;
+        c+=texture2D(tDiffuse,vUv+dir*1.385)*.316;c+=texture2D(tDiffuse,vUv-dir*1.385)*.316;
+        c+=texture2D(tDiffuse,vUv+dir*3.231)*.070;c+=texture2D(tDiffuse,vUv-dir*3.231)*.070;
+        gl_FragColor=c;}`});
+  const compMat=new THREE.ShaderMaterial({uniforms:{tBase:{value:null},tBloom:{value:null},str:{value:1.8}},vertexShader:_VS,
+    fragmentShader:`uniform sampler2D tBase;uniform sampler2D tBloom;uniform float str;varying vec2 vUv;
+      void main(){gl_FragColor=texture2D(tBase,vUv)+texture2D(tBloom,vUv)*str;}`});
+  const qScene=new THREE.Scene(),qCam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+  const qMesh=new THREE.Mesh(new THREE.PlaneGeometry(2,2));qScene.add(qMesh);
+
   const scene=new THREE.Scene();
 
   /* ── Camera ── */
   const cam=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,0.1,200);
   cam.position.set(0,-2,26);
 
-  window.addEventListener('resize',()=>{
-    renderer.setSize(innerWidth,innerHeight);
-    cam.aspect=innerWidth/innerHeight;
-    cam.updateProjectionMatrix();
-  },{passive:true});
-
   /* ── Lights ── */
-  scene.add(new THREE.AmbientLight(0x200008,1.5));
-  const dl=new THREE.DirectionalLight(0xff6699,2.5);
-  dl.position.set(4,8,6);scene.add(dl);
-  const pl=new THREE.PointLight(0xff1144,5.0,35);
-  pl.position.set(0,4,8);scene.add(pl);
-  const pl2=new THREE.PointLight(0xff88cc,3.0,25);
-  pl2.position.set(-3,-2,6);scene.add(pl2);
-  const pl3=new THREE.PointLight(0xff3366,4.0,30);
-  pl3.position.set(3,0,7);scene.add(pl3);
+  const ambLight=new THREE.AmbientLight(0x1a0005,1.5);scene.add(ambLight);
+  const dl=new THREE.DirectionalLight(0xff6699,3.0);dl.position.set(5,10,8);scene.add(dl);
+  const pl1=new THREE.PointLight(0xff1133,6.0,45);pl1.position.set(0,5,10);scene.add(pl1);
+  const pl2=new THREE.PointLight(0xff88cc,4.0,32);pl2.position.set(-5,-3,8);scene.add(pl2);
+  const pl3=new THREE.PointLight(0xcc0044,5.0,38);pl3.position.set(5,-2,9);scene.add(pl3);
 
   /* ── Scroll ── */
   let scrollP=0;
@@ -3117,54 +3143,52 @@ if(!isMobile)
     return s;
   }
 
-  /* ── Build 3D rose ── */
+  /* ── Build 3D rose (MeshStandardMaterial + emissive glow) ── */
   function mkRose(px,py,pz,sz){
     const grp=new THREE.Group();
     grp.position.set(px,py,pz);
     grp._bloom=0;
     grp._mats=[];
 
-    // 4 petal layers: outer→inner, more closed each time
+    // 4 petal layers: outer→inner
     const layers=[
-      {n:7,tilt:1.18,r:sz*.38,yOff:0,   col:0x880022,psz:sz*.95},
-      {n:6,tilt:1.42,r:sz*.28,yOff:sz*.12,col:0xcc1144,psz:sz*.78},
-      {n:5,tilt:1.58,r:sz*.18,yOff:sz*.26,col:0xff3366,psz:sz*.60},
-      {n:4,tilt:1.72,r:sz*.10,yOff:sz*.40,col:0xff88aa,psz:sz*.42},
+      {n:7,tilt:1.18,r:sz*.38,yOff:0,      col:0x880022,em:0xff1144,psz:sz*.95},
+      {n:6,tilt:1.42,r:sz*.28,yOff:sz*.12, col:0xcc1144,em:0xff2255,psz:sz*.78},
+      {n:5,tilt:1.58,r:sz*.18,yOff:sz*.26, col:0xff3366,em:0xff4477,psz:sz*.60},
+      {n:4,tilt:1.72,r:sz*.10,yOff:sz*.40, col:0xff88aa,em:0xff99bb,psz:sz*.42},
     ];
     layers.forEach(l=>{
       const geo=new THREE.ShapeGeometry(mkPetalShape(l.psz),12);
       for(let p=0;p<l.n;p++){
         const a=(Math.PI*2/l.n)*p;
-        const mat=new THREE.MeshPhongMaterial({
-          color:l.col,side:THREE.DoubleSide,shininess:55,
+        const mat=new THREE.MeshStandardMaterial({
+          color:l.col,emissive:new THREE.Color(l.em),emissiveIntensity:0,
+          roughness:.45,metalness:.08,side:THREE.DoubleSide,
           transparent:true,opacity:0
         });
         grp._mats.push(mat);
         const mesh=new THREE.Mesh(geo,mat);
-        // Each petal: tilt outward then spin around Y
-        const pivot=new THREE.Group();
-        pivot.rotation.y=a;
-        const inner=new THREE.Group();
-        inner.rotation.x=l.tilt;
-        inner.position.set(0,l.yOff,l.r);
-        inner.add(mesh);
-        pivot.add(inner);
+        const pivot=new THREE.Group();pivot.rotation.y=a;
+        const inner=new THREE.Group();inner.rotation.x=l.tilt;
+        inner.position.set(0,l.yOff,l.r);inner.add(mesh);pivot.add(inner);
         grp.add(pivot);
       }
     });
 
-    // Stamen sphere
+    // Stamen — warm gold glow
     const stGeo=new THREE.SphereGeometry(sz*.10,10,10);
-    const stMat=new THREE.MeshPhongMaterial({color:0xffdd44,shininess:90,transparent:true,opacity:0});
+    const stMat=new THREE.MeshStandardMaterial({
+      color:0xffdd44,emissive:new THREE.Color(0xffaa00),emissiveIntensity:0,
+      roughness:.3,metalness:.2,transparent:true,opacity:0
+    });
     grp._mats.push(stMat);
     const stamen=new THREE.Mesh(stGeo,stMat);
-    stamen.position.y=sz*.52;
-    grp.add(stamen);
+    stamen.position.y=sz*.52;grp.add(stamen);
 
     return grp;
   }
 
-  /* ── Main trunk (single, center) — gros tronc ── */
+  /* ── Main trunk ── */
   const trunkPts=[
     new THREE.Vector3(0,-14,0),
     new THREE.Vector3(0.8,-7,1.2),
@@ -3174,7 +3198,7 @@ if(!isMobile)
   ];
   const trunkCurve=new THREE.CatmullRomCurve3(trunkPts);
   const trunkGeo=new THREE.TubeGeometry(trunkCurve,80,0.72,14,false);
-  const trunkMat=new THREE.MeshPhongMaterial({color:0x2a0808,shininess:22,transparent:true,opacity:.96});
+  const trunkMat=new THREE.MeshStandardMaterial({color:0x2a0808,roughness:.82,metalness:.1,transparent:true,opacity:.96});
   scene.add(new THREE.Mesh(trunkGeo,trunkMat));
 
   /* ── Branches + roses ── */
@@ -3203,96 +3227,151 @@ if(!isMobile)
     const bCurve=new THREE.CatmullRomCurve3([orig,mid,end]);
     const thick=0.06+(1-cfg.t)*0.14;
     const bGeo=new THREE.TubeGeometry(bCurve,14,thick,6,false);
-    const bMat=new THREE.MeshPhongMaterial({color:0x2a0810,shininess:10,transparent:true,opacity:0});
+    const bMat=new THREE.MeshStandardMaterial({color:0x2a0810,roughness:.8,metalness:.05,transparent:true,opacity:0});
     const bMesh=new THREE.Mesh(bGeo,bMat);
-    bMesh._revT=cfg.t;
-    scene.add(bMesh);
-    branches3D.push(bMesh);
+    bMesh._revT=cfg.t;scene.add(bMesh);branches3D.push(bMesh);
 
-    // Thorn
     const thornGeo=new THREE.ConeGeometry(0.06,0.22,5);
-    const thornMat=new THREE.MeshPhongMaterial({color:0x1a0608,transparent:true,opacity:0});
+    const thornMat=new THREE.MeshStandardMaterial({color:0x1a0608,roughness:.9,transparent:true,opacity:0});
     const thorn=new THREE.Mesh(thornGeo,thornMat);
     const mp=bCurve.getPoint(0.5);
     thorn.position.copy(mp);
     thorn.lookAt(mp.clone().add(dir.clone().cross(tang).normalize()));
-    thorn._revT=cfg.t;
-    scene.add(thorn);
-    branches3D.push(thorn);
+    thorn._revT=cfg.t;scene.add(thorn);branches3D.push(thorn);
 
-    // Rose at tip — grosses roses
     const rSz=1.30+(1-cfg.t)*0.55;
     const rose=mkRose(end.x,end.y,end.z,rSz);
     rose._revT=cfg.t+0.05;
     rose._phase=Math.random()*Math.PI*2;
-    scene.add(rose);
-    roses3D.push(rose);
+    scene.add(rose);roses3D.push(rose);
   });
 
   /* ── Falling petals ── */
   const fallers=[];
   const fpGeo=new THREE.ShapeGeometry(mkPetalShape(0.20),8);
-  const fpColors=[0xff3366,0xff6699,0xff99bb,0xffccdd];
-  function spawnFaller(){
-    const mat=new THREE.MeshPhongMaterial({
-      color:fpColors[Math.floor(Math.random()*fpColors.length)],
-      side:THREE.DoubleSide,shininess:35,
-      transparent:true,opacity:0.35+Math.random()*.45
+  const fpColors=[0xff2255,0xff4477,0xff6699,0xff99bb];
+  function spawnFaller(sp2){
+    const col=fpColors[Math.floor(Math.random()*fpColors.length)];
+    const mat=new THREE.MeshStandardMaterial({
+      color:col,emissive:new THREE.Color(col),emissiveIntensity:0.4+sp2*1.2,
+      roughness:.5,metalness:.05,side:THREE.DoubleSide,
+      transparent:true,opacity:0.45+Math.random()*.45
     });
     const m=new THREE.Mesh(fpGeo,mat);
-    m.position.set((Math.random()-.5)*22,14+Math.random()*4,(Math.random()-.5)*5);
+    m.position.set((Math.random()-.5)*24,14+Math.random()*6,(Math.random()-.5)*6);
     m.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);
-    m._vy=-(0.025+Math.random()*.035);
-    m._vx=(Math.random()-.5)*.018;
-    m._rx=(Math.random()-.5)*.04;
-    m._rz=(Math.random()-.5)*.03;
+    m._vy=-(0.03+Math.random()*.04);
+    m._vx=(Math.random()-.5)*.02;
+    m._rx=(Math.random()-.5)*.05;
+    m._rz=(Math.random()-.5)*.04;
     m._wb=Math.random()*Math.PI*2;
-    m._wv=0.022+Math.random()*.025;
-    scene.add(m);
-    fallers.push(m);
+    m._wv=0.025+Math.random()*.03;
+    scene.add(m);fallers.push(m);
   }
-  for(let i=0;i<20;i++){spawnFaller();fallers[fallers.length-1].position.y=(Math.random()-.5)*26;}
+  for(let i=0;i<20;i++){spawnFaller(0);fallers[fallers.length-1].position.y=(Math.random()-.5)*26;}
 
   /* ── Animate ── */
   let frame=0;
   function animate(){
     frame++;requestAnimationFrame(animate);
 
-    // Reveal branches
+    // Quadratic + cubic scroll powers for exponential intensity at bottom
+    const sp2=scrollP*scrollP;
+    const sp3=sp2*scrollP;
+
+    // ── Dynamic exposure + lights scale with scroll² ──
+    renderer.toneMappingExposure=1.2+sp2*2.2;
+    ambLight.intensity=1.5+sp2*5.0;
+    pl1.intensity=6+sp2*18;
+    pl2.intensity=4+sp2*10;
+    pl3.intensity=5+sp2*13;
+    // Bloom bright threshold drops as scroll rises (more things glow)
+    brightMat.uniforms.thresh.value=Math.max(0.12,0.62-sp2*0.44);
+
+    // ── Reveal branches ──
     branches3D.forEach(b=>{
       const tgt=scrollP>b._revT?0.88:0;
       b.material.opacity+=(tgt-b.material.opacity)*.06;
     });
 
-    // Bloom roses — grow from bud (scale 0) to open flower
+    // ── Bloom roses — grow + emissive glow scales with scroll² ──
     roses3D.forEach(rose=>{
       const tgt=scrollP>rose._revT?1:0;
       rose._bloom+=(tgt-rose._bloom)*.04;
       const b=rose._bloom;
-      rose._mats.forEach(m=>{m.opacity=Math.min(1,b*1.3);});
+      const emI=b*(0.35+sp2*3.8+sp3*2.5); // explosive glow at bottom
+      rose._mats.forEach(m=>{
+        m.opacity=Math.min(1,b*1.3);
+        m.emissiveIntensity=emI;
+      });
       rose.scale.setScalar(b<0.01?0.01:b);
       rose.rotation.y=Math.sin(frame*.007+rose._phase)*.12;
       rose.rotation.z=Math.cos(frame*.005+rose._phase)*.06;
     });
 
-    // Spawn + move falling petals
-    if(scrollP>.05&&frame%10===0&&fallers.length<80)spawnFaller();
+    // ── Falling petals — faster + more at high scroll ──
+    const spawnRate=Math.max(2,Math.floor(10-sp2*7)); // spawn every 2–10 frames
+    const maxFallers=Math.round(40+sp3*120);          // up to 160 petals at bottom
+    const fallSpeed=1+sp2*2.8;                        // petals plunge faster
+    if(scrollP>.04&&frame%spawnRate===0&&fallers.length<maxFallers)spawnFaller(sp2);
     for(let i=fallers.length-1;i>=0;i--){
       const p=fallers[i];
-      p._wb+=p._wv;
-      p.position.y+=p._vy;
-      p.position.x+=p._vx+Math.sin(p._wb)*.012;
-      p.rotation.x+=p._rx;
-      p.rotation.z+=p._rz;
-      if(p.position.y<-14){scene.remove(p);fallers.splice(i,1);}
+      p._wb+=p._wv*(1+sp2*.8);
+      p.position.y+=p._vy*fallSpeed;
+      p.position.x+=p._vx+Math.sin(p._wb)*.015;
+      p.rotation.x+=p._rx*(1+sp2*.5);
+      p.rotation.z+=p._rz*(1+sp2*.5);
+      // Emissive burst on falling petals at high scroll
+      p.material.emissiveIntensity=0.4+sp2*1.5;
+      if(p.position.y<-15){scene.remove(p);fallers.splice(i,1);}
     }
 
-    // Camera: start low (root), rise to show blooms as scrollP→1
-    cam.position.x=Math.sin(frame*.003)*.5;
-    cam.position.y=-2+scrollP*6+Math.sin(frame*.002)*.25;
-    cam.lookAt(0,cam.position.y+1,0);
+    // ── Camera: sweeps up and breathes with scroll ──
+    cam.position.x=Math.sin(frame*.003)*(.5+sp2*.8);
+    cam.position.y=-2+scrollP*7+Math.sin(frame*.002)*.3;
+    cam.position.z=26-sp2*4; // slowly pushes in closer at bottom
+    cam.lookAt(0,cam.position.y+1+sp2*2,0);
 
+    // ── Bloom pipeline ──
+    // 1) render scene to main RT
+    renderer.setRenderTarget(rtMain);
+    renderer.clear();
     renderer.render(scene,cam);
+
+    // 2) bright-pass extract → rtA
+    qMesh.material=brightMat;
+    brightMat.uniforms.tDiffuse.value=rtMain.texture;
+    renderer.setRenderTarget(rtA);renderer.clear();renderer.render(qScene,qCam);
+
+    // 3) horizontal blur rtA → rtB
+    qMesh.material=blurMat;
+    blurMat.uniforms.tDiffuse.value=rtA.texture;
+    blurMat.uniforms.dir.value.set(1/BW,0);
+    renderer.setRenderTarget(rtB);renderer.clear();renderer.render(qScene,qCam);
+
+    // 4) vertical blur rtB → rtA
+    blurMat.uniforms.tDiffuse.value=rtB.texture;
+    blurMat.uniforms.dir.value.set(0,1/BH);
+    renderer.setRenderTarget(rtA);renderer.clear();renderer.render(qScene,qCam);
+
+    // 5) second horizontal blur (wider spread at high scroll)
+    blurMat.uniforms.tDiffuse.value=rtA.texture;
+    blurMat.uniforms.dir.value.set((1+sp2*1.5)/BW,0);
+    renderer.setRenderTarget(rtB);renderer.clear();renderer.render(qScene,qCam);
+
+    // 6) second vertical blur
+    blurMat.uniforms.tDiffuse.value=rtB.texture;
+    blurMat.uniforms.dir.value.set(0,(1+sp2*1.5)/BH);
+    renderer.setRenderTarget(rtA);renderer.clear();renderer.render(qScene,qCam);
+
+    // 7) composite: base + bloom → screen
+    qMesh.material=compMat;
+    compMat.uniforms.tBase.value=rtMain.texture;
+    compMat.uniforms.tBloom.value=rtA.texture;
+    compMat.uniforms.str.value=1.4+sp2*2.2+sp3*5.5; // EXPLOSIVE bloom at scroll bottom
+    renderer.setRenderTarget(null);
+    renderer.clear();
+    renderer.render(qScene,qCam);
   }
   animate();
 })();
