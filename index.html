@@ -2132,6 +2132,64 @@ else
   renderer.toneMappingExposure=1.6;
   renderer.outputColorSpace=THREE.SRGBColorSpace;
 
+  // ══ BLOOM POST-PROCESSING (manual pipeline — no addons needed) ══
+  const PR=Math.min(devicePixelRatio,2);
+  const FW=Math.round(W*PR), FH=Math.round(H*PR);  // full-res
+  const BW=Math.round(FW/2), BH=Math.round(FH/2);  // half-res for blur
+  const _rtOpts={minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,format:THREE.RGBAFormat,type:THREE.UnsignedByteType};
+  const rtMain=new THREE.WebGLRenderTarget(FW,FH,_rtOpts);
+  const rtA  =new THREE.WebGLRenderTarget(BW,BH,_rtOpts);
+  const rtB  =new THREE.WebGLRenderTarget(BW,BH,_rtOpts);
+
+  const _VS=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,1.);}`;
+
+  // Pass 1 — Luminosity threshold (extract bright pixels)
+  const bloomBrightMat=new THREE.ShaderMaterial({
+    uniforms:{tDiffuse:{value:null},thresh:{value:.68}},
+    vertexShader:_VS,
+    fragmentShader:`uniform sampler2D tDiffuse;uniform float thresh;varying vec2 vUv;
+      void main(){
+        vec4 c=texture2D(tDiffuse,vUv);
+        float br=max(c.r,max(c.g,c.b));
+        float w=smoothstep(thresh-.07,thresh+.1,br);
+        gl_FragColor=vec4(c.rgb*w,c.a);
+      }`
+  });
+
+  // Pass 2 — Separable 5-tap Gaussian blur (H or V via dir uniform)
+  const bloomBlurMat=new THREE.ShaderMaterial({
+    uniforms:{tDiffuse:{value:null},dir:{value:new THREE.Vector2(1./BW,0)}},
+    vertexShader:_VS,
+    fragmentShader:`uniform sampler2D tDiffuse;uniform vec2 dir;varying vec2 vUv;
+      void main(){
+        vec4 c=texture2D(tDiffuse,vUv)                          *0.2270270;
+        c+=texture2D(tDiffuse,vUv+dir*1.3846154)               *0.3162162;
+        c+=texture2D(tDiffuse,vUv-dir*1.3846154)               *0.3162162;
+        c+=texture2D(tDiffuse,vUv+dir*3.2307692)               *0.0702703;
+        c+=texture2D(tDiffuse,vUv-dir*3.2307692)               *0.0702703;
+        gl_FragColor=c;
+      }`
+  });
+
+  // Pass 3 — Additive composite: scene + bloom
+  const bloomComposMat=new THREE.ShaderMaterial({
+    uniforms:{tBase:{value:null},tBloom:{value:null},str:{value:1.35},pulse:{value:0.}},
+    vertexShader:_VS,
+    fragmentShader:`uniform sampler2D tBase;uniform sampler2D tBloom;
+      uniform float str;uniform float pulse;varying vec2 vUv;
+      void main(){
+        vec4 base =texture2D(tBase, vUv);
+        vec4 bloom=texture2D(tBloom,vUv);
+        gl_FragColor=base+bloom*(str+pulse);
+      }`
+  });
+
+  // Fullscreen quad used by all passes
+  const _qScene=new THREE.Scene();
+  const _qCam  =new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+  const _qMesh =new THREE.Mesh(new THREE.PlaneGeometry(2,2));
+  _qScene.add(_qMesh);
+
   const scene=new THREE.Scene();
   scene.fog=new THREE.FogExp2(0x00010a,.012);
   const camera=new THREE.PerspectiveCamera(52,W/H,.1,300);
@@ -2667,7 +2725,43 @@ else
       });
     });
 
+    // ── BLOOM PIPELINE ──
+    // 1 · Scene → full-res RT (tone-mapping applied here)
+    renderer.setRenderTarget(rtMain);
     renderer.render(scene,camera);
+
+    // 2 · Bright-pass → half-res rtA
+    bloomBrightMat.uniforms.tDiffuse.value=rtMain.texture;
+    _qMesh.material=bloomBrightMat;
+    renderer.setRenderTarget(rtA);
+    renderer.render(_qScene,_qCam);
+
+    // 3 · Separable blur × 2 iterations (H → B, V → A, repeat)
+    for(let _bi=0;_bi<2;_bi++){
+      bloomBlurMat.uniforms.tDiffuse.value=(_bi===0?rtA:rtB).texture;
+      bloomBlurMat.uniforms.dir.value.set(1.5/BW,0);
+      _qMesh.material=bloomBlurMat;
+      renderer.setRenderTarget(rtB);
+      renderer.render(_qScene,_qCam);
+
+      bloomBlurMat.uniforms.tDiffuse.value=rtB.texture;
+      bloomBlurMat.uniforms.dir.value.set(0,1.5/BH);
+      renderer.setRenderTarget(rtA);
+      renderer.render(_qScene,_qCam);
+    }
+
+    // 4 · Composite → screen (bloom pulses with heartbeat)
+    bloomComposMat.uniforms.tBase.value =rtMain.texture;
+    bloomComposMat.uniforms.tBloom.value=rtA.texture;
+    bloomComposMat.uniforms.pulse.value =hb*.45; // heartbeat-driven bloom boost
+    _qMesh.material=bloomComposMat;
+    renderer.toneMapping=THREE.NoToneMapping;          // already applied in pass 1
+    renderer.outputColorSpace=THREE.LinearSRGBColorSpace;
+    renderer.setRenderTarget(null);
+    renderer.render(_qScene,_qCam);
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;  // restore for next frame
+    renderer.outputColorSpace=THREE.SRGBColorSpace;
+
     requestAnimationFrame(animSkeleton);
   })();
 })();
