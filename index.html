@@ -354,14 +354,17 @@ section{padding:9rem 0;position:relative}
 ══════════════════════════ */
 #timeline{padding:9rem 0}
 .tl{margin-top:3.5rem;display:flex;flex-direction:column;gap:0}
-.tli{display:grid;grid-template-columns:110px 40px 1fr;gap:0;padding:2.2rem 0;border-bottom:1px solid rgba(0,229,255,.05);position:relative;opacity:0;transform:translateX(-16px);transition:opacity .5s,transform .5s}
+.tli{display:grid;grid-template-columns:110px 40px 1fr;gap:0;padding:2.2rem 0;border-bottom:1px solid rgba(0,229,255,.05);position:relative}
 .tli:last-child{border-bottom:none}
-.tli.in{opacity:1;transform:none}
-.tli-year{font-family:var(--ff);font-size:.8rem;font-weight:700;color:rgba(0,229,255,.4);text-align:right;padding-top:.2rem;padding-right:1.5rem}
+.tli.in{opacity:1;transform:none} /* fallback reduced-motion */
+.tli-year{font-family:var(--ff);font-size:.8rem;font-weight:700;color:rgba(0,229,255,.4);text-align:right;padding-top:.2rem;padding-right:1.5rem;will-change:transform,opacity}
 .tli-dna{display:flex;flex-direction:column;align-items:center;position:relative}
-.tli-dot{width:10px;height:10px;border-radius:50%;background:var(--dc,var(--neural));border:2px solid var(--bg);box-shadow:0 0 14px var(--dc,rgba(0,229,255,.7));flex-shrink:0;margin-top:.1rem;position:relative;z-index:1}
-.tli-dna-line{width:1px;flex:1;background:linear-gradient(var(--dc,rgba(0,229,255,.2)),rgba(0,229,255,.06));margin-top:.4rem}
-.tli-body{padding-bottom:.5rem;padding-left:.8rem}
+.tli-dot{width:10px;height:10px;border-radius:50%;background:var(--dc,var(--neural));border:2px solid var(--bg);box-shadow:0 0 14px var(--dc,rgba(0,229,255,.7));flex-shrink:0;margin-top:.1rem;position:relative;z-index:2}
+.tli-dot::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1.5px solid var(--dc,rgba(0,229,255,.5));opacity:0;transform:scale(.4)}
+.tli-dot.ring::after{animation:dotRing .7s ease-out forwards}
+@keyframes dotRing{0%{opacity:.9;transform:scale(.4)}100%{opacity:0;transform:scale(2.8)}}
+.tli-dna-line{width:1px;flex:1;background:linear-gradient(var(--dc,rgba(0,229,255,.2)),rgba(0,229,255,.06));margin-top:.4rem;transform-origin:top center;will-change:transform}
+.tli-body{padding-bottom:.5rem;padding-left:.8rem;will-change:transform,opacity}
 .tli-title{font-family:var(--ff);font-size:1.05rem;font-weight:700;margin-bottom:.45rem;transition:color .2s}
 .tli:hover .tli-title{color:var(--neural);text-shadow:0 0 12px rgba(0,229,255,.3)}
 .tli-desc{font-size:.82rem;color:var(--muted);line-height:1.75;max-width:500px}
@@ -1343,9 +1346,72 @@ ScrollTrigger.create({trigger:'#sk-list',start:'top 78%',once:true,onEnter:()=>{
   document.querySelectorAll('.sk-bar').forEach(b=>b.style.width=b.dataset.w+'%');
 }});
 
-document.querySelectorAll('.tli').forEach((el,i)=>{
-  ScrollTrigger.create({trigger:el,start:'top 88%',once:true,onEnter:()=>setTimeout(()=>el.classList.add('in'),i*90)});
-});
+/* ══ TIMELINE — GSAP CINEMATIC ══ */
+(function(){
+  const SC='▓░█◈01#?';
+  const items=document.querySelectorAll('.tli');
+
+  // Set GSAP initial state (disables CSS-only fallback, GSAP owns it now)
+  items.forEach(el=>{
+    const body=el.querySelector('.tli-body');
+    const yearEl=el.querySelector('.tli-year');
+    const dot=el.querySelector('.tli-dot');
+    const line=el.querySelector('.tli-dna-line');
+    gsap.set(el,{opacity:1,x:0}); // override legacy CSS
+    if(body)gsap.set(body,{opacity:0,y:22});
+    if(yearEl)gsap.set(yearEl,{opacity:0,x:-18});
+    if(dot)gsap.set(dot,{scale:0,opacity:0});
+    if(line)gsap.set(line,{scaleY:0});
+  });
+
+  items.forEach((el,i)=>{
+    const body=el.querySelector('.tli-body');
+    const yearEl=el.querySelector('.tli-year');
+    const dot=el.querySelector('.tli-dot');
+    const line=el.querySelector('.tli-dna-line');
+    const origYear=yearEl?yearEl.textContent.trim():'';
+
+    ScrollTrigger.create({
+      trigger:el,start:'top 87%',once:true,
+      onEnter:()=>{
+        const tl=gsap.timeline({delay:i*.055});
+
+        // 1 — Dot: scale pop + elastic settle
+        if(dot){
+          tl.to(dot,{scale:2.0,opacity:1,duration:.14,ease:'back.out(3)'},0)
+            .to(dot,{scale:1,duration:.55,ease:'elastic.out(1,.45)'},.14)
+            .call(()=>dot.classList.add('ring'),null,.14); // ring expand CSS anim
+        }
+
+        // 2 — DNA line draws downward
+        if(line)tl.to(line,{scaleY:1,duration:.85,ease:'power3.out'},.12);
+
+        // 3 — Year: scramble then lock
+        if(yearEl){
+          tl.to(yearEl,{opacity:1,x:0,duration:.35,ease:'power3.out'},.08)
+            .call(()=>{
+              const base=origYear.replace(/[^0-9→ ]/g,'');
+              let f=0;const max=16;
+              const iv=setInterval(()=>{
+                if(f<max-4){
+                  yearEl.textContent=origYear.replace(/[0-9]/g,()=>SC[Math.floor(Math.random()*SC.length)]);
+                }else{
+                  yearEl.textContent=origYear;
+                  clearInterval(iv);
+                }
+                f++;
+              },38);
+            },null,.08);
+        }
+
+        // 4 — Body slides up
+        if(body)tl.to(body,{opacity:1,y:0,duration:.65,ease:'power3.out'},.2);
+
+        el.classList.add('in');
+      }
+    });
+  });
+})();
 
 // Scramble titles
 const SC='█▓░◈⚡01#◉';
