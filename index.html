@@ -2066,6 +2066,56 @@ if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
   document.querySelectorAll('.sk-bar').forEach(b=>b.style.width=b.dataset.w+'%');
 }
 
+/* ══════════════════════ BONE AUDIO SYNTHESIZER ══════════════════════ */
+(function(){
+  let ac=null,ready=false;
+
+  function getAC(){
+    if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();
+    if(ac.state==='suspended')ac.resume();
+    return ac;
+  }
+
+  // Unlock on first real user gesture
+  ['pointerdown','keydown'].forEach(ev=>{
+    document.addEventListener(ev,()=>{getAC();ready=true;},{once:true,passive:true});
+  });
+
+  // One noise burst: white noise → BPF → gain envelope
+  function burst(freq,Q,vol,dur,detune=0){
+    const a=getAC();
+    const len=Math.ceil(a.sampleRate*(dur+.05));
+    const buf=a.createBuffer(1,len,a.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+    const src=a.createBufferSource();
+    src.buffer=buf;src.detune.value=detune;
+    const bp=a.createBiquadFilter();
+    bp.type='bandpass';bp.frequency.value=freq;bp.Q.value=Q;
+    const g=a.createGain();
+    const now=a.currentTime;
+    g.gain.setValueAtTime(vol,now);
+    g.gain.exponentialRampToValueAtTime(1e-4,now+dur);
+    src.connect(bp);bp.connect(g);g.connect(a.destination);
+    src.start(now);src.stop(now+dur+.06);
+  }
+
+  // Bone crack: high snap + mid body + optional low thud (big bones)
+  window._boneCrack=function({vol=0.3,pitch=1,big=false}={}){
+    if(!ready)return;
+    const d=(Math.random()-.5)*180;
+    burst(2600*pitch+Math.random()*400, 2.0, vol*.9,  0.08+Math.random()*.04, d);
+    burst(1100*pitch,                   1.4, vol*.35, 0.10, d*.5);
+    if(big) burst(200+Math.random()*60, 4.0, vol*.45, 0.16);
+  };
+
+  // Subtle hover crackle (nearly inaudible — just texture)
+  window._boneHoverCrackle=function(){
+    if(!ready)return;
+    burst(3000+Math.random()*900, 2.8, 0.07+Math.random()*.04, 0.035);
+  };
+})();
+
 /* ══════════════════════ 3D SPINE — REALISTIC ══════════════════════ */
 const isMobile=window.innerWidth<768||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 if(isMobile){document.getElementById('spine-canvas').style.display='none';}
@@ -2488,9 +2538,12 @@ else
 
     // ── CURSOR × BONE GLOW ──
     if(++_rayF%2===0){
+      const _prevHit=_hitPt!==null;
       raycaster.setFromCamera(mouseNDC,camera);
       const hits=raycaster.intersectObjects(allSkelMeshes,false);
       _hitPt=hits.length?hits[0].point.clone():null;
+      // 🔊 Hover crackle on cursor landing on skeleton
+      if(!_prevHit&&_hitPt)window._boneHoverCrackle?.();
     }
     {
       const GRAD=2.8; // world-unit radius of glow falloff
@@ -2590,7 +2643,7 @@ else
     cord.material.emissiveIntensity=.85+cpulse*.6;
 
     // ── RG REVEAL — elastic scale + opacity + cyan flash per bone ──
-    RG.forEach(g=>{
+    RG.forEach((g,gi)=>{
       const targeting=skelScrollRatio>=g.t;
       g.m.forEach(m=>{
         const prevOp=m.material.opacity;
@@ -2601,13 +2654,15 @@ else
         if(!ribMeshes.includes(m))m.scale.setScalar(Math.max(.001,es));
         else m.scale.y=Math.max(.001,es);
         m.material.opacity=m.userData.revT*.95;
-        // Flash on crossing 30% opacity
+        // Flash on crossing 30% opacity → bone crack sound
         if(prevOp<.28&&m.material.opacity>=.28&&!m.userData.flashed){
           m.userData.flashed=true;
           m.material.emissive.setRGB(.04,.80,.66);m.material.emissiveIntensity=4.8;
           const wp=new THREE.Vector3();m.getWorldPosition(wp);
           pArc.position.copy(wp);pArc.intensity=9;
           setTimeout(()=>{m.material.emissive.setRGB(.03,.02,.012);m.material.emissiveIntensity=.7;pArc.intensity=0;},270);
+          // 🔊 Bone crack — big bones (pelvis/legs) get extra low thud
+          window._boneCrack?.({vol:.24+Math.random()*.12,pitch:.82+Math.random()*.36,big:gi>=7});
         }
       });
     });
