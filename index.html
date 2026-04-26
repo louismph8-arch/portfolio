@@ -1480,12 +1480,11 @@ window.addEventListener('scroll',()=>{
   document.getElementById('nav').classList.toggle('scrolled',scrollY>40);
 
   /* ── Hero frame glow grows with scroll ── */
-  const heroH=document.getElementById('hero')?.offsetHeight||innerHeight;
-  const p=Math.min(1,scrollY/heroH);
+  const fp=Math.min(1,scrollY/(document.getElementById('hero')?.offsetHeight||innerHeight));
   const hf=document.getElementById('hero-frame');
   if(hf){
-    hf.style.borderColor=`rgba(220,50,90,${0.07+p*.38})`;
-    hf.style.boxShadow=`inset 0 0 ${50+p*140}px rgba(220,50,90,${0.03+p*.10}),0 0 ${70+p*130}px rgba(220,50,90,${0.02+p*.07})`;
+    hf.style.borderColor=`rgba(220,50,90,${0.07+fp*.38})`;
+    hf.style.boxShadow=`inset 0 0 ${50+fp*140}px rgba(220,50,90,${0.03+fp*.10}),0 0 ${70+fp*130}px rgba(220,50,90,${0.02+fp*.07})`;
   }
   let cur='';
   ['hero','about','projects','skills','terminal','timeline','services','contact']
