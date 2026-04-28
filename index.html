@@ -3210,11 +3210,15 @@ if(!isMobile)
   const pl2=new THREE.PointLight(0xff88cc,4.0,32);pl2.position.set(-5,-3,8);scene.add(pl2);
   const pl3=new THREE.PointLight(0xcc0044,5.0,38);pl3.position.set(5,-2,9);scene.add(pl3);
 
-  /* ── Scroll ── */
+  /* ── Scroll — native listener + fmScroll override when ready ── */
   let scrollP=0;
   window.addEventListener('scroll',()=>{
     scrollP=Math.min(1,scrollY/Math.max(document.documentElement.scrollHeight-innerHeight,1));
   },{passive:true});
+  // fmScroll gives velocity-aware progress (smoother at fast scroll)
+  document.addEventListener('motionready',()=>{
+    fmScroll(info=>{scrollP=info.y.progress;});
+  });
 
   /* ── Fog for depth ── */
   scene.fog=new THREE.FogExp2(0x000000,0.015);
@@ -3335,7 +3339,8 @@ if(!isMobile)
     const bGeo=new THREE.TubeGeometry(bCurve,14,thick,6,false);
     const bMat=new THREE.MeshStandardMaterial({color:0x2a0810,roughness:.8,metalness:.05,transparent:true,opacity:0});
     const bMesh=new THREE.Mesh(bGeo,bMat);
-    bMesh._revT=cfg.t;scene.add(bMesh);branches3D.push(bMesh);
+    bMesh._revT=cfg.t;bMesh._opTgt=-1;bMesh._opAnim=null;
+    scene.add(bMesh);branches3D.push(bMesh);
 
     const thornGeo=new THREE.ConeGeometry(0.06,0.22,5);
     const thornMat=new THREE.MeshStandardMaterial({color:0x1a0608,roughness:.9,transparent:true,opacity:0});
@@ -3343,12 +3348,14 @@ if(!isMobile)
     const mp=bCurve.getPoint(0.5);
     thorn.position.copy(mp);
     thorn.lookAt(mp.clone().add(dir.clone().cross(tang).normalize()));
-    thorn._revT=cfg.t;scene.add(thorn);branches3D.push(thorn);
+    thorn._revT=cfg.t;thorn._opTgt=-1;thorn._opAnim=null;
+    scene.add(thorn);branches3D.push(thorn);
 
     const rSz=1.30+(1-cfg.t)*0.55;
     const rose=mkRose(end.x,end.y,end.z,rSz);
     rose._revT=cfg.t+0.05;
     rose._phase=Math.random()*Math.PI*2;
+    rose._bloomTgt=-1;rose._bloomAnim=null; // Framer Motion spring state
     scene.add(rose);roses3D.push(rose);
   });
 
@@ -3410,22 +3417,53 @@ if(!isMobile)
     pl1.intensity=4+sp2*6;pl2.intensity=3+sp2*4;pl3.intensity=3.5+sp2*5;
     brightMat.uniforms.thresh.value=Math.max(0.42,0.72-sp2*0.28);
 
-    // ── Reveal branches ──
+    // ── Reveal branches — Framer Motion spring or lerp fallback ──
     branches3D.forEach(b=>{
       const tgt=scrollP>b._revT?0.88:0;
-      b.material.opacity+=(tgt-b.material.opacity)*.06;
+      if(tgt!==b._opTgt){
+        b._opTgt=tgt;
+        if(b._opAnim)b._opAnim.stop?.();
+        if(window.fmAnimate){
+          const s=b.material.opacity;
+          b._opAnim=fmAnimate(s,tgt,{
+            type:'spring',stiffness:72,damping:17,
+            onUpdate:v=>{b.material.opacity=Math.max(0,Math.min(1,v));}
+          });
+        }
+      }
+      if(!window.fmAnimate)b.material.opacity+=(tgt-b.material.opacity)*.06;
     });
 
-    // ── Bloom roses ──
+    // ── Bloom roses — Framer Motion spring (natural petal physics) ──
     roses3D.forEach(rose=>{
       const tgt=scrollP>rose._revT?1:0;
-      rose._bloom+=(tgt-rose._bloom)*.04;
+      if(tgt!==rose._bloomTgt){
+        rose._bloomTgt=tgt;
+        if(rose._bloomAnim)rose._bloomAnim.stop?.();
+        if(window.fmAnimate){
+          const sv=rose._bloom;
+          rose._bloomAnim=fmAnimate(sv,tgt,{
+            type:'spring',
+            stiffness:tgt>0?36:95,   // open slowly/bounce, close snappy
+            damping:  tgt>0?8:18,    // low damping → springy overshoot on open
+            mass:     tgt>0?1.4:0.7,
+            onUpdate:v=>{rose._bloom=Math.max(0,v);}
+          });
+        }
+      }
+      if(!window.fmAnimate)rose._bloom+=(tgt-rose._bloom)*.04;
       const b=rose._bloom;
       const emI=b*(0.15+sp2*1.2+sp3*0.9);
       rose._mats.forEach(m=>{m.opacity=Math.min(1,b*1.3);m.emissiveIntensity=emI;});
       rose.scale.setScalar(b<0.01?0.01:b);
-      rose.rotation.y=Math.sin(frame*.007+rose._phase)*.12;
-      rose.rotation.z=Math.cos(frame*.005+rose._phase)*.06;
+      // Framer Motion oscillation on fully-bloomed roses
+      if(b>.85&&window.fmAnimate){
+        rose.rotation.y=Math.sin(frame*.007+rose._phase)*(0.10+sp2*.08);
+        rose.rotation.z=Math.cos(frame*.005+rose._phase)*(0.05+sp2*.04);
+      }else{
+        rose.rotation.y=Math.sin(frame*.007+rose._phase)*.12;
+        rose.rotation.z=Math.cos(frame*.005+rose._phase)*.06;
+      }
     });
 
     // ── Sparkles — orbit around roses, appear when bloomed ──
