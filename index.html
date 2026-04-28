@@ -569,6 +569,16 @@ footer{border-top:1px solid rgba(212,96,122,.06);padding:1.5rem 3.5rem;display:f
   .tli{grid-template-columns:70px 30px 1fr}
 }
 
+/* ══ FOCUS-VISIBLE — keyboard nav ══ */
+/* Custom cursor hides pointer cues — restore keyboard focus rings */
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--neural);outline-offset:3px;border-radius:4px}
+a:focus-visible,button:focus-visible{outline-color:var(--neural);box-shadow:0 0 0 4px rgba(200,80,106,.18)}
+.btn:focus-visible{outline-color:var(--neural);box-shadow:0 0 0 4px rgba(200,80,106,.18),0 0 30px rgba(200,80,106,.12)}
+.ct-sc:focus-visible{outline-offset:4px;border-radius:18px}
+.proj-card:focus-visible{outline-offset:4px;border-radius:14px}
+#tinp:focus-visible{outline:none} /* terminal has its own style */
+
 /* ══ PREFERS-REDUCED-MOTION ══ */
 @media(prefers-reduced-motion:reduce){
   /* Kill canvases with continuous animation */
@@ -763,7 +773,7 @@ footer{border-top:1px solid rgba(212,96,122,.06);padding:1.5rem 3.5rem;display:f
             <div class="now-label">En ce moment</div>
             <div class="now-activity" id="now-activity">Chargement…</div>
           </div>
-          <img class="now-art" id="now-art" alt="art">
+          <img class="now-art" id="now-art" alt="Artwork en cours" loading="lazy" decoding="async">
         </div>
       </div>
     </div>
@@ -781,7 +791,7 @@ footer{border-top:1px solid rgba(212,96,122,.06);padding:1.5rem 3.5rem;display:f
     <div class="rev"><div class="s-tag"><i>◈</i> Organes Vitaux</div><h2 class="s-h">Ce que je <span>crée</span></h2></div>
     <div class="proj-cards rev">
       <!-- CARD 1 -->
-      <div class="proj-card" id="pc0">
+      <div class="proj-card" id="pc0" role="button" tabindex="0" aria-label="Bots Discord — cliquer pour voir les détails">
         <div class="card-inner">
           <div class="card-face">
             <div class="cf-num">01 / 03</div>
@@ -806,7 +816,7 @@ footer{border-top:1px solid rgba(212,96,122,.06);padding:1.5rem 3.5rem;display:f
         </div>
       </div>
       <!-- CARD 2 -->
-      <div class="proj-card" id="pc1">
+      <div class="proj-card" id="pc1" role="button" tabindex="0" aria-label="App Mobile Football — cliquer pour voir les détails">
         <div class="card-inner">
           <div class="card-face">
             <div class="cf-num">02 / 03</div>
@@ -831,7 +841,7 @@ footer{border-top:1px solid rgba(212,96,122,.06);padding:1.5rem 3.5rem;display:f
         </div>
       </div>
       <!-- CARD 3 -->
-      <div class="proj-card" id="pc2">
+      <div class="proj-card" id="pc2" role="button" tabindex="0" aria-label="Bios Discord HTML — cliquer pour voir les détails">
         <div class="card-inner">
           <div class="card-face">
             <div class="cf-num">03 / 03</div>
@@ -1828,6 +1838,8 @@ document.querySelectorAll('.proj-card').forEach(card=>{
   card.addEventListener('click',()=>card.classList.toggle('flipped'));
   // Touch fallback (touchend = tap on mobile)
   card.addEventListener('touchend',e=>{e.preventDefault();card.classList.toggle('flipped');});
+  // Keyboard accessibility (Enter / Space to flip)
+  card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();card.classList.toggle('flipped');}});
 });
 // cursor big on card hover
 document.querySelectorAll('.proj-card').forEach(el=>{
