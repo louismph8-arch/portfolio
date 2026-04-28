@@ -330,7 +330,7 @@ section{padding:9rem 0;position:relative}
 ══════════════════════════ */
 .proj-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3.5rem}
 .proj-card{perspective:1000px;height:320px;cursor:none}
-.card-inner{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
+.card-inner{position:relative;width:100%;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
 .proj-card.flipped .card-inner{transform:rotateY(180deg)}
 .card-face,.card-back{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;-webkit-backface-visibility:hidden;padding:2rem;display:flex;flex-direction:column;border:1px solid rgba(220,50,90,.1);background:var(--card)}
 .card-face{background:linear-gradient(135deg,rgba(220,50,90,.04),rgba(153,0,255,.04))}
@@ -343,6 +343,8 @@ section{padding:9rem 0;position:relative}
 .cf-desc{font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem}
 .cf-tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:auto}
 .cf-hint{font-family:var(--fc);font-size:.46rem;letter-spacing:.15em;color:rgba(220,50,90,.22);margin-top:.6rem;text-align:right}
+/* Touch hint — show "Tap" instead of "Hover" on touch devices */
+@media(hover:none){.cf-hint::before{content:'Tap ';}.cf-hint{color:rgba(220,50,90,.35)}}
 .cb-title{font-family:var(--ff);font-size:.9rem;font-weight:700;color:var(--neural);margin-bottom:.9rem}
 .cb-feats{list-style:none;flex:1;display:flex;flex-direction:column;gap:.45rem;margin-bottom:1rem}
 .cb-feats li{font-size:.76rem;color:var(--dim);display:flex;align-items:flex-start;gap:.5rem;line-height:1.5}
@@ -562,6 +564,26 @@ footer{border-top:1px solid rgba(220,50,90,.06);padding:1.5rem 3.5rem;display:fl
   .proj-num,.proj-tags{display:none}
   section{padding:6rem 0}
   .tli{grid-template-columns:70px 30px 1fr}
+}
+
+/* ══ PREFERS-REDUCED-MOTION ══ */
+@media(prefers-reduced-motion:reduce){
+  /* Kill canvases with continuous animation */
+  #rose-canvas,#hero-canvas{display:none!important}
+  /* Stop marquee scroll */
+  .marquee{animation:none!important;overflow:hidden}
+  /* Stop gradient text animations */
+  .hero-big .testa,.hero-big .rossa,.n-logo,.s-h span,.ab-n,
+  .cf-name,.cb-link{animation:none!important;background-position:0 0!important}
+  /* Stop pulse / heartbeat / dispoPulse */
+  .n-dot,.dispo-dot,.dispo-badge,.hv-bar-fill{animation:none!important}
+  /* Stop scan line animations */
+  body::before{display:none}
+  #prog{transition:none!important}
+  /* Collapse all CSS transitions to instant */
+  *{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
+  /* But keep card flip readable */
+  .card-inner{transition:transform .15s ease!important}
 }
 </style>
 </head>
@@ -1801,11 +1823,24 @@ document.querySelectorAll('.s-h').forEach(el=>{
 /* ══════════════════════ FLIP CARDS ══════════════════════ */
 document.querySelectorAll('.proj-card').forEach(card=>{
   card.addEventListener('click',()=>card.classList.toggle('flipped'));
+  // Touch fallback (touchend = tap on mobile)
+  card.addEventListener('touchend',e=>{e.preventDefault();card.classList.toggle('flipped');});
 });
 // cursor big on card hover
 document.querySelectorAll('.proj-card').forEach(el=>{
   el.addEventListener('mouseenter',()=>cur.classList.add('big'));
   el.addEventListener('mouseleave',()=>cur.classList.remove('big'));
+});
+
+/* ══════════════════════ PROJ LIST — CLICK/TOUCH EXPAND ══════════════════════ */
+// Replaces hover-only expand with click/tap for mobile accessibility
+document.querySelectorAll('.proj').forEach(el=>{
+  el.addEventListener('click',()=>{
+    const isOpen=el.classList.contains('open');
+    // Close all others
+    document.querySelectorAll('.proj.open').forEach(p=>p.classList.remove('open'));
+    if(!isOpen)el.classList.add('open');
+  });
 });
 
 /* ══════════════════════ DISCORD STATUS + EN CE MOMENT ══════════════════════ */
@@ -2161,11 +2196,27 @@ document.addEventListener('keydown',e=>{
 })();
 
 /* ══════════════════════ REDUCED MOTION ══════════════════════ */
-if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
-  gsap.globalTimeline.timeScale(20);
-  document.querySelectorAll('.tli').forEach(el=>el.classList.add('in'));
-  document.querySelectorAll('.sk-bar').forEach(b=>b.style.width=b.dataset.w+'%');
-}
+(function(){
+  const mq=window.matchMedia('(prefers-reduced-motion:reduce)');
+  function applyReducedMotion(active){
+    if(!active)return;
+    // Speed-run GSAP (instant reveals)
+    gsap.globalTimeline.timeScale(50);
+    // Immediately reveal timeline & skill bars
+    document.querySelectorAll('.tli').forEach(el=>el.classList.add('in'));
+    document.querySelectorAll('.sk-bar').forEach(b=>b.style.width=b.dataset.w+'%');
+    // Stop 3D canvases
+    ['rose-canvas','hero-canvas'].forEach(id=>{
+      const c=document.getElementById(id);
+      if(c)c.style.display='none';
+    });
+    // Stop grain flicker
+    const g=document.getElementById('grain');
+    if(g)g.style.display='none';
+  }
+  applyReducedMotion(mq.matches);
+  mq.addEventListener('change',e=>applyReducedMotion(e.matches));
+})();
 
 /* ══════════════════════ BONE AUDIO SYNTHESIZER ══════════════════════ */
 (function(){
