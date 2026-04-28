@@ -339,7 +339,8 @@ section{padding:9rem 0;position:relative}
 .proj-card:hover .card-face{border-color:rgba(212,96,122,.3);box-shadow:0 0 30px rgba(212,96,122,.08)}
 .proj-card.flipped:hover .card-back{border-color:rgba(196,154,58,.4);box-shadow:0 0 30px rgba(196,154,58,.1)}
 .cf-num{font-family:var(--fc);font-size:.52rem;letter-spacing:.25em;color:rgba(212,96,122,.35)}
-.cf-ico{font-size:2.4rem;margin:auto 0 .8rem}
+.cf-ico{width:2.4rem;height:2.4rem;margin:auto 0 .8rem;color:var(--neural);opacity:.82}
+.cf-ico svg{width:100%;height:100%;display:block}
 .cf-name{font-family:var(--ff);font-size:1.2rem;font-weight:800;margin-bottom:.5rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200%;animation:gradShift 4s linear infinite}
 .cf-desc{font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem}
 .cf-tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:auto}
@@ -431,7 +432,8 @@ section{padding:9rem 0;position:relative}
 .sv:hover::after{transform:scaleX(1)}
 .sv.pop{background:rgba(212,96,122,.02);border-top:1px solid rgba(212,96,122,.1)}
 .sv-badge{font-family:var(--fc);font-size:.46rem;letter-spacing:.2em;color:var(--bio);margin-bottom:1.2rem;text-transform:uppercase;text-shadow:0 0 8px rgba(196,154,58,.5)}
-.sv-ico{font-size:1.6rem;margin-bottom:1rem}
+.sv-ico{width:1.6rem;height:1.6rem;margin-bottom:1rem;color:var(--neural);opacity:.78}
+.sv-ico svg{width:100%;height:100%;display:block}
 .sv-name{font-family:var(--ff);font-size:.95rem;font-weight:700;margin-bottom:.5rem;color:var(--white)}
 .sv-price{font-family:var(--ff);font-size:2.2rem;font-weight:800;margin-bottom:.25rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200%;animation:gradShift 4s linear infinite}
 .sv-price-sub{font-family:var(--fc);font-size:.55rem;color:var(--muted);margin-bottom:1.4rem}
@@ -783,14 +785,14 @@ footer{border-top:1px solid rgba(212,96,122,.06);padding:1.5rem 3.5rem;display:f
         <div class="card-inner">
           <div class="card-face">
             <div class="cf-num">01 / 03</div>
-            <div class="cf-ico">🤖</div>
+            <div class="cf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M8 12h.01M16 12h.01"/><path d="M9 15.5h6"/><path d="M10 8V5M14 8V5M10 5h4"/><circle cx="12" cy="5" r=".5" fill="currentColor"/></svg></div>
             <div class="cf-name">Bots Discord</div>
             <div class="cf-desc">Bots complets — sécurité, modération, utilitaires avancés.</div>
             <div class="cf-tags"><span class="ptg">Node.js</span><span class="ptg">Discord.js</span><span class="ptg">MongoDB</span></div>
             <div class="cf-hint">Cliquer pour détails →</div>
           </div>
           <div class="card-back">
-            <div class="cb-title">⚡ Fonctionnalités</div>
+            <div class="cb-title">◈ Fonctionnalités</div>
             <ul class="cb-feats">
               <li>Modération avancée (ban, kick, mute, warn)</li>
               <li>Commandes slash avec autocomplétion</li>
@@ -808,14 +810,14 @@ footer{border-top:1px solid rgba(212,96,122,.06);padding:1.5rem 3.5rem;display:f
         <div class="card-inner">
           <div class="card-face">
             <div class="cf-num">02 / 03</div>
-            <div class="cf-ico">📱</div>
+            <div class="cf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="7" y1="6" x2="17" y2="6"/><line x1="7" y1="18" x2="17" y2="18"/><circle cx="12" cy="20" r=".6" fill="currentColor" stroke="none"/></svg></div>
             <div class="cf-name">App Mobile Football</div>
             <div class="cf-desc">Application mobile pour une équipe de foot — joueurs, matchs, stats.</div>
             <div class="cf-tags"><span class="ptg">React Native</span><span class="ptg">Firebase</span><span class="ptg">Expo</span></div>
             <div class="cf-hint">Cliquer pour détails →</div>
           </div>
           <div class="card-back">
-            <div class="cb-title">⚡ Fonctionnalités</div>
+            <div class="cb-title">◈ Fonctionnalités</div>
             <ul class="cb-feats">
               <li>Gestion des joueurs et profils</li>
               <li>Calendrier des matchs</li>
@@ -833,14 +835,14 @@ footer{border-top:1px solid rgba(212,96,122,.06);padding:1.5rem 3.5rem;display:f
         <div class="card-inner">
           <div class="card-face">
             <div class="cf-num">03 / 03</div>
-            <div class="cf-ico">🌌</div>
+            <div class="cf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="12" y1="5" x2="12" y2="19" stroke-width="1" opacity=".4"/></svg></div>
             <div class="cf-name">Bios Discord HTML</div>
             <div class="cf-desc">Profils Discord en HTML sur mesure — identité visuelle unique.</div>
             <div class="cf-tags"><span class="ptg">HTML</span><span class="ptg">CSS</span><span class="ptg">Design</span></div>
             <div class="cf-hint">Cliquer pour détails →</div>
           </div>
           <div class="card-back">
-            <div class="cb-title">⚡ Fonctionnalités</div>
+            <div class="cb-title">◈ Fonctionnalités</div>
             <ul class="cb-feats">
               <li>Design 100% unique et sur mesure</li>
               <li>Animations CSS fluides</li>
@@ -865,7 +867,7 @@ footer{border-top:1px solid rgba(212,96,122,.06);padding:1.5rem 3.5rem;display:f
 <!-- ═══ SKILLS ═══ -->
 <section id="skills">
   <div class="wrap">
-    <div class="rev"><div class="s-tag"><i>⚡</i> Système Nerveux</div><h2 class="s-h">Mon <span>arsenal</span></h2></div>
+    <div class="rev"><div class="s-tag"><i>◈</i> Système Nerveux</div><h2 class="s-h">Mon <span>arsenal</span></h2></div>
     <!-- Orbital tech system -->
     <div class="sk-orbit-wrap rev">
       <canvas id="sk-canvas" width="560" height="380"></canvas>
@@ -938,7 +940,7 @@ footer{border-top:1px solid rgba(212,96,122,.06);padding:1.5rem 3.5rem;display:f
     <div class="rev"><div class="s-tag"><i>♥</i> Systèmes Vitaux</div><h2 class="s-h">Mes <span>tarifs</span></h2></div>
     <div class="serv-grid rev">
       <div class="sv">
-        <div class="sv-ico">🤖</div>
+        <div class="sv-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M8 12h.01M16 12h.01"/><path d="M9 15.5h6"/><path d="M10 8V5M14 8V5M10 5h4"/><circle cx="12" cy="5" r=".5" fill="currentColor"/></svg></div>
         <div class="sv-name">Bot Discord</div>
         <div class="sv-price">50$</div>
         <div class="sv-price-sub">/ bot basique</div>
@@ -947,7 +949,7 @@ footer{border-top:1px solid rgba(212,96,122,.06);padding:1.5rem 3.5rem;display:f
       </div>
       <div class="sv pop">
         <div class="sv-badge">POPULAIRE</div>
-        <div class="sv-ico">🌌</div>
+        <div class="sv-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
         <div class="sv-name">Bio Discord HTML</div>
         <div class="sv-price">10$</div>
         <div class="sv-price-sub">/ bio sur mesure</div>
@@ -955,7 +957,7 @@ footer{border-top:1px solid rgba(212,96,122,.06);padding:1.5rem 3.5rem;display:f
         <a href="https://discord.com/users/777495590049021972" target="_blank" rel="noopener" class="sv-btn">Commander →</a>
       </div>
       <div class="sv">
-        <div class="sv-ico">📱</div>
+        <div class="sv-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="7" y1="6" x2="17" y2="6"/><line x1="7" y1="18" x2="17" y2="18"/><circle cx="12" cy="20" r=".6" fill="currentColor" stroke="none"/></svg></div>
         <div class="sv-name">App Mobile</div>
         <div class="sv-price">Devis</div>
         <div class="sv-price-sub">/ sur mesure</div>
@@ -963,7 +965,7 @@ footer{border-top:1px solid rgba(212,96,122,.06);padding:1.5rem 3.5rem;display:f
         <a href="mailto:Louismph8@gmail.com" class="sv-btn">Contacter →</a>
       </div>
       <div class="sv">
-        <div class="sv-ico">🌐</div>
+        <div class="sv-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
         <div class="sv-name">Site Web</div>
         <div class="sv-price">500$</div>
         <div class="sv-price-sub">/ site complet</div>
@@ -2180,7 +2182,7 @@ document.addEventListener('keydown',e=>{
 
       // Label
       const lx=x,ly=y+(y>cy?16:-(12))*scale;
-      ctx.font=`${isHov?'600':'400'} ${isHov?11:10}px Outfit,sans-serif`;
+      ctx.font=`${isHov?'600':'400'} ${isHov?11:10}px "DM Sans",sans-serif`;
       ctx.fillStyle=isHov?'rgba(240,232,223,.95)':'rgba(240,232,223,.62)';
       ctx.textAlign='center';ctx.textBaseline='middle';
       if(isHov){
