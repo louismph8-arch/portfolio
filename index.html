@@ -569,6 +569,114 @@ footer{border-top:1px solid rgba(200,80,106,.06);padding:1.5rem 3.5rem;display:f
   .tli{grid-template-columns:70px 30px 1fr}
 }
 
+/* ══════════════════════════════════════════════
+   PREMIUM REDESIGN — Noir Botanique 2.0
+══════════════════════════════════════════════ */
+
+/* ── GRADIENT ORBS — ambient hero depth ── */
+.hero-orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:1}
+.hero-orb-1{width:700px;height:700px;background:radial-gradient(circle,rgba(200,80,106,.1) 0%,transparent 70%);top:-200px;left:-150px;animation:orbFloat 9s ease-in-out infinite}
+.hero-orb-2{width:450px;height:450px;background:radial-gradient(circle,rgba(122,24,40,.07) 0%,transparent 70%);bottom:0;right:-80px;animation:orbFloat 11s ease-in-out infinite 2.5s}
+.hero-orb-3{width:320px;height:320px;background:radial-gradient(circle,rgba(196,154,58,.055) 0%,transparent 70%);top:45%;right:22%;animation:orbFloat 7.5s ease-in-out infinite 5s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(22px,-18px) scale(1.06)}66%{transform:translate(-14px,12px) scale(.95)}}
+
+/* ── HERO FLOATING BADGES ── */
+.hero-badges{position:absolute;top:10.5rem;right:3.5rem;display:flex;flex-direction:column;gap:.75rem;z-index:12;opacity:0}
+.hbadge{display:inline-flex;align-items:center;gap:.55rem;padding:.38rem .95rem;border-radius:20px;background:rgba(7,8,10,.75);border:1px solid rgba(255,255,255,.07);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);font-family:var(--fc);font-size:.5rem;letter-spacing:.14em;color:var(--dim);transition:border-color .3s,transform .3s,box-shadow .3s;cursor:default}
+.hbadge:hover{border-color:rgba(200,80,106,.25);transform:translateX(-5px);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.hbadge-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.hbadge-dot-r{background:var(--neural);box-shadow:0 0 6px var(--neural);animation:heartbeat 1.4s ease infinite}
+.hbadge-dot-g{background:#00ff88;box-shadow:0 0 6px #00ff88;animation:heartbeat 1.6s ease infinite .3s}
+.hbadge-dot-b{background:var(--bio);box-shadow:0 0 6px var(--bio);animation:heartbeat 1.8s ease infinite .6s}
+@media(max-width:1000px){.hero-badges{display:none}}
+
+/* ── SPLIT CHAR ANIMATION ── */
+.split-c{display:inline-block;opacity:0;transform:translateY(60%) rotateX(-25deg);transform-origin:50% 0;backface-visibility:hidden;transition:opacity .55s cubic-bezier(.2,0,.1,1),transform .55s cubic-bezier(.2,0,.1,1)}
+.split-c.vis{opacity:1;transform:translateY(0) rotateX(0deg)}
+
+/* ── MAGNETIC BTN ENHANCEMENT ── */
+.btn{will-change:transform}
+
+/* ── WIDE PROJECT CARDS (horizontal scroll) ── */
+.proj-horiz{position:relative;margin-top:3.5rem}
+.proj-horiz-track{display:flex;gap:1.5rem;cursor:none;user-select:none;-webkit-user-select:none;padding-bottom:.5rem;overflow-x:auto;scrollbar-width:none}
+.proj-horiz-track::-webkit-scrollbar{display:none}
+.proj-horiz-track.grabbed{cursor:none}
+.proj-wide{min-width:min(680px,88vw);height:420px;background:var(--card);border:1px solid rgba(200,80,106,.1);border-radius:1.6rem;padding:2.5rem;display:flex;flex-direction:column;position:relative;overflow:hidden;transition:border-color .4s,transform .35s,background .4s;flex-shrink:0}
+.proj-wide:hover{border-color:rgba(200,80,106,.28);transform:translateY(-4px);background:rgba(255,255,255,.035)}
+.proj-wide::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--px,50%) var(--py,50%),rgba(200,80,106,.08),transparent 55%);opacity:0;transition:opacity .4s;pointer-events:none}
+.proj-wide:hover::before{opacity:1}
+.pw-num{font-family:var(--ff);font-size:8rem;font-weight:800;opacity:.04;position:absolute;bottom:-1.5rem;right:1.5rem;line-height:1;-webkit-text-stroke:1.5px rgba(200,80,106,.4);-webkit-text-fill-color:transparent;pointer-events:none}
+.pw-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.pw-ico{width:2.6rem;height:2.6rem;color:var(--neural);opacity:.82;flex-shrink:0}
+.pw-ico svg{width:100%;height:100%}
+.pw-status{font-family:var(--fc);font-size:.46rem;letter-spacing:.18em;color:var(--bio);background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.18);border-radius:20px;padding:.2rem .7rem;white-space:nowrap;animation:dispoPulse 3s ease-in-out infinite}
+.pw-title{font-family:var(--ff);font-size:clamp(1.6rem,3vw,2.6rem);font-weight:800;line-height:1.05;margin:.9rem 0 .5rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200%;animation:gradShift 5s linear infinite}
+.pw-desc{font-size:.86rem;color:var(--dim);line-height:1.8;flex:1}
+.pw-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.1rem}
+.pw-tag{font-family:var(--fc);font-size:.5rem;letter-spacing:.1em;padding:.2rem .6rem;border-radius:5px;background:rgba(200,80,106,.06);border:1px solid rgba(200,80,106,.14);color:rgba(200,80,106,.6)}
+.pw-footer{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:auto;padding-top:1.2rem;border-top:1px solid rgba(200,80,106,.06)}
+.pw-link{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--fc);font-size:.52rem;letter-spacing:.14em;color:var(--neural);text-decoration:none;border:1px solid rgba(200,80,106,.18);padding:.28rem .8rem;border-radius:6px;transition:all .25s}
+.pw-link:hover{background:rgba(200,80,106,.08);border-color:rgba(200,80,106,.42);transform:translateY(-1px)}
+.pw-feats{list-style:none;display:flex;flex-direction:column;gap:.32rem;margin-top:.7rem}
+.pw-feats li{font-size:.76rem;color:var(--muted);display:flex;align-items:flex-start;gap:.45rem;line-height:1.5}
+.pw-feats li::before{content:'›';color:var(--neural);flex-shrink:0}
+/* drag scroll hint */
+.proj-scroll-bar{height:2px;background:rgba(200,80,106,.07);border-radius:1px;margin-top:.8rem;position:relative;overflow:hidden}
+.proj-scroll-thumb{position:absolute;left:0;top:0;height:100%;background:var(--grad);border-radius:1px;background-size:200%;animation:gradShift 4s linear infinite;transition:width .2s ease,left .2s ease}
+.proj-drag-hint{text-align:right;font-family:var(--fc);font-size:.48rem;letter-spacing:.14em;color:rgba(200,80,106,.22);margin-top:.5rem}
+
+/* ── BENTO GRID — SKILLS 2.0 ── */
+.bento{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:minmax(80px,auto);gap:.85rem;margin-top:3rem}
+.bn{background:var(--card);border:1px solid var(--border);border-radius:1.2rem;padding:1.6rem;position:relative;overflow:hidden;transition:border-color .35s,background .35s,transform .35s}
+.bn::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--bx,50%) var(--by,50%),rgba(200,80,106,.07),transparent 55%);opacity:0;transition:opacity .35s;pointer-events:none}
+.bn:hover{border-color:rgba(200,80,106,.22);background:rgba(255,255,255,.04);transform:translateY(-2px)}
+.bn:hover::before{opacity:1}
+.bn-label{font-family:var(--fc);font-size:.48rem;letter-spacing:.22em;color:rgba(200,80,106,.38);text-transform:uppercase;margin-bottom:.85rem}
+.bn-val{font-family:var(--ff);font-size:3.2rem;font-weight:800;line-height:1;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200%;animation:gradShift 4s linear infinite}
+.bn-val-unit{font-family:var(--ff);font-size:1.4rem;font-weight:600;color:rgba(200,80,106,.7);-webkit-text-fill-color:rgba(200,80,106,.7)}
+.bn-sub{font-size:.78rem;color:var(--muted);line-height:1.55;margin-top:.4rem}
+.bn-tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.85rem}
+.bn-tag{font-family:var(--fc);font-size:.47rem;letter-spacing:.1em;padding:.18rem .52rem;border-radius:5px;background:rgba(200,80,106,.06);border:1px solid rgba(200,80,106,.13);color:rgba(200,80,106,.55);transition:all .2s;cursor:default}
+.bn-tag:hover{border-color:rgba(200,80,106,.35);color:var(--neural);background:rgba(200,80,106,.1)}
+.bn-ico{width:1.8rem;height:1.8rem;color:var(--neural);opacity:.72;margin-bottom:.85rem}
+.bn-ico svg{width:100%;height:100%}
+.bn-bar-track{width:100%;height:3px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:.9rem;overflow:hidden}
+.bn-bar-fill{height:100%;background:var(--grad);border-radius:2px;width:0%;transition:width 1.5s cubic-bezier(.4,0,.2,1)}
+/* Column spans */
+.bn-4{grid-column:span 4}
+.bn-6{grid-column:span 6}
+.bn-8{grid-column:span 8}
+.bn-12{grid-column:span 12}
+.bn-r2{grid-row:span 2}
+@media(max-width:900px){
+  .bn-4{grid-column:span 6}
+  .bn-8{grid-column:span 12}
+}
+@media(max-width:580px){
+  .bn-4,.bn-6,.bn-8,.bn-12{grid-column:span 12}
+  .bn-r2{grid-row:span 1}
+}
+
+/* ── STATS STRIP ── */
+.stats-strip{padding:5rem 0 0}
+.stats-grid{max-width:1120px;margin:0 auto;padding:0 3.5rem}
+.stats-inner{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(200,80,106,.06);border-radius:1.4rem;overflow:hidden;border:1px solid rgba(200,80,106,.08)}
+.stat-cell{background:var(--bg);padding:2.5rem 2rem;text-align:center;position:relative;overflow:hidden;transition:background .3s}
+.stat-cell::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--grad);background-size:200%;animation:gradShift 4s linear infinite;transform:scaleX(0);transition:transform .4s;transform-origin:center}
+.stat-cell:hover{background:rgba(200,80,106,.025)}
+.stat-cell:hover::after{transform:scaleX(1)}
+.stat-num{font-family:var(--ff);font-size:clamp(2.8rem,4.5vw,4.2rem);font-weight:800;line-height:1;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200%;animation:gradShift 5s linear infinite}
+.stat-num span{font-size:60%;color:rgba(200,80,106,.7);-webkit-text-fill-color:rgba(200,80,106,.7)}
+.stat-label{font-family:var(--fc);font-size:.5rem;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-top:.6rem}
+@media(max-width:680px){.stats-inner{grid-template-columns:1fr 1fr}.stats-grid{padding:0 1.5rem}}
+@media(max-width:400px){.stats-inner{grid-template-columns:1fr}}
+
+/* ── ENHANCED FOOTER ── */
+footer{border-top:1px solid rgba(200,80,106,.06);padding:1.8rem 3.5rem;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1rem}
+.ft-center{text-align:center;font-family:var(--ff);font-size:.9rem;font-weight:700;letter-spacing:.05em;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200%;animation:gradShift 4s linear infinite}
+@media(max-width:680px){footer{grid-template-columns:1fr;text-align:center;gap:.5rem;padding:1.5rem 2rem}.ft-l,.ft-r{text-align:center}}
+
 /* ══ FOCUS-VISIBLE — keyboard nav ══ */
 /* Custom cursor hides pointer cues — restore keyboard focus rings */
 :focus{outline:none}
@@ -685,20 +793,29 @@ a:focus-visible,button:focus-visible{outline-color:var(--neural);box-shadow:0 0 
 <!-- ═══ HERO ═══ -->
 <section id="hero">
   <canvas id="hero-canvas"></canvas>
-  <!-- Decorative rounded frame like the video container in hero-section-5 -->
   <div class="hero-frame" id="hero-frame"></div>
+  <!-- Ambient gradient orbs -->
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+  <!-- Floating status badges -->
+  <div class="hero-badges" id="hero-badges">
+    <div class="hbadge"><span class="hbadge-dot hbadge-dot-g"></span>Disponible · Freelance</div>
+    <div class="hbadge"><span class="hbadge-dot hbadge-dot-r"></span>Discord · Web · Mobile</div>
+    <div class="hbadge"><span class="hbadge-dot hbadge-dot-b"></span>Montréal &amp; Remote</div>
+  </div>
   <div class="hero-inner">
     <div class="hero-text-wrap" id="hero-text-wrap">
       <div class="hero-pre" id="h-pre">// Développeur · Montréal &amp; Remote</div>
-      <div class="hero-big glitch-title" id="h-big" data-text="TESTAROSSA"><span class="testa">TESTA</span><span class="rossa">ROSSA</span></div>
+      <div class="hero-big glitch-title" id="h-big" data-text="TESTAROSSA"><span class="testa" id="h-testa">TESTA</span><span class="rossa" id="h-rossa">ROSSA</span></div>
       <p class="hero-sub" id="h-sub">Dev passionné — bots Discord, apps mobiles &amp; sites web sur mesure. Disponible pour vos projets.</p>
       <div class="hero-typed-line" id="h-typed"><span id="typed"></span><span class="cursor-bl"></span></div>
       <div class="hero-cta" id="h-cta">
-        <a href="#projects" class="btn btn-g">
-          Voir mes projets
+        <a href="#projects" class="btn btn-g" id="btn-projects">
+          <span class="btn-txt">Voir mes projets</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </a>
-        <a href="#contact" class="btn btn-o">Me contacter</a>
+        <a href="#contact" class="btn btn-o" id="btn-contact"><span class="btn-txt">Me contacter</span></a>
       </div>
     </div>
   </div>
@@ -785,86 +902,140 @@ a:focus-visible,button:focus-visible{outline-color:var(--neural);box-shadow:0 0 
   <path class="vp vp2" d="M0,38 C60,38 100,50 180,38 C240,28 280,48 360,40 C420,32 460,50 540,38 C600,28 640,46 720,38 C780,30 820,48 900,40 C960,32 1000,48 1080,38 L1200,38"/>
 </svg></div>
 
+<!-- ═══ STATS STRIP ═══ -->
+<section class="stats-strip">
+  <div class="stats-grid">
+    <div class="stats-inner">
+      <div class="stat-cell rev">
+        <div class="stat-num" data-t="4"><span id="st0">0</span><span>+</span></div>
+        <div class="stat-label">Ans d'expérience</div>
+      </div>
+      <div class="stat-cell rev">
+        <div class="stat-num" data-t="12"><span id="st1">0</span><span>+</span></div>
+        <div class="stat-label">Projets réalisés</div>
+      </div>
+      <div class="stat-cell rev">
+        <div class="stat-num" data-t="8"><span id="st2">0</span><span>+</span></div>
+        <div class="stat-label">Clients satisfaits</div>
+      </div>
+      <div class="stat-cell rev">
+        <div class="stat-num" data-t="10"><span id="st3">0</span><span>+</span></div>
+        <div class="stat-label">Technologies</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ═══ PROJECTS ═══ -->
 <section id="projects">
   <div class="wrap">
     <div class="rev"><div class="s-tag"><i>◈</i> Organes Vitaux</div><h2 class="s-h">Ce que je <span>crée</span></h2></div>
-    <div class="proj-cards rev">
-      <!-- CARD 1 -->
-      <div class="proj-card" id="pc0" role="button" tabindex="0" aria-label="Bots Discord — cliquer pour voir les détails">
-        <div class="card-inner">
-          <div class="card-face">
-            <div class="cf-num">01 / 03</div>
-            <div class="cf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M8 12h.01M16 12h.01"/><path d="M9 15.5h6"/><path d="M10 8V5M14 8V5M10 5h4"/><circle cx="12" cy="5" r=".5" fill="currentColor"/></svg></div>
-            <div class="cf-name">Bots Discord</div>
-            <div class="cf-desc">Bots complets — sécurité, modération, utilitaires avancés.</div>
-            <div class="cf-tags"><span class="ptg">Node.js</span><span class="ptg">Discord.js</span><span class="ptg">MongoDB</span></div>
-            <div class="cf-hint">Cliquer pour détails →</div>
+    <!-- Horizontal scroll project cards -->
+    <div class="proj-horiz rev" id="proj-horiz">
+      <div class="proj-horiz-track" id="proj-track">
+
+        <!-- CARD 1 — Bots Discord -->
+        <div class="proj-wide">
+          <div class="pw-num">01</div>
+          <div class="pw-top">
+            <div class="pw-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M8 12h.01M16 12h.01"/><path d="M9 15.5h6"/><path d="M10 8V5M14 8V5M10 5h4"/><circle cx="12" cy="5" r=".5" fill="currentColor"/></svg>
+            </div>
+            <div class="pw-status">● Actif</div>
           </div>
-          <div class="card-back">
-            <div class="cb-title">◈ Fonctionnalités</div>
-            <ul class="cb-feats">
-              <li>Modération avancée (ban, kick, mute, warn)</li>
-              <li>Commandes slash avec autocomplétion</li>
-              <li>Système de tickets et support</li>
-              <li>Anti-spam &amp; protection anti-raid</li>
-              <li>Logs détaillés de toutes les actions</li>
-            </ul>
-            <a href="https://github.com/louismph8-arch" target="_blank" class="cb-link">→ GitHub</a>
-            <div class="cb-back-btn">← Retourner</div>
+          <div class="pw-title">Bots Discord</div>
+          <div class="pw-desc">Bots complets de niveau production — modération avancée, sécurité, systèmes de tickets, anti-raid et logs détaillés en temps réel.</div>
+          <ul class="pw-feats">
+            <li>Modération : ban, kick, mute, warn avec historique</li>
+            <li>Commandes slash + autocomplétion intelligente</li>
+            <li>Anti-spam &amp; protection anti-raid automatisée</li>
+          </ul>
+          <div class="pw-tags">
+            <span class="pw-tag">Node.js</span><span class="pw-tag">Discord.js</span><span class="pw-tag">MongoDB</span><span class="pw-tag">Express</span>
           </div>
-        </div>
-      </div>
-      <!-- CARD 2 -->
-      <div class="proj-card" id="pc1" role="button" tabindex="0" aria-label="App Mobile Football — cliquer pour voir les détails">
-        <div class="card-inner">
-          <div class="card-face">
-            <div class="cf-num">02 / 03</div>
-            <div class="cf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="7" y1="6" x2="17" y2="6"/><line x1="7" y1="18" x2="17" y2="18"/><circle cx="12" cy="20" r=".6" fill="currentColor" stroke="none"/></svg></div>
-            <div class="cf-name">App Mobile Football</div>
-            <div class="cf-desc">Application mobile pour une équipe de foot — joueurs, matchs, stats.</div>
-            <div class="cf-tags"><span class="ptg">React Native</span><span class="ptg">Firebase</span><span class="ptg">Expo</span></div>
-            <div class="cf-hint">Cliquer pour détails →</div>
-          </div>
-          <div class="card-back">
-            <div class="cb-title">◈ Fonctionnalités</div>
-            <ul class="cb-feats">
-              <li>Gestion des joueurs et profils</li>
-              <li>Calendrier des matchs</li>
-              <li>Statistiques en temps réel</li>
-              <li>Messagerie interne d'équipe</li>
-              <li>Compatible iOS &amp; Android</li>
-            </ul>
-            <a href="https://github.com/louismph8-arch" target="_blank" class="cb-link">→ GitHub</a>
-            <div class="cb-back-btn">← Retourner</div>
+          <div class="pw-footer">
+            <a href="https://github.com/louismph8-arch" target="_blank" class="pw-link">→ GitHub</a>
+            <a href="https://discord.com/users/777495590049021972" target="_blank" class="pw-link">→ Commander</a>
           </div>
         </div>
-      </div>
-      <!-- CARD 3 -->
-      <div class="proj-card" id="pc2" role="button" tabindex="0" aria-label="Bios Discord HTML — cliquer pour voir les détails">
-        <div class="card-inner">
-          <div class="card-face">
-            <div class="cf-num">03 / 03</div>
-            <div class="cf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="12" y1="5" x2="12" y2="19" stroke-width="1" opacity=".4"/></svg></div>
-            <div class="cf-name">Bios Discord HTML</div>
-            <div class="cf-desc">Profils Discord en HTML sur mesure — identité visuelle unique.</div>
-            <div class="cf-tags"><span class="ptg">HTML</span><span class="ptg">CSS</span><span class="ptg">Design</span></div>
-            <div class="cf-hint">Cliquer pour détails →</div>
+
+        <!-- CARD 2 — App Mobile -->
+        <div class="proj-wide">
+          <div class="pw-num">02</div>
+          <div class="pw-top">
+            <div class="pw-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="7" y1="6" x2="17" y2="6"/><line x1="7" y1="18" x2="17" y2="18"/><circle cx="12" cy="20" r=".6" fill="currentColor" stroke="none"/></svg>
+            </div>
+            <div class="pw-status">● Livré</div>
           </div>
-          <div class="card-back">
-            <div class="cb-title">◈ Fonctionnalités</div>
-            <ul class="cb-feats">
-              <li>Design 100% unique et sur mesure</li>
-              <li>Animations CSS fluides</li>
-              <li>Thème personnalisé selon tes préfs</li>
-              <li>Effets visuels — néon, particules</li>
-              <li>Livraison rapide 24–48h</li>
-            </ul>
-            <a href="https://discord.com/users/777495590049021972" target="_blank" class="cb-link">→ Commander Discord</a>
-            <div class="cb-back-btn">← Retourner</div>
+          <div class="pw-title">App Mobile Football</div>
+          <div class="pw-desc">Application mobile cross-platform pour une équipe de football locale — gestion complète des joueurs, matchs et statistiques en temps réel.</div>
+          <ul class="pw-feats">
+            <li>Gestion des profils joueurs &amp; équipes</li>
+            <li>Calendrier des matchs + résultats live</li>
+            <li>Statistiques &amp; messagerie interne d'équipe</li>
+          </ul>
+          <div class="pw-tags">
+            <span class="pw-tag">React Native</span><span class="pw-tag">Expo</span><span class="pw-tag">Firebase</span><span class="pw-tag">iOS / Android</span>
+          </div>
+          <div class="pw-footer">
+            <a href="https://github.com/louismph8-arch" target="_blank" class="pw-link">→ GitHub</a>
+            <a href="mailto:Louismph8@gmail.com" class="pw-link">→ Demander démo</a>
           </div>
         </div>
+
+        <!-- CARD 3 — Bios Discord HTML -->
+        <div class="proj-wide">
+          <div class="pw-num">03</div>
+          <div class="pw-top">
+            <div class="pw-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="12" y1="5" x2="12" y2="19" stroke-width="1" opacity=".4"/></svg>
+            </div>
+            <div class="pw-status">● Populaire</div>
+          </div>
+          <div class="pw-title">Bios Discord HTML</div>
+          <div class="pw-desc">Profils Discord en HTML entièrement sur mesure — effets visuels avancés, animations CSS fluides et identité visuelle unique à chaque commande.</div>
+          <ul class="pw-feats">
+            <li>Design 100% unique, thème personnalisé</li>
+            <li>Animations CSS — néon, particules, glitch</li>
+            <li>Livraison rapide 24–48h · Révisions incluses</li>
+          </ul>
+          <div class="pw-tags">
+            <span class="pw-tag">HTML5</span><span class="pw-tag">CSS3</span><span class="pw-tag">Design</span><span class="pw-tag">Animations</span>
+          </div>
+          <div class="pw-footer">
+            <a href="https://discord.com/users/777495590049021972" target="_blank" class="pw-link">→ Commander · 10$</a>
+          </div>
+        </div>
+
+        <!-- CARD 4 — Site Web -->
+        <div class="proj-wide">
+          <div class="pw-num">04</div>
+          <div class="pw-top">
+            <div class="pw-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <div class="pw-status">● Disponible</div>
+          </div>
+          <div class="pw-title">Sites Web</div>
+          <div class="pw-desc">Sites web sur mesure — landing pages, portfolios, dashboards. Design moderne, responsive mobile et performance optimisée.</div>
+          <ul class="pw-feats">
+            <li>Design sur mesure · HTML / CSS / JS</li>
+            <li>Responsive mobile + SEO de base</li>
+            <li>Hébergement GitHub Pages inclus</li>
+          </ul>
+          <div class="pw-tags">
+            <span class="pw-tag">HTML/CSS</span><span class="pw-tag">JavaScript</span><span class="pw-tag">Design</span><span class="pw-tag">SEO</span>
+          </div>
+          <div class="pw-footer">
+            <a href="mailto:Louismph8@gmail.com" class="pw-link">→ Contacter · 500$+</a>
+          </div>
+        </div>
+
       </div>
+      <!-- Scroll progress bar -->
+      <div class="proj-scroll-bar"><div class="proj-scroll-thumb" id="proj-thumb" style="width:25%"></div></div>
+      <div class="proj-drag-hint">← Faire glisser →</div>
     </div>
   </div>
 </section>
@@ -878,28 +1049,79 @@ a:focus-visible,button:focus-visible{outline-color:var(--neural);box-shadow:0 0 
 <section id="skills">
   <div class="wrap">
     <div class="rev"><div class="s-tag"><i>◈</i> Système Nerveux</div><h2 class="s-h">Mon <span>arsenal</span></h2></div>
-    <!-- Orbital tech system -->
-    <div class="sk-orbit-wrap rev">
-      <canvas id="sk-canvas" width="560" height="380"></canvas>
-    </div>
-    <!-- Bars + categories -->
-    <div class="sk-cols rev">
-      <div class="sk-list" id="sk-list">
-        <div class="sk"><div class="sk-top"><span class="sk-name">Python</span><span class="sk-pct">90%</span></div><div class="sk-track"><div class="sk-bar" data-w="90" style="background:linear-gradient(90deg,#3776AB,#FFD43B);--d:0s"></div></div></div>
-        <div class="sk"><div class="sk-top"><span class="sk-name">Discord.py / Discord.js</span><span class="sk-pct">92%</span></div><div class="sk-track"><div class="sk-bar" data-w="92" style="background:linear-gradient(90deg,#5865F2,#c49a3a);--d:.08s"></div></div></div>
-        <div class="sk"><div class="sk-top"><span class="sk-name">Firebase &amp; Firestore</span><span class="sk-pct">86%</span></div><div class="sk-track"><div class="sk-bar" data-w="86" style="background:linear-gradient(90deg,#FF6F00,#ffaa00);--d:.16s"></div></div></div>
-        <div class="sk"><div class="sk-top"><span class="sk-name">HTML / CSS</span><span class="sk-pct">88%</span></div><div class="sk-track"><div class="sk-bar" data-w="88" style="background:linear-gradient(90deg,#c8506a,#e8a880);--d:.24s"></div></div></div>
-        <div class="sk"><div class="sk-top"><span class="sk-name">JavaScript / Node.js</span><span class="sk-pct">82%</span></div><div class="sk-track"><div class="sk-bar" data-w="82" style="background:linear-gradient(90deg,#F7DF1E,#339933);--d:.32s"></div></div></div>
-        <div class="sk"><div class="sk-top"><span class="sk-name">React Native</span><span class="sk-pct">72%</span></div><div class="sk-track"><div class="sk-bar" data-w="72" style="background:linear-gradient(90deg,#c8506a,#c49a3a);--d:.4s"></div></div></div>
-        <div class="sk"><div class="sk-top"><span class="sk-name">MongoDB</span><span class="sk-pct">68%</span></div><div class="sk-track"><div class="sk-bar" data-w="68" style="background:linear-gradient(90deg,#c49a3a,#e8cc7a);--d:.48s"></div></div></div>
+
+    <!-- BENTO GRID -->
+    <div class="bento rev" id="bento-grid">
+
+      <!-- Big stat: Discord expertise -->
+      <div class="bn bn-4 bn-r2">
+        <div class="bn-label">Expertise principale</div>
+        <div class="bn-val">92<span class="bn-val-unit">%</span></div>
+        <div class="bn-sub">Discord.js &amp; Discord.py — bots de niveau production</div>
+        <div class="bn-bar-track"><div class="bn-bar-fill" data-w="92"></div></div>
+        <div class="bn-tags" style="margin-top:1rem">
+          <span class="bn-tag">discord.py</span><span class="bn-tag">Discord.js</span><span class="bn-tag">Slash Commands</span><span class="bn-tag">Webhooks</span>
+        </div>
       </div>
-      <div class="sk-right">
-        <div class="sk-cat"><div class="sk-cat-title">Discord</div><div class="sk-badges"><span class="sk-badge">discord.py</span><span class="sk-badge">Discord.js</span><span class="sk-badge">Slash Commands</span><span class="sk-badge">Webhooks</span><span class="sk-badge">Bots</span></div></div>
-        <div class="sk-cat"><div class="sk-cat-title">Backend</div><div class="sk-badges"><span class="sk-badge">Python</span><span class="sk-badge">Node.js</span><span class="sk-badge">Express</span><span class="sk-badge">REST API</span></div></div>
-        <div class="sk-cat"><div class="sk-cat-title">Firebase</div><div class="sk-badges"><span class="sk-badge">Firestore</span><span class="sk-badge">Auth</span><span class="sk-badge">RTDB</span><span class="sk-badge">Cloud Functions</span><span class="sk-badge">Storage</span></div></div>
-        <div class="sk-cat"><div class="sk-cat-title">Frontend / Mobile</div><div class="sk-badges"><span class="sk-badge">HTML5</span><span class="sk-badge">CSS3</span><span class="sk-badge">React Native</span><span class="sk-badge">Expo</span></div></div>
-        <div class="sk-cat"><div class="sk-cat-title">Outils</div><div class="sk-badges"><span class="sk-badge">Git</span><span class="sk-badge">GitHub</span><span class="sk-badge">VS Code</span><span class="sk-badge">MongoDB</span></div></div>
+
+      <!-- JavaScript / Node -->
+      <div class="bn bn-4">
+        <div class="bn-label">JavaScript / Node.js</div>
+        <div class="bn-val" style="font-size:2rem">82<span class="bn-val-unit">%</span></div>
+        <div class="bn-bar-track"><div class="bn-bar-fill" data-w="82"></div></div>
+        <div class="bn-tags"><span class="bn-tag">Node.js</span><span class="bn-tag">Express</span><span class="bn-tag">REST API</span></div>
       </div>
+
+      <!-- Python -->
+      <div class="bn bn-4">
+        <div class="bn-label">Python</div>
+        <div class="bn-val" style="font-size:2rem">90<span class="bn-val-unit">%</span></div>
+        <div class="bn-bar-track"><div class="bn-bar-fill" data-w="90"></div></div>
+        <div class="bn-tags"><span class="bn-tag">Automation</span><span class="bn-tag">Bots</span></div>
+      </div>
+
+      <!-- Firebase -->
+      <div class="bn bn-4">
+        <div class="bn-label">Firebase</div>
+        <div class="bn-val" style="font-size:2rem">86<span class="bn-val-unit">%</span></div>
+        <div class="bn-bar-track"><div class="bn-bar-fill" data-w="86"></div></div>
+        <div class="bn-tags"><span class="bn-tag">Firestore</span><span class="bn-tag">Auth</span><span class="bn-tag">RTDB</span></div>
+      </div>
+
+      <!-- Frontend -->
+      <div class="bn bn-6">
+        <div class="bn-label">Frontend &amp; Design</div>
+        <div class="bn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+        <div class="bn-tags">
+          <span class="bn-tag">HTML5</span><span class="bn-tag">CSS3</span><span class="bn-tag">Animations CSS</span><span class="bn-tag">Responsive</span><span class="bn-tag">Three.js</span><span class="bn-tag">GSAP</span><span class="bn-tag">UI Design</span>
+        </div>
+      </div>
+
+      <!-- Mobile -->
+      <div class="bn bn-6">
+        <div class="bn-label">Mobile · React Native</div>
+        <div class="bn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="7" y1="6" x2="17" y2="6"/><line x1="7" y1="18" x2="17" y2="18"/></svg></div>
+        <div class="bn-tags">
+          <span class="bn-tag">React Native</span><span class="bn-tag">Expo</span><span class="bn-tag">iOS</span><span class="bn-tag">Android</span><span class="bn-tag">Navigation</span>
+        </div>
+      </div>
+
+      <!-- Années d'XP -->
+      <div class="bn bn-4">
+        <div class="bn-label">Expérience</div>
+        <div class="bn-val">4<span class="bn-val-unit">ans</span></div>
+        <div class="bn-sub">De coder avec passion depuis 2021</div>
+      </div>
+
+      <!-- Outils -->
+      <div class="bn bn-8">
+        <div class="bn-label">Outils &amp; Workflow</div>
+        <div class="bn-tags">
+          <span class="bn-tag">Git</span><span class="bn-tag">GitHub</span><span class="bn-tag">VS Code</span><span class="bn-tag">MongoDB</span><span class="bn-tag">Figma</span><span class="bn-tag">Postman</span><span class="bn-tag">npm</span><span class="bn-tag">CI/CD</span>
+        </div>
+        <div class="bn-sub" style="margin-top:.8rem">Stack moderne, projets bien structurés, code propre et documenté.</div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -1057,8 +1279,9 @@ a:focus-visible,button:focus-visible{outline-color:var(--neural);box-shadow:0 0 
 </section>
 
 <footer>
-  <div class="ft-l">◈ Testarossa · destinylouis · Montréal <span class="blink">_</span></div>
-  <div class="ft-r">tape "louis" · konami · 5× clic · clic droit</div>
+  <div class="ft-l">◈ Testarossa · 2025 <span class="blink">_</span></div>
+  <div class="ft-center">destinylouis</div>
+  <div class="ft-r" style="text-align:right">tape "louis" · konami · clic droit</div>
 </footer>
 
 <!-- PWA install chip (shown only when browser supports & page is installable) -->
@@ -1496,9 +1719,16 @@ function heroIn(){
     h<18?'// Testarossa · signal fort · Freelance':
     '// Testarossa · neurones en veille';
 
+  // ── Wrap title chars in split-c spans for per-char animation ──
+  ['h-testa','h-rossa'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const txt=el.textContent;
+    el.innerHTML=txt.split('').map(c=>`<span class="split-c">${c}</span>`).join('');
+  });
+
   gsap.set('.n-links a',{opacity:0,y:8});
   gsap.set(['.n-right','#nav .n-logo','#snav'],{opacity:0});
-  gsap.set(['#h-pre','#h-big','#h-sub','#h-typed','#h-cta','#h-vitals','#sh'],{opacity:0,y:16});
+  gsap.set(['#h-pre','#h-big','#h-sub','#h-typed','#h-cta','#h-vitals','#sh','#hero-badges'],{opacity:0,y:16});
 
   const tl=gsap.timeline();
   tl.to('#nav .n-logo',{opacity:1,duration:.5})
@@ -1506,18 +1736,27 @@ function heroIn(){
     .to(['.n-right'],{opacity:1,duration:.4},'-=.3')
     .to('#snav',{opacity:1,duration:.5},'-=.4')
     .to('#h-pre',{opacity:1,y:0,duration:.7,ease:'power3.out'})
-    .to('#h-big',{opacity:1,y:0,duration:1,ease:'power4.out'},'-=.4')
-    .to('#h-sub',{opacity:1,y:0,duration:.7,ease:'power3.out'},'-=.5')
+    .call(()=>{
+      // Show container, stagger-in each char with spring-like timing
+      gsap.set('#h-big',{opacity:1,y:0});
+      const chars=document.querySelectorAll('#h-big .split-c');
+      chars.forEach((c,i)=>{
+        const delay=i*62+(i>=5?120:0); // pause between TESTA and ROSSA
+        setTimeout(()=>c.classList.add('vis'), delay + 80);
+      });
+    })
+    .to('#h-sub',{opacity:1,y:0,duration:.7,ease:'power3.out'},'-=.1')
     .to('#h-typed',{opacity:1,y:0,duration:.4},'-=.3')
     .to('#h-cta',{opacity:1,y:0,duration:.6,ease:'power3.out'},'-=.2')
     .to('#h-vitals',{opacity:1,y:0,duration:.6},'-=.3')
-    .to('#sh',{opacity:1,y:0,duration:.5},'-=.2');
+    .to('#sh',{opacity:1,y:0,duration:.5},'-=.2')
+    .to('#hero-badges',{opacity:1,y:0,duration:.8,ease:'power2.out'},'-=.5');
 
-  setTimeout(startTyping,600);
-  setTimeout(fetchStatus,800);
-  setTimeout(fetchCounter,800);
-  // Bloom hero roses as title appears — staggered spring entrance
-  setTimeout(()=>{ window._roseHeroBloom && window._roseHeroBloom(); }, 700);
+  setTimeout(startTyping,700);
+  setTimeout(fetchStatus,900);
+  setTimeout(fetchCounter,900);
+  // Bloom hero roses — staggered spring entrance
+  setTimeout(()=>{ window._roseHeroBloom && window._roseHeroBloom(); }, 750);
 }
 
 /* ══════════════════════ TYPING ══════════════════════ */
@@ -1567,6 +1806,132 @@ ScrollTrigger.create({trigger:'.ab-stats',start:'top 82%',once:true,onEnter:()=>
 ScrollTrigger.create({trigger:'#sk-list',start:'top 78%',once:true,onEnter:()=>{
   document.querySelectorAll('.sk-bar').forEach(b=>b.style.width=b.dataset.w+'%');
 }});
+
+/* ══════════════════════ STATS STRIP COUNTERS ══════════════════════ */
+ScrollTrigger.create({trigger:'.stats-strip',start:'top 82%',once:true,onEnter:()=>{
+  [['st0',4],['st1',12],['st2',8],['st3',10]].forEach(([id,t],i)=>{
+    const el=document.getElementById(id);if(!el)return;
+    let n=0;const spd=t/65;
+    setTimeout(()=>{const iv=setInterval(()=>{n=Math.min(n+spd,t);el.textContent=Math.floor(n);if(n>=t){el.textContent=t;clearInterval(iv);}},18);},i*140);
+  });
+}});
+
+/* ══════════════════════ BENTO BARS ══════════════════════ */
+ScrollTrigger.create({trigger:'#bento-grid',start:'top 80%',once:true,onEnter:()=>{
+  document.querySelectorAll('.bn-bar-fill').forEach((b,i)=>{
+    setTimeout(()=>b.style.width=b.dataset.w+'%',i*120);
+  });
+}});
+
+/* ══════════════════════ BENTO MOUSE GLOW ══════════════════════ */
+document.querySelectorAll('.bn').forEach(bn=>{
+  bn.addEventListener('mousemove',e=>{
+    const r=bn.getBoundingClientRect();
+    bn.style.setProperty('--bx',((e.clientX-r.left)/r.width*100)+'%');
+    bn.style.setProperty('--by',((e.clientY-r.top)/r.height*100)+'%');
+  });
+});
+
+/* ══════════════════════ WIDE CARD MOUSE GLOW ══════════════════════ */
+document.querySelectorAll('.proj-wide').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    card.style.setProperty('--px',((e.clientX-r.left)/r.width*100)+'%');
+    card.style.setProperty('--py',((e.clientY-r.top)/r.height*100)+'%');
+  });
+});
+
+/* ══════════════════════ HORIZONTAL DRAG SCROLL ══════════════════════ */
+(function(){
+  const track=document.getElementById('proj-track');
+  const thumb=document.getElementById('proj-thumb');
+  if(!track)return;
+  let isDown=false,startX=0,scrollLeft=0;
+
+  function updateThumb(){
+    if(!thumb)return;
+    const maxS=track.scrollWidth-track.clientWidth;
+    if(maxS<=0){thumb.style.width='100%';thumb.style.left='0';return;}
+    const pct=track.scrollLeft/maxS;
+    const tw=Math.max(12,track.clientWidth/track.scrollWidth*100);
+    thumb.style.width=tw+'%';
+    thumb.style.left=(pct*(100-tw))+'%';
+  }
+
+  track.addEventListener('mousedown',e=>{
+    isDown=true;startX=e.pageX-track.offsetLeft;scrollLeft=track.scrollLeft;
+    track.classList.add('grabbed');
+  });
+  window.addEventListener('mouseup',()=>{isDown=false;track.classList.remove('grabbed');});
+  window.addEventListener('mousemove',e=>{
+    if(!isDown)return;
+    e.preventDefault();
+    const x=e.pageX-track.offsetLeft;
+    track.scrollLeft=scrollLeft-(x-startX)*1.5;
+    updateThumb();
+  });
+
+  let touchStart=0,touchSL=0;
+  track.addEventListener('touchstart',e=>{touchStart=e.touches[0].clientX;touchSL=track.scrollLeft;},{passive:true});
+  track.addEventListener('touchmove',e=>{
+    track.scrollLeft=touchSL-(e.touches[0].clientX-touchStart);
+    updateThumb();
+  },{passive:true});
+
+  track.addEventListener('scroll',updateThumb,{passive:true});
+  window.addEventListener('resize',updateThumb);
+  setTimeout(updateThumb,600);
+})();
+
+/* ══════════════════════ MAGNETIC HOVER BUTTONS ══════════════════════ */
+document.querySelectorAll('.btn').forEach(btn=>{
+  btn.addEventListener('mousemove',e=>{
+    const r=btn.getBoundingClientRect();
+    const x=(e.clientX-r.left-r.width/2)*.2;
+    const y=(e.clientY-r.top-r.height/2)*.2;
+    btn.style.transform=`translate(${x}px,${y}px) translateY(-2px)`;
+  });
+  btn.addEventListener('mouseleave',()=>btn.style.transform='');
+});
+
+/* ══════════════════════ TEXT SCRAMBLE FOR SECTION HEADINGS ══════════════════════ */
+class TextScramble{
+  constructor(el){this.el=el;this.chars='!<>-_\\/[]{}—=+*^?#◈';this.update=this.update.bind(this);}
+  setText(t){
+    const ol=this.el.innerText,len=Math.max(ol.length,t.length);
+    const p=new Promise(r=>this.resolve=r);
+    this.queue=[];
+    for(let i=0;i<len;i++){
+      const s=Math.floor(Math.random()*14),e2=s+Math.floor(Math.random()*10);
+      this.queue.push({from:ol[i]||'',to:t[i]||'',start:s,end:e2});
+    }
+    cancelAnimationFrame(this.frameRequest);
+    this.frame=0;this.update();return p;
+  }
+  update(){
+    let out='',done=0;
+    for(let i=0,n=this.queue.length;i<n;i++){
+      let{from,to,start,end,char}=this.queue[i];
+      if(this.frame>=end){done++;out+=to;}
+      else if(this.frame>=start){
+        if(!char||Math.random()<.28){char=this.chars[Math.floor(Math.random()*this.chars.length)];this.queue[i].char=char;}
+        out+=`<span style="opacity:.5;color:var(--neural)">${char}</span>`;
+      }else out+=from;
+    }
+    this.el.innerHTML=out;
+    if(done===this.queue.length)this.resolve();
+    else{this.frameRequest=requestAnimationFrame(this.update);this.frame++;}
+  }
+}
+/* Fire scramble on each section heading span when it enters view */
+document.querySelectorAll('.s-h span').forEach(span=>{
+  let fired=false;
+  ScrollTrigger.create({trigger:span,start:'top 88%',once:true,onEnter:()=>{
+    if(fired)return;fired=true;
+    const orig=span.innerText;
+    new TextScramble(span).setText(orig);
+  }});
+});
 
 /* ══ TIMELINE — GSAP CINEMATIC ══ */
 (function(){
