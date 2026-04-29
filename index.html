@@ -3977,16 +3977,16 @@ if(!isMobile)
 })();
 
 /* ══════════════════════════════════════════════════════
-   SERPENT 3D — émerge du fond, traverse l'écran, s'enroule
+   SERPENT 3D RÉALISTE — écailles, tête, yeux, langue, parallax scroll
 ══════════════════════════════════════════════════════ */
 (function(){
-  /* ── Canvas ── */
+  /* ── Canvas — opaque pour les vraies couleurs du serpent ── */
   const cv=document.createElement('canvas');
   cv.id='snake-canvas';
   Object.assign(cv.style,{
-    position:'fixed',inset:'0',zIndex:'4',
+    position:'fixed',inset:'0',zIndex:'5',
     pointerEvents:'none',width:'100%',height:'100%',
-    mixBlendMode:'screen',transition:'opacity 1.8s ease'
+    mixBlendMode:'screen',transition:'opacity 2.5s ease'
   });
   document.body.appendChild(cv);
 
@@ -3994,183 +3994,258 @@ if(!isMobile)
   const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
   renderer.setSize(W,H);
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.setClearColor(0,0);
+  renderer.setClearColor(0x000000,0);
 
   const scene=new THREE.Scene();
-  /* Camera reculée pour réduire l'effet de perspective extrême */
-  const cam=new THREE.PerspectiveCamera(44,W/H,0.01,300);
-  cam.position.set(0,0,16);
+  const cam=new THREE.PerspectiveCamera(40,W/H,0.01,200);
+  cam.position.set(0,0,15);
 
-  /* ── Courbe du serpent : fond → perce l'écran → s'enroule — chemin décalé droite ── */
+  /* ── Matériau serpent — Phong illuminé par les lumières de scène ── */
+  const scaleMat=new THREE.MeshPhongMaterial({
+    color:new THREE.Color(0xc83018),    /* rouge-orange corps    */
+    emissive:new THREE.Color(0x5a0c04), /* auto-illumination     */
+    emissiveIntensity:1.0,
+    specular:new THREE.Color(0xff9850), /* reflet chaud          */
+    shininess:90,
+    side:THREE.FrontSide
+  });
+
+  /* ── Chemin courbe — S réaliste ── */
   const PATH=[
-    new THREE.Vector3( 0.5,  0.2,-50),   // naît au fond
-    new THREE.Vector3( 3.0, -2.5,-38),
-    new THREE.Vector3(-3.5,  1.5,-28),
-    new THREE.Vector3( 2.5,  0.8,-18),
-    new THREE.Vector3(-1.0, -1.5,-10),
-    new THREE.Vector3( 0.5,  0.5, -4),
-    new THREE.Vector3( 0.2,  0.1,  0),   // ◄ PERCÉE — plan de l'écran
-    new THREE.Vector3(-1.8,  1.8,  1.5),
-    new THREE.Vector3( 2.8, -0.7,  2.8),
-    new THREE.Vector3(-1.0,  2.0,  3.5),
-    new THREE.Vector3( 1.8, -1.8,  4.2),
-    new THREE.Vector3(-0.3,  0.7,  4.6),
-    new THREE.Vector3( 0.7, -0.3,  5.0), // repos final — loin enough from cam
+    new THREE.Vector3( 0.4, 0.6,-46),
+    new THREE.Vector3( 2.8,-2.0,-36),
+    new THREE.Vector3(-3.0, 1.4,-26),
+    new THREE.Vector3( 2.6,-0.5,-17),
+    new THREE.Vector3(-2.0, 1.8, -9),
+    new THREE.Vector3( 1.0, 0.3, -3),
+    new THREE.Vector3( 0.0, 0.1,  1),   // ◄ PERCÉE
+    new THREE.Vector3(-1.6, 1.5,  2.6),
+    new THREE.Vector3( 2.3,-0.8,  3.8),
+    new THREE.Vector3(-0.8, 1.7,  4.6),
+    new THREE.Vector3( 1.3,-0.9,  5.2),
+    new THREE.Vector3( 0.1, 0.4,  5.7),
   ];
   const curve=new THREE.CatmullRomCurve3(PATH,false,'catmullrom',0.5);
 
-  const SEGS=300, RAD=14, TUBE_R=0.13;
-  const geo=new THREE.TubeGeometry(curve,SEGS,TUBE_R,RAD,false);
+  const SEGS=380,RSEG=20,TUBE_R=0.155;
+  const geo=new THREE.TubeGeometry(curve,SEGS,TUBE_R,RSEG,false);
+
+  /* ── Effilement du corps (queue pointue, tête arrondie) ── */
+  (function taper(){
+    const pos=geo.attributes.position;
+    const uv=geo.attributes.uv;
+    for(let i=0;i<pos.count;i++){
+      const u=uv.getX(i);
+      let sc=1.0;
+      if(u<0.07) sc=Math.pow(u/0.07,0.55);      /* queue pointue */
+      if(u>0.92) sc=0.55+0.45*(1.0-(u-0.92)/0.08);
+      if(sc>=0.999) continue;
+      const t=Math.min(u,0.9999);
+      const cp=curve.getPoint(t);
+      pos.setXYZ(i,
+        cp.x+(pos.getX(i)-cp.x)*sc,
+        cp.y+(pos.getY(i)-cp.y)*sc,
+        cp.z+(pos.getZ(i)-cp.z)*sc
+      );
+    }
+    pos.needsUpdate=true;
+    geo.computeVertexNormals();
+  })();
+
   const TOTAL_IDX=geo.index.count;
   const IDX_PER_SEG=TOTAL_IDX/SEGS;
   geo.setDrawRange(0,0);
 
-  /* ── Matériau : acier cramoisi ── */
-  const mat=new THREE.MeshStandardMaterial({
-    color:new THREE.Color(0xc8506a),
-    emissive:new THREE.Color(0x7a1828),
-    emissiveIntensity:1.2,
-    metalness:0.88,
-    roughness:0.14,
-  });
-
-  const snake=new THREE.Mesh(geo,mat);
+  const snake=new THREE.Mesh(geo,scaleMat);
   scene.add(snake);
 
-  /* ── Tête lumineuse — plus petite et moins aveuglante ── */
-  const headMat=new THREE.MeshStandardMaterial({
-    color:0xffffff,emissive:new THREE.Color(0xff9050),
-    emissiveIntensity:2.0,metalness:0.9,roughness:0.1
-  });
-  const head=new THREE.Mesh(new THREE.SphereGeometry(TUBE_R*0.95,16,16),headMat);
-  head.visible=false;
-  scene.add(head);
+  /* ── Tête réaliste ── */
+  const headGroup=new THREE.Group();
+  headGroup.visible=false;
+  scene.add(headGroup);
 
-  /* ── Lueur de tête ── */
-  const headPL=new THREE.PointLight(0xff7030,3.5,6);
+  /* Corps de tête : ellipsoïde aplati-allongé */
+  const hGeo=new THREE.SphereGeometry(TUBE_R*1.5,24,18);
+  hGeo.applyMatrix4(new THREE.Matrix4().makeScale(1.08,0.70,1.55));
+  headGroup.add(new THREE.Mesh(hGeo,scaleMat));
+
+  /* Museau */
+  const snGeo=new THREE.SphereGeometry(TUBE_R*0.82,16,12);
+  snGeo.applyMatrix4(new THREE.Matrix4().makeScale(0.92,0.62,0.58));
+  const snout=new THREE.Mesh(snGeo,scaleMat);
+  snout.position.z=TUBE_R*1.82;
+  headGroup.add(snout);
+
+  /* Yeux — 3 couches : sclérotique / iris / pupille */
+  const eyeOutMat=new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:0.05,metalness:0.9});
+  const irisMat=new THREE.MeshStandardMaterial({color:0xcc9000,roughness:0.1,emissive:0x443200,emissiveIntensity:0.5});
+  const pupMat=new THREE.MeshStandardMaterial({color:0x000000,roughness:0.02,metalness:0.95});
+  [-1,1].forEach(function(side){
+    const eg=new THREE.Group();
+    eg.add(new THREE.Mesh(new THREE.SphereGeometry(TUBE_R*0.28,12,12),eyeOutMat));
+    const iris=new THREE.Mesh(new THREE.SphereGeometry(TUBE_R*0.20,10,10),irisMat);
+    iris.position.z=TUBE_R*0.14;
+    const pup=new THREE.Mesh(new THREE.SphereGeometry(TUBE_R*0.11,8,8),pupMat);
+    pup.position.z=TUBE_R*0.19;
+    eg.add(iris,pup);
+    eg.position.set(side*TUBE_R*1.02,TUBE_R*0.26,TUBE_R*0.92);
+    eg.rotation.y=side*0.52;
+    eg.rotation.x=-0.14;
+    headGroup.add(eg);
+  });
+
+  /* ── Langue fourchue ── */
+  const tongueGroup=new THREE.Group();
+  tongueGroup.visible=false;
+  headGroup.add(tongueGroup);
+  const tMat=new THREE.MeshBasicMaterial({color:0xdd1111});
+  /* Tige */
+  const stemM=new THREE.Mesh(new THREE.CylinderGeometry(0.010,0.006,TUBE_R*1.9,4),tMat);
+  stemM.rotation.x=Math.PI/2;
+  stemM.position.z=TUBE_R*2.25;
+  tongueGroup.add(stemM);
+  /* Fourches */
+  [-1,1].forEach(function(s){
+    const tip=new THREE.Mesh(new THREE.CylinderGeometry(0.006,0.002,TUBE_R*1.1,4),tMat);
+    tip.rotation.x=Math.PI/2;
+    tip.rotation.z=s*0.48;
+    tip.position.set(s*TUBE_R*0.44,0,TUBE_R*3.15);
+    tongueGroup.add(tip);
+  });
+
+  /* ── Lumière de tête ── */
+  const headPL=new THREE.PointLight(0xff7020,3.0,7);
   scene.add(headPL);
 
-  /* ── Anneau de choc à la percée ── */
+  /* ── Éclairage global ── */
+  scene.add(new THREE.AmbientLight(0xffeedd,1.2));
+  const keyL=new THREE.DirectionalLight(0xfff0e0,4.5);
+  keyL.position.set(4,6,10);
+  scene.add(keyL);
+  const fillL=new THREE.PointLight(0x3050cc,1.3,28);
+  fillL.position.set(-7,-3,5);
+  scene.add(fillL);
+  const rimL=new THREE.PointLight(0xff3010,2.0,20);
+  rimL.position.set(1,-6,-3);
+  scene.add(rimL);
+
+  /* ── Onde de choc ── */
   let shockR=0,shockA=0;
-  const shockMat=new THREE.MeshBasicMaterial({
-    color:0xff8060,transparent:true,opacity:0,side:THREE.DoubleSide
-  });
-  const shockMesh=new THREE.Mesh(new THREE.RingGeometry(0,0.01,64),shockMat);
-  shockMesh.position.set(0.2,0.1,0.1);
+  const shockMat=new THREE.MeshBasicMaterial({color:0xff9060,transparent:true,opacity:0,side:THREE.DoubleSide});
+  const shockMesh=new THREE.Mesh(new THREE.RingGeometry(0.01,0.02,64),shockMat);
+  shockMesh.position.set(0,0.1,0.2);
   shockMesh.lookAt(cam.position);
   scene.add(shockMesh);
 
-  /* ── Particules burst ── */
-  const BCOUNT=50;
+  /* ── Burst particules ── */
+  const BCOUNT=60;
   const bPos=new Float32Array(BCOUNT*3);
   const bVel=Array.from({length:BCOUNT},()=>{
     const a=Math.random()*Math.PI*2,b=Math.random()*Math.PI;
-    const spd=0.045+Math.random()*0.055;
-    return{x:Math.sin(b)*Math.cos(a)*spd,y:Math.sin(b)*Math.sin(a)*spd,z:(Math.random()-.3)*spd};
+    const s=0.04+Math.random()*0.055;
+    return{x:Math.sin(b)*Math.cos(a)*s,y:Math.sin(b)*Math.sin(a)*s,z:(Math.random()-.3)*s};
   });
   const bGeo=new THREE.BufferGeometry();
   bGeo.setAttribute('position',new THREE.BufferAttribute(bPos,3));
   const bMat=new THREE.PointsMaterial({
-    color:0xff9050,size:0.09,transparent:true,opacity:0,
-    blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true
+    color:0xff8030,size:0.07,transparent:true,opacity:0,
+    blending:THREE.AdditiveBlending,depthWrite:false
   });
   const burstPts=new THREE.Points(bGeo,bMat);
-  burstPts.position.set(0.2,0.1,0.15);
+  burstPts.position.set(0,0.1,0.2);
   scene.add(burstPts);
   let burstActive=false,burstF=0;
 
-  /* ── Éclairage ── */
-  scene.add(new THREE.AmbientLight(0xffffff,0.3));
-  const pl1=new THREE.PointLight(0xc84060,2.0,12);
-  pl1.position.set(-3,2,4);scene.add(pl1);
-  const pl2=new THREE.PointLight(0x7a1428,1.6,8);
-  pl2.position.set(3,-2,3);scene.add(pl2);
+  /* ── Parallax scroll ── */
+  let scrollTgt=0,scrollCur=0;
+  window.addEventListener('scroll',()=>{scrollTgt=window.scrollY*0.006;},{passive:true});
 
-  /* ── État + déclenchement ── */
-  let revSegs=0,breached=false,done=false,frame=0,started=false,restFrames=0;
+  /* ── État ── */
+  let revSegs=0,breached=false,done=false,frame=0,restFrames=0,started=false;
 
-  const startDelay=()=>{
-    if(document.getElementById('loader')?.style.display==='none'||!document.getElementById('loader')){
-      started=true;head.visible=true;
-    } else setTimeout(startDelay,200);
+  const waitLoader=()=>{
+    const ldr=document.getElementById('loader');
+    if(!ldr||ldr.style.display==='none'){started=true;headGroup.visible=true;}
+    else setTimeout(waitLoader,200);
   };
-  setTimeout(startDelay,1800);
+  setTimeout(waitLoader,1800);
+
+  function orientHead(t){
+    const t0=Math.min(t,0.9998),t1=Math.min(t+0.008,0.9999);
+    headGroup.position.copy(curve.getPoint(t0));
+    headGroup.lookAt(curve.getPoint(t1));
+    headPL.position.copy(headGroup.position);
+  }
 
   function animate(){
     requestAnimationFrame(animate);
     frame++;
-
     if(!started){renderer.render(scene,cam);return;}
 
-    /* ── Révéler progressivement ── */
-    if(!done){
-      revSegs=Math.min(revSegs+SEGS/200,SEGS);
-      geo.setDrawRange(0,Math.floor(revSegs)*IDX_PER_SEG);
+    /* Parallax doux */
+    scrollCur+=(scrollTgt-scrollCur)*0.07;
+    scene.position.y=scrollCur;
 
+    if(!done){
+      revSegs=Math.min(revSegs+SEGS/230,SEGS);
+      geo.setDrawRange(0,Math.floor(revSegs)*IDX_PER_SEG);
       const t=Math.min(revSegs/SEGS,1);
-      const hp=curve.getPoint(t);
-      head.position.copy(hp);
-      headPL.position.copy(hp);
+      orientHead(t);
 
       if(t>0.49&&!breached){
-        breached=true;
-        shockR=0;shockA=1.2;
+        breached=true;shockR=0;shockA=1.3;
         burstActive=true;burstF=0;
-        bPos.fill(0);bMat.opacity=0.9;
+        bPos.fill(0);bMat.opacity=0.85;
         bGeo.attributes.position.needsUpdate=true;
+        tongueGroup.visible=true;
       }
-
       if(revSegs>=SEGS){done=true;restFrames=0;}
 
-    } else {
+    }else{
       restFrames++;
-      /* Ondulation douce une fois en place */
-      const t=0.97+Math.sin(frame*.018)*.03;
-      const hp=curve.getPoint(Math.min(t,1));
-      head.position.copy(hp);
-      headPL.position.copy(hp);
-      snake.rotation.z=Math.sin(frame*.006)*.02;
-      snake.rotation.y=Math.cos(frame*.004)*.015;
+      orientHead(Math.min(0.97+Math.sin(frame*0.017)*0.025,1));
 
-      /* Fade-out après ~2.5s de repos */
-      if(restFrames>150){
-        const a=Math.max(0,1-(restFrames-150)/100);
-        cv.style.opacity=a;
+      /* Clignotement de langue */
+      const flick=Math.sin(frame*0.07);
+      tongueGroup.visible=flick>0.0;
+      tongueGroup.position.z=flick>0?flick*0.03:0;
+
+      /* Ondulation corps */
+      snake.rotation.z=Math.sin(frame*0.005)*0.016;
+      snake.rotation.y=Math.cos(frame*0.004)*0.010;
+
+      /* Fade-out après ~3s */
+      if(restFrames>190){
+        const a=Math.max(0,1.0-(restFrames-190)/100);
+        cv.style.opacity=String(a);
         if(a<=0){cv.style.display='none';return;}
       }
     }
 
-    /* ── Onde de choc ── */
+    /* Onde de choc */
     if(breached&&shockA>0){
-      shockR+=0.065;shockA=Math.max(0,shockA-.022);
+      shockR+=0.068;shockA=Math.max(0,shockA-0.022);
       shockMesh.geometry.dispose();
-      shockMesh.geometry=new THREE.RingGeometry(shockR*.5,shockR,64);
+      shockMesh.geometry=new THREE.RingGeometry(shockR*0.5,shockR,64);
       shockMat.opacity=shockA;
-      if(shockR>1.0&&shockA<0.5){shockR=0.04;shockA=0.5;}
+      if(shockR>1.1&&shockA<0.5){shockR=0.05;shockA=0.5;}
     }
 
-    /* ── Burst particules ── */
+    /* Burst */
     if(burstActive){
       burstF++;
-      if(burstF<50){
+      if(burstF<55){
         for(let i=0;i<BCOUNT;i++){
           bPos[i*3]+=bVel[i].x;bPos[i*3+1]+=bVel[i].y;bPos[i*3+2]+=bVel[i].z;
         }
         bGeo.attributes.position.needsUpdate=true;
-        bMat.opacity=Math.max(0,0.9-burstF/35);
-      } else {burstActive=false;bMat.opacity=0;}
+        bMat.opacity=Math.max(0,0.85-burstF/40);
+      }else{burstActive=false;bMat.opacity=0;}
     }
 
-    /* ── Glow tête pulsant ── */
-    const glow=1.6+Math.sin(frame*.09)*.55;
-    headMat.emissiveIntensity=glow;
-    headPL.intensity=glow*0.75;
-
-    /* ── Lumières orbitales ── */
-    pl1.position.x=Math.sin(frame*.009)*3.5;
-    pl1.position.y=Math.cos(frame*.007)*2.0;
-    pl2.position.x=-Math.sin(frame*.011)*2.5;
-    pl2.position.y=Math.sin(frame*.008)*1.5;
+    /* Lumière fill orbitale */
+    fillL.position.x=Math.sin(frame*0.008)*7;
+    fillL.position.y=Math.cos(frame*0.006)*3.5;
 
     renderer.render(scene,cam);
   }
