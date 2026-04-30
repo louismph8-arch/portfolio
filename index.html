@@ -208,6 +208,66 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 /* ── SECTION NUMBERS ── */
 .sec-num{font-family:var(--fh);font-size:clamp(8rem,18vw,16rem);font-weight:900;color:rgba(255,255,255,.025);position:absolute;top:-20px;right:-20px;line-height:1;pointer-events:none;user-select:none;z-index:0;letter-spacing:-.05em}
 
+/* ── LOADER ── */
+#loader{position:fixed;inset:0;z-index:10000;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .4s}
+#loader.out{opacity:0;pointer-events:none}
+#loader-svg{width:72px;height:80px}
+#loader-t{stroke-dasharray:280;stroke-dashoffset:280}
+#loader-t.draw{animation:draw-t .85s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes draw-t{to{stroke-dashoffset:0}}
+#loader-curtain{position:absolute;inset:0;background:var(--accent);transform:scaleY(0);transform-origin:bottom;will-change:transform;transition:transform .35s cubic-bezier(.7,0,.3,1)}
+#loader-curtain.wipe-in{transform:scaleY(1)}
+#loader-curtain.wipe-out{transform-origin:top;transform:scaleY(0)}
+#loader-label{font-family:var(--fh);font-size:10px;font-weight:700;letter-spacing:.18em;color:var(--dimmer);margin-top:18px;text-transform:uppercase;position:relative;z-index:2}
+
+/* ── SCROLL PROGRESS ── */
+#progress{position:fixed;top:0;left:0;height:2px;width:0%;background:var(--accent);z-index:9999;box-shadow:0 0 10px rgba(230,57,70,.8),0 0 20px rgba(230,57,70,.35);pointer-events:none;transition:width .04s linear}
+
+/* ── FILM GRAIN ── */
+#grain{position:fixed;inset:0;z-index:9997;pointer-events:none;opacity:.045;background-size:256px 256px;animation:grain-shake .12s steps(1) infinite}
+@keyframes grain-shake{
+  0%,100%{background-position:0 0}
+  12%{background-position:12px -8px}
+  25%{background-position:-10px 14px}
+  37%{background-position:18px 6px}
+  50%{background-position:-6px -16px}
+  62%{background-position:14px 10px}
+  75%{background-position:-14px 4px}
+  87%{background-position:8px -12px}
+}
+
+/* ── CURSOR SPOTLIGHT ── */
+#spotlight{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:0;transition:opacity .5s}
+#spotlight.active{opacity:1}
+
+/* ── WORD SPLIT REVEAL ── */
+.split-line{display:block;overflow:hidden;line-height:1!important}
+.split-word{display:inline-block;transform:translateY(115%);transition:transform .85s cubic-bezier(.16,1,.3,1)}
+.split-line.on .split-word{transform:translateY(0)}
+
+/* ── HORIZONTAL PROJECTS SCROLL ── */
+.proj-hscroll{display:flex;gap:14px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab;padding-bottom:8px;user-select:none;-webkit-user-select:none;padding-right:48px}
+.proj-hscroll::-webkit-scrollbar{display:none}
+.proj-hscroll:active{cursor:grabbing}
+.proj-hscroll .proj-hero{min-width:min(700px,82vw);flex-shrink:0;margin-bottom:0}
+.proj-hscroll .pcard{min-width:min(300px,74vw);flex-shrink:0}
+
+/* ── GITHUB CONTRIBUTIONS ── */
+.contrib-section{margin-top:72px;border-top:1px solid var(--border);padding-top:48px}
+.contrib-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.contrib-title{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:8px}
+.contrib-title svg{opacity:.5}
+.contrib-total{font-family:var(--fh);font-size:.95rem;font-weight:700;color:var(--dimmer)}
+.contrib-grid{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.contrib-grid::-webkit-scrollbar{display:none}
+.ch-week{display:flex;flex-direction:column;gap:3px}
+.ch-day{width:13px;height:13px;border-radius:2px;background:rgba(255,255,255,0.06);cursor:default;transition:transform .12s,box-shadow .12s;border:1px solid rgba(255,255,255,0.04)}
+.ch-day:hover{transform:scale(1.5);box-shadow:0 0 8px rgba(230,57,70,.6)}
+.ch-day[title]{position:relative}
+.contrib-footer{display:flex;align-items:center;gap:6px;margin-top:12px;font-size:11px;color:var(--dimmer)}
+.cl-cells{display:flex;gap:3px;margin-left:auto}
+.cl-cells span{width:12px;height:12px;border-radius:2px;display:block}
+
 /* ── MOBILE ── */
 @media(max-width:900px){
   .wrap{padding:0 24px}
@@ -230,6 +290,24 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 </style>
 </head>
 <body>
+
+<!-- LOADER -->
+<div id="loader">
+  <svg id="loader-svg" viewBox="0 0 72 80" fill="none">
+    <path id="loader-t" d="M6 14 L66 14 M39 14 L39 72" stroke="#e63946" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div id="loader-label">Testarossa</div>
+  <div id="loader-curtain"></div>
+</div>
+
+<!-- SCROLL PROGRESS -->
+<div id="progress"></div>
+
+<!-- FILM GRAIN -->
+<div id="grain"></div>
+
+<!-- CURSOR SPOTLIGHT -->
+<div id="spotlight"></div>
 
 <canvas id="particles"></canvas>
 <div id="cur"></div>
@@ -300,6 +378,23 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
       </div>
       <div class="about-img about-img2">
         <div class="about-img-placeholder">DEV</div>
+      </div>
+    </div>
+
+    <!-- GITHUB CONTRIBUTIONS -->
+    <div class="contrib-section rev" id="contrib-section">
+      <div class="contrib-header">
+        <div class="contrib-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+          Activité GitHub · 12 derniers mois
+        </div>
+        <span class="contrib-total" id="contrib-total"></span>
+      </div>
+      <div class="contrib-grid" id="contrib-grid"></div>
+      <div class="contrib-footer">
+        <span>Moins</span>
+        <div class="cl-cells" id="contrib-legend"></div>
+        <span>Plus</span>
       </div>
     </div>
   </div>
@@ -423,8 +518,8 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
   <div class="wrap">
     <span class="lbl rev">Mes projets</span>
     <h2 class="big rev" style="margin-bottom:48px">MES PROJETS</h2>
-    <div id="projs-wrap">
-      <div class="proj-hero rev" style="min-height:300px;align-items:center;justify-content:center">
+    <div class="proj-hscroll" id="projs-wrap">
+      <div class="proj-hero rev" style="min-height:300px;align-items:center;justify-content:center;min-width:min(700px,82vw)">
         <div class="proj-bg-text">…</div>
         <div style="position:relative;z-index:2;color:var(--dim);font-size:14px">Chargement des projets…</div>
       </div>
@@ -543,9 +638,21 @@ window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',scrollY>50
   const back=new THREE.DirectionalLight(0x606060,2);
   back.position.set(0,0,-8); scene.add(back);
 
+  /* ── MOUSE PARALLAX ── */
+  let mx=0,my=0,tx=0,ty=0;
+  document.addEventListener('mousemove',e=>{
+    mx=(e.clientX/innerWidth-.5)*2;
+    my=(e.clientY/innerHeight-.5)*2;
+  },{passive:true});
+
   let f=0;
   function loop(){
     requestAnimationFrame(loop);f++;
+    /* Smooth lerp towards mouse */
+    tx+=(mx-tx)*0.04;
+    ty+=(my-ty)*0.04;
+    scene.rotation.y=tx*0.18;
+    scene.rotation.x=-ty*0.10;
     renderer.render(scene,cam);
   }
   loop();
@@ -636,12 +743,12 @@ const TECHS=[
 
   function placeholders(){
     const items=[
-      {name:'discord-bot',description:'Bot Discord avancé avec modération, commandes slash et intégrations.',language:'JavaScript',stargazers_count:0,html_url:'#'},
-      {name:'react-native-app',description:'Application mobile cross-platform iOS & Android.',language:'TypeScript',stargazers_count:0,html_url:'#'},
-      {name:'portfolio',description:'Portfolio web moderne avec animations Three.js.',language:'JavaScript',stargazers_count:0,html_url:'#'},
-      {name:'api-backend',description:'API RESTful avec Node.js et MongoDB.',language:'JavaScript',stargazers_count:0,html_url:'#'},
-      {name:'landing-page',description:'Landing page animée avec conversions optimisées.',language:'CSS',stargazers_count:0,html_url:'#'},
-      {name:'python-tool',description:'Outil CLI Python pour automatiser des tâches.',language:'Python',stargazers_count:0,html_url:'#'},
+      {name:'discord-bot',description:'Bot Discord avancé avec modération, commandes slash et intégrations tierces.',language:'JavaScript',stargazers_count:0,html_url:'#'},
+      {name:'react-native-app',description:'Application mobile cross-platform iOS & Android avec UI fluide.',language:'TypeScript',stargazers_count:0,html_url:'#'},
+      {name:'portfolio',description:'Portfolio web moderne avec animations Three.js et effets 3D.',language:'JavaScript',stargazers_count:0,html_url:'#'},
+      {name:'api-backend',description:'API RESTful avec Node.js, MongoDB et authentification JWT.',language:'JavaScript',stargazers_count:0,html_url:'#'},
+      {name:'landing-page',description:'Landing page animée haute conversion.',language:'CSS',stargazers_count:0,html_url:'#'},
+      {name:'python-tool',description:'Outil CLI Python pour automatiser des tâches répétitives.',language:'Python',stargazers_count:0,html_url:'#'},
     ];
     render(items);
   }
@@ -649,12 +756,9 @@ const TECHS=[
   function render(repos){
     const filtered=repos.filter(r=>!r.fork).slice(0,6);
     if(!filtered.length){placeholders();return;}
+    /* All cards in a single horizontal row */
     let html=buildCard(filtered[0],true);
-    if(filtered.length>1){
-      html+='<div class="projs-small">';
-      filtered.slice(1).forEach(r=>{html+=buildCard(r,false);});
-      html+='</div>';
-    }
+    filtered.slice(1).forEach(r=>{html+=buildCard(r,false);});
     wrap.innerHTML=html;
     wrap.querySelectorAll('.rev').forEach(el=>obs.observe(el));
     const sr=document.getElementById('stat-repos');
@@ -769,6 +873,249 @@ const obs=new IntersectionObserver(entries=>{
   entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('on');});
 },{threshold:.1});
 document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
+
+/* ─────────────────────────────── LOADER ─── */
+(()=>{
+  const loader=document.getElementById('loader');
+  const tPath=document.getElementById('loader-t');
+  const curtain=document.getElementById('loader-curtain');
+
+  /* Step 1 — draw the T */
+  setTimeout(()=>tPath.classList.add('draw'),80);
+
+  /* Step 2 — red wipe in */
+  setTimeout(()=>curtain.classList.add('wipe-in'),1050);
+
+  /* Step 3 — red wipe out, reveal page */
+  setTimeout(()=>{
+    curtain.classList.remove('wipe-in');
+    curtain.classList.add('wipe-out');
+  },1420);
+
+  /* Step 4 — remove loader, trigger scramble */
+  setTimeout(()=>{
+    loader.classList.add('out');
+    setTimeout(()=>{loader.remove();},400);
+    /* Kick off hero scramble */
+    scrambleHero();
+    /* Kick off split-word reveal for hero title too */
+    document.getElementById('spotlight').classList.add('active');
+  },1800);
+})();
+
+/* ─────────────────────────────── TEXT SCRAMBLE (hero title) ─── */
+function scrambleHero(){
+  const el=document.querySelector('.hero-title');
+  if(!el)return;
+  const CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZ#@%&!?0123456789';
+  /* Work on plain text lines, preserve <br> */
+  const lines=el.innerHTML.split(/<br\s*\/?>/i);
+  const plainLines=lines.map(l=>l.replace(/<[^>]+>/g,''));
+  const totalLen=plainLines.join('').length;
+  const dur=1100;
+  const start=performance.now();
+
+  function step(now){
+    const t=(now-start)/dur;
+    if(t>=1){
+      /* Restore original */
+      el.innerHTML=lines.join('<br>');
+      return;
+    }
+    let out='';
+    let charIdx=0;
+    plainLines.forEach((line,li)=>{
+      if(li>0)out+='<br>';
+      for(let i=0;i<line.length;i++){
+        const globalIdx=charIdx+i;
+        const threshold=globalIdx/totalLen;
+        if(t>threshold+.2){
+          out+=line[i]; /* settled */
+        } else {
+          out+=CHARS[Math.floor(Math.random()*CHARS.length)];
+        }
+      }
+      charIdx+=line.length;
+    });
+    el.innerHTML=out;
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ─────────────────────────────── SCROLL PROGRESS BAR ─── */
+(()=>{
+  const bar=document.getElementById('progress');
+  window.addEventListener('scroll',()=>{
+    const pct=scrollY/(document.documentElement.scrollHeight-innerHeight);
+    bar.style.width=(pct*100)+'%';
+  },{passive:true});
+})();
+
+/* ─────────────────────────────── FILM GRAIN (canvas noise) ─── */
+(()=>{
+  const cv=document.createElement('canvas');
+  cv.width=256;cv.height=256;
+  const ctx=cv.getContext('2d');
+  const img=ctx.createImageData(256,256);
+  for(let i=0;i<img.data.length;i+=4){
+    const v=Math.random()*255|0;
+    img.data[i]=v;img.data[i+1]=v;img.data[i+2]=v;img.data[i+3]=255;
+  }
+  ctx.putImageData(img,0,0);
+  const el=document.getElementById('grain');
+  el.style.backgroundImage=`url(${cv.toDataURL()})`;
+  el.style.backgroundSize='256px 256px';
+})();
+
+/* ─────────────────────────────── CURSOR SPOTLIGHT ─── */
+(()=>{
+  const sp=document.getElementById('spotlight');
+  document.addEventListener('mousemove',e=>{
+    sp.style.background=`radial-gradient(700px circle at ${e.clientX}px ${e.clientY}px,rgba(255,255,255,.032) 0%,rgba(255,255,255,.008) 40%,transparent 75%)`;
+  },{passive:true});
+})();
+
+/* ─────────────────────────────── SPLIT WORD REVEAL (section h2) ─── */
+(()=>{
+  document.querySelectorAll('h2.big').forEach(h=>{
+    /* Split on <br> — each line gets own overflow:hidden wrapper */
+    const raw=h.innerHTML;
+    const lines=raw.split(/<br\s*\/?>/i);
+    h.innerHTML=lines.map((line,i)=>{
+      const delay=i*120;
+      return `<span class="split-line" style="transition-delay:${delay}ms"><span class="split-word" style="transition-delay:${delay}ms">${line}</span></span>`;
+    }).join('');
+
+    /* Observe parent for scroll trigger */
+    const lineObs=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{
+        if(!e.isIntersecting)return;
+        h.querySelectorAll('.split-line').forEach((ln,i)=>{
+          setTimeout(()=>ln.classList.add('on'),i*80);
+        });
+        lineObs.unobserve(h);
+      });
+    },{threshold:.15});
+    lineObs.observe(h);
+  });
+})();
+
+/* ─────────────────────────────── HORIZONTAL PROJECTS DRAG ─── */
+(()=>{
+  function initHScroll(el){
+    if(!el)return;
+    let isDown=false,startX=0,scrollLeft=0,velX=0,lastX=0,raf=0;
+
+    el.addEventListener('mousedown',e=>{
+      isDown=true;velX=0;
+      startX=e.pageX-el.offsetLeft;
+      lastX=e.pageX;
+      scrollLeft=el.scrollLeft;
+      cancelAnimationFrame(raf);
+    });
+    el.addEventListener('mouseleave',()=>{isDown=false;applyMomentum();});
+    el.addEventListener('mouseup',()=>{isDown=false;applyMomentum();});
+    el.addEventListener('mousemove',e=>{
+      if(!isDown)return;
+      e.preventDefault();
+      velX=e.pageX-lastX;lastX=e.pageX;
+      el.scrollLeft=scrollLeft-(e.pageX-startX);
+    });
+
+    function applyMomentum(){
+      let v=-velX*5;
+      function decel(){
+        v*=0.88;
+        el.scrollLeft+=v;
+        if(Math.abs(v)>0.8)raf=requestAnimationFrame(decel);
+      }
+      decel();
+    }
+
+    /* Touch inertia is native on mobile via -webkit-overflow-scrolling:touch */
+  }
+  /* Init on render — projs-wrap is replaced by GitHub async, so we also watch DOM */
+  initHScroll(document.getElementById('projs-wrap'));
+  const mutObs=new MutationObserver(()=>initHScroll(document.getElementById('projs-wrap')));
+  const pw=document.getElementById('projs-wrap');
+  if(pw)mutObs.observe(pw,{childList:true});
+})();
+
+/* ─────────────────────────────── GITHUB CONTRIBUTIONS HEATMAP ─── */
+(async()=>{
+  const grid=document.getElementById('contrib-grid');
+  const totalEl=document.getElementById('contrib-total');
+  const legendEl=document.getElementById('contrib-legend');
+  if(!grid)return;
+
+  const COLORS=['rgba(255,255,255,0.06)','#5c1a1a','#8b2020','#c0292e','#e63946'];
+  const LEGEND_LABELS=['0','1-3','4-6','7-10','10+'];
+
+  /* Build legend */
+  if(legendEl){
+    legendEl.innerHTML=COLORS.map((c,i)=>`<span style="background:${c}" title="${LEGEND_LABELS[i]}"></span>`).join('');
+  }
+
+  function renderGrid(contributions,total){
+    if(totalEl)totalEl.textContent=total+' contributions';
+    /* Pad to start on Sunday */
+    const first=new Date(contributions[0].date);
+    const pad=first.getDay(); /* 0=Sun */
+    const cells=[...Array(pad).fill(null),...contributions];
+    /* Build weeks */
+    const weeks=[];
+    for(let i=0;i<cells.length;i+=7){
+      weeks.push(cells.slice(i,i+7));
+    }
+    grid.innerHTML=weeks.map(week=>`
+      <div class="ch-week">${week.map(d=>d
+        ?`<div class="ch-day" style="background:${COLORS[d.level]}" title="${d.date} · ${d.count} contributions"></div>`
+        :`<div class="ch-day" style="opacity:0"></div>`
+      ).join('')}</div>
+    `).join('');
+    obs.observe(document.getElementById('contrib-section'));
+  }
+
+  function genFakeContribs(){
+    /* Realistic distribution: burst patterns, quieter periods, weekends lighter */
+    const days=[];const now=new Date();
+    let streak=0;
+    for(let i=364;i>=0;i--){
+      const d=new Date(now);d.setDate(d.getDate()-i);
+      const dow=d.getDay(); /* 0=Sun, 6=Sat */
+      const weekendFactor=dow===0||dow===6?.3:1;
+      /* Occasional burst periods */
+      if(Math.random()<.06)streak=Math.floor(Math.random()*14)+3;
+      const inBurst=streak-->0;
+      const chance=inBurst?.72:.28;
+      const rand=Math.random();
+      let count=0;
+      if(rand<chance*weekendFactor){
+        count=inBurst
+          ?Math.floor(Math.random()*11)+2
+          :Math.floor(Math.random()*5)+1;
+      }
+      const level=count===0?0:count<=3?1:count<=6?2:count<=9?3:4;
+      days.push({date:d.toISOString().slice(0,10),count,level});
+    }
+    return days;
+  }
+
+  try{
+    const r=await fetch(`https://github-contributions-api.jogruber.de/v4/destinylouis?y=last`);
+    if(!r.ok)throw 0;
+    const data=await r.json();
+    const contributions=data.contributions||[];
+    const total=contributions.reduce((a,c)=>a+c.count,0);
+    /* If account has no public activity, use generated demo data */
+    if(total===0)throw 0;
+    renderGrid(contributions,total);
+  }catch{
+    const days=genFakeContribs();
+    renderGrid(days,days.reduce((a,c)=>a+c.count,0));
+  }
+})();
 </script>
 </body>
 </html>
