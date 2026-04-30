@@ -76,17 +76,17 @@ h2.big{font-family:var(--fh);font-weight:900;font-size:clamp(2.8rem,7.5vw,7.2rem
 .nav-cta:hover{background:rgba(255,255,255,.07)}
 
 /* ── HERO ── */
-#hero{position:relative;height:100vh;min-height:680px;display:flex;align-items:center;overflow:hidden}
+#hero{position:relative;height:100vh;min-height:680px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 #hero-cv{position:absolute;inset:0;width:100%;height:100%}
-.hero-gradient{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.92) 40%,rgba(0,0,0,.35) 100%);z-index:1;pointer-events:none}
-.hero-content{position:relative;z-index:2;padding:0 48px;padding-top:80px;max-width:800px}
-.hero-tag{display:inline-flex;align-items:center;gap:9px;padding:7px 18px;border-radius:var(--pill);border:1px solid var(--border);font-size:12px;font-weight:500;color:var(--dim);margin-bottom:32px}
-.hero-title{font-family:var(--fh);font-weight:900;font-size:clamp(3.8rem,10vw,9.5rem);line-height:.86;letter-spacing:-.01em;text-transform:uppercase;margin-bottom:30px}
-.hero-sub{font-size:clamp(.95rem,1.4vw,1.1rem);color:var(--dim);max-width:500px;line-height:1.75;margin-bottom:44px}
-.hero-btns{display:flex;gap:14px;flex-wrap:wrap}
+.hero-gradient{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,rgba(0,0,0,.05) 0%,rgba(0,0,0,.55) 80%,rgba(0,0,0,.85) 100%);z-index:1;pointer-events:none}
+.hero-content{position:relative;z-index:2;text-align:center;display:flex;flex-direction:column;align-items:center;padding:0 40px;padding-top:90px;width:100%}
+.hero-tag{display:inline-flex;align-items:center;gap:9px;padding:7px 18px;border-radius:var(--pill);border:1px solid rgba(255,255,255,.15);font-size:12px;font-weight:500;color:var(--dim);margin-bottom:36px}
+.hero-title{font-family:var(--fh);font-weight:900;font-size:clamp(4.2rem,9.5vw,10rem);line-height:.88;letter-spacing:-.01em;text-transform:uppercase;margin-bottom:28px;max-width:1100px}
+.hero-sub{font-size:clamp(.95rem,1.4vw,1.12rem);color:var(--dim);max-width:560px;line-height:1.75;margin-bottom:44px;text-align:center}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
 .hero-bottom{position:absolute;bottom:32px;left:48px;right:48px;z-index:2;display:flex;justify-content:space-between;align-items:center}
 .hero-badge{display:flex;align-items:center;gap:10px;padding:10px 18px;border:1px solid var(--border);border-radius:var(--pill);font-size:12px;font-weight:500;color:var(--dim)}
-.hero-badge img{width:26px;height:26px;border-radius:50%}
+.hero-badge img{width:24px;height:24px;border-radius:50%}
 .scroll-hint{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dimmer)}
 .scroll-circle{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;animation:bob 1.8s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
@@ -360,65 +360,67 @@ window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',scrollY>50
   renderer.setSize(W,H);
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   renderer.setClearColor(0x000000,1);
-  renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.4;
+  renderer.toneMapping=THREE.LinearToneMapping;
+  renderer.toneMappingExposure=1.0;
 
   const scene=new THREE.Scene();
-  const cam=new THREE.PerspectiveCamera(56,W/H,0.1,100);
-  /* Camera: slightly right-offset so cylinders fill right half */
-  cam.position.set(0,0,8);
-  cam.lookAt(2,0,0);
+  const cam=new THREE.PerspectiveCamera(60,W/H,0.1,80);
+  cam.position.set(0,0,6);
+  cam.lookAt(0.5,-0.5,0);
 
-  /* Dark charcoal material — visible but not bright */
+  /* Dark metallic material — matches QixStudio dark-with-bright-highlights */
   const mat=new THREE.MeshStandardMaterial({
-    color:0x1c1c1c,
-    metalness:.75,
-    roughness:.28,
-    envMapIntensity:1.2
+    color:0x2e2e2e, metalness:0.6, roughness:0.35,
+    emissive:0x070707, emissiveIntensity:1
   });
 
-  /* Fan of cylinders spread from center-right */
-  const cyls=[];
-  const N=9;
-  for(let i=0;i<N;i++){
-    const t=i/(N-1);
-    const geo=new THREE.CylinderGeometry(.3,.3,14,24);
-    const mesh=new THREE.Mesh(geo,mat);
-    /* Position: fan from ~x=1.5 to x=6, staggered depth */
-    const angle=(t-.5)*Math.PI*.6;
-    mesh.position.set(
-      1.5+t*4.8+(Math.random()*.3-.15),
-      (Math.random()*.6-.3),
-      -1.5+(t-.5)*2.4
-    );
-    mesh.rotation.z=((t-.5)*.35)+(Math.random()*.04-.02);
-    mesh.rotation.x=.04+t*.06;
-    scene.add(mesh);
-    cyls.push({mesh,angle,ph:i*.42+Math.random()*.5,ox:mesh.position.x,oy:mesh.position.y});
-  }
+  /* ── BIG TORI — QixStudio arching rings ── */
 
-  /* Lights — key from top-left for strong cylinder highlights */
-  scene.add(new THREE.AmbientLight(0x111111,1));
-  const key=new THREE.DirectionalLight(0xffffff,6.0);
-  key.position.set(-3,8,6);
-  scene.add(key);
-  /* Rim from right for edge separation from black background */
-  const rim=new THREE.DirectionalLight(0xaaaaaa,2.2);
-  rim.position.set(8,2,2);
-  scene.add(rim);
-  /* Bottom fill */
-  const fill=new THREE.PointLight(0x333333,3.5,18);
-  fill.position.set(4,-5,4);
-  scene.add(fill);
+  /* Main left arch */
+  const T1=new THREE.Mesh(new THREE.TorusGeometry(5,1.2,24,120),mat);
+  T1.position.set(-1.5,-4.5,0);
+  T1.rotation.x=1.0; T1.rotation.z=-0.18;
+  scene.add(T1);
+
+  /* Secondary ring */
+  const T2=new THREE.Mesh(new THREE.TorusGeometry(4.2,0.85,20,100),mat);
+  T2.position.set(0.5,-5,-2);
+  T2.rotation.x=1.08; T2.rotation.z=0.12;
+  scene.add(T2);
+
+  /* Large shallow ring — only upper arc in frame */
+  const T3=new THREE.Mesh(new THREE.TorusGeometry(7,1.0,20,120),mat);
+  T3.position.set(-0.5,-7.5,-1.5);
+  T3.rotation.x=0.95; T3.rotation.z=-0.3;
+  scene.add(T3);
+
+  /* ── RIGHT SIDE diagonal cylinders ── */
+  const cyl=(x,y,z,rz,ry=0,h=14,r=0.36)=>{
+    const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,20),mat);
+    m.position.set(x,y,z); m.rotation.z=rz; m.rotation.y=ry;
+    scene.add(m);
+  };
+  cyl(3.5, 0,-0.5,.22,.04);
+  cyl(5.0, 1,-1.5,.16,.07);
+  cyl(6.5,-0.5,-2.5,.26,.03);
+  cyl(4.8, 2.5,-2,.12,.09);
+  cyl(7.5, 0.5,-3.5,.20,.05);
+
+  /* ── LIGHTS ── */
+  scene.add(new THREE.AmbientLight(0x282828,1));
+  /* Key — top-left strong for specular highlight on torus arc */
+  const key=new THREE.DirectionalLight(0xffffff,7);
+  key.position.set(-5,9,6); scene.add(key);
+  /* Right rim — bright edge on cylinders */
+  const rim=new THREE.DirectionalLight(0xffffff,4);
+  rim.position.set(9,2,5); scene.add(rim);
+  /* Back subtle */
+  const back=new THREE.DirectionalLight(0x303030,1.2);
+  back.position.set(0,0,-8); scene.add(back);
 
   let f=0;
   function loop(){
-    requestAnimationFrame(loop);
-    f++;
-    cyls.forEach(({mesh,angle,ph,ox,oy})=>{
-      mesh.rotation.z+=(Math.sin(f*.0022+ph)*.0004);
-      mesh.position.y=oy+Math.sin(f*.003+ph)*.06;
-    });
+    requestAnimationFrame(loop);f++;
     renderer.render(scene,cam);
   }
   loop();
