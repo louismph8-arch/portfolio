@@ -36,9 +36,62 @@ body{background:var(--black);color:var(--white);font-family:var(--fb);font-size:
 a{color:inherit;text-decoration:none}
 button{font-family:var(--fb)}
 
-/* ── CURSOR ── */
-#cur{position:fixed;width:8px;height:8px;background:#fff;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .18s,height .18s,opacity .18s;mix-blend-mode:difference}
-#cur.big{width:42px;height:42px}
+/* ── CURSOR RING ── */
+#cur{position:fixed;width:36px;height:36px;border:1.5px solid rgba(255,255,255,.55);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .25s cubic-bezier(.23,1,.32,1),height .25s cubic-bezier(.23,1,.32,1),border-color .25s,background .25s}
+#cur.big{width:60px;height:60px;border-color:var(--accent);background:rgba(230,57,70,.06)}
+#cur-dot{position:fixed;width:4px;height:4px;background:#fff;border-radius:50%;pointer-events:none;z-index:10000;transform:translate(-50%,-50%);transition:opacity .2s}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+html{scrollbar-width:thin;scrollbar-color:var(--accent) transparent}
+
+/* ── SECTION DOTS ── */
+#sdots{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;gap:11px;opacity:0;transition:opacity .5s;pointer-events:none}
+#sdots.visible{opacity:1;pointer-events:auto}
+.sdot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.18);border:none;cursor:pointer;transition:background .2s,transform .2s,height .3s;padding:0;position:relative;display:block}
+.sdot::after{content:attr(data-label);position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:10.5px;font-weight:600;letter-spacing:.08em;color:rgba(255,255,255,.7);white-space:nowrap;opacity:0;transition:opacity .18s;pointer-events:none;font-family:var(--fb);text-transform:uppercase}
+.sdot:hover::after{opacity:1}
+.sdot.active{background:#fff;transform:scale(1.6)}
+.sdot:hover{background:rgba(255,255,255,.55)}
+@media(max-width:900px){#sdots{display:none}}
+
+/* ── NAV ACTIVE LINK ── */
+.nav-links a{position:relative}
+.nav-links a.active{color:#fff}
+.nav-links a.active::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent)}
+
+/* ── PULSING STATUS DOT ── */
+.dot{position:relative}
+.dot::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:1.5px solid var(--green);animation:ping 2s ease-out infinite;opacity:0}
+.dot.idle::before{border-color:#f59e0b}
+.dot.dnd::before{border-color:#ef4444;animation:none}
+.dot.off::before{animation:none;display:none}
+@keyframes ping{0%{opacity:.55;transform:scale(.7)}100%{opacity:0;transform:scale(2.2)}}
+
+/* ── TERMINAL CARD ── */
+.terminal-card{background:#0a0a0a!important;border:1px solid rgba(255,255,255,.1)!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;padding:0!important;border-radius:12px!important;overflow:hidden!important}
+.term-bar{display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);flex-shrink:0}
+.term-btn{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.term-file{font-size:11px;color:rgba(255,255,255,.28);margin-left:auto;font-family:monospace}
+.term-pre{flex:1;overflow:hidden;padding:18px 20px;font-family:'Courier New',Courier,monospace;font-size:12.5px;line-height:1.75;margin:0;color:rgba(255,255,255,.75)}
+.t-dim{color:rgba(255,255,255,.28)}
+.t-kw{color:#c792ea}
+.t-fn{color:#82aaff}
+.t-str{color:#c3e88d}
+.t-cmt{color:rgba(255,255,255,.3);font-style:italic}
+.t-num{color:#f78c6c}
+.t-cursor{display:inline-block;width:7px;height:14px;background:var(--accent);vertical-align:middle;animation:blink .9s step-end infinite;margin-left:1px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── IDENTITY CARD (DEV placeholder) ── */
+.identity-card{background:linear-gradient(135deg,#0d0d0d,#111)!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-end!important;padding:28px!important;border:1px solid rgba(255,255,255,.08)!important}
+.id-name{font-family:var(--fh);font-size:2.2rem;font-weight:900;line-height:1;margin-bottom:8px}
+.id-role{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:24px}
+.id-tags{display:flex;flex-direction:column;gap:6px}
+.id-tag{font-size:11px;font-weight:500;color:var(--dimmer);display:flex;align-items:center;gap:7px}
+.id-tag::before{content:'▸';color:var(--accent);font-size:9px}
 
 /* ── UTILS ── */
 .wrap{max-width:var(--max);margin:0 auto;padding:0 48px}
@@ -311,6 +364,16 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 
 <canvas id="particles"></canvas>
 <div id="cur"></div>
+<div id="cur-dot"></div>
+
+<!-- SECTION DOTS -->
+<nav id="sdots" aria-label="Sections">
+  <button class="sdot" data-label="À propos" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})"></button>
+  <button class="sdot" data-label="Services" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})"></button>
+  <button class="sdot" data-label="Tarifs" onclick="document.getElementById('tarifs').scrollIntoView({behavior:'smooth'})"></button>
+  <button class="sdot" data-label="Projets" onclick="document.getElementById('projects').scrollIntoView({behavior:'smooth'})"></button>
+  <button class="sdot" data-label="Contact" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})"></button>
+</nav>
 
 <!-- NAV -->
 <nav class="nav" id="nav">
@@ -373,11 +436,23 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
       </div>
     </div>
     <div class="about-imgs rev">
-      <div class="about-img">
-        <div class="about-img-placeholder">CODE</div>
+      <div class="about-img terminal-card">
+        <div class="term-bar">
+          <span class="term-btn" style="background:#ff5f57"></span>
+          <span class="term-btn" style="background:#ffbd2e"></span>
+          <span class="term-btn" style="background:#28c940"></span>
+          <span class="term-file">discord-bot.js</span>
+        </div>
+        <pre class="term-pre" id="term-code" aria-hidden="true"></pre>
       </div>
-      <div class="about-img about-img2">
-        <div class="about-img-placeholder">DEV</div>
+      <div class="about-img about-img2 identity-card">
+        <div class="id-name">Louis</div>
+        <div class="id-role">Développeur Full-Stack</div>
+        <div class="id-tags">
+          <div class="id-tag">Montréal · Remote</div>
+          <div class="id-tag">Discord · Mobile · Web</div>
+          <div class="id-tag">Disponible freelance</div>
+        </div>
       </div>
     </div>
 
@@ -554,16 +629,31 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 <script>
-/* ─────────────────────────────── CURSOR ─── */
-const cur=document.getElementById('cur');
-document.addEventListener('mousemove',e=>{
-  cur.style.left=e.clientX+'px';
-  cur.style.top=e.clientY+'px';
-},{passive:true});
-document.querySelectorAll('a,button,.scard,.proj-hero,.pcard').forEach(el=>{
-  el.addEventListener('mouseenter',()=>cur.classList.add('big'));
-  el.addEventListener('mouseleave',()=>cur.classList.remove('big'));
-});
+/* ─────────────────────────────── CURSOR RING (lerp) ─── */
+(()=>{
+  const ring=document.getElementById('cur');
+  const dot=document.getElementById('cur-dot');
+  let cx=window.innerWidth/2,cy=window.innerHeight/2;
+  let tx=cx,ty=cy;
+
+  document.addEventListener('mousemove',e=>{
+    tx=e.clientX;ty=e.clientY;
+    if(dot){dot.style.left=tx+'px';dot.style.top=ty+'px';}
+  },{passive:true});
+
+  (function tick(){
+    cx+=(tx-cx)*.11;
+    cy+=(ty-cy)*.11;
+    ring.style.left=cx+'px';
+    ring.style.top=cy+'px';
+    requestAnimationFrame(tick);
+  })();
+
+  document.querySelectorAll('a,button,.scard,.proj-hero,.pcard,.tcard').forEach(el=>{
+    el.addEventListener('mouseenter',()=>ring.classList.add('big'));
+    el.addEventListener('mouseleave',()=>ring.classList.remove('big'));
+  });
+})();
 
 /* ─────────────────────────────── NAV ─── */
 const nav=document.getElementById('nav');
@@ -874,6 +964,152 @@ const obs=new IntersectionObserver(entries=>{
 },{threshold:.1});
 document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
 
+/* ─────────────────────────────── SECTION DOTS + NAV ACTIVE ─── */
+(()=>{
+  const sdots=document.getElementById('sdots');
+  const dotBtns=document.querySelectorAll('.sdot');
+  const navLinks=document.querySelectorAll('.nav-links a');
+  const sections=['about','services','tarifs','projects','contact'];
+
+  /* Show dots after hero scroll */
+  window.addEventListener('scroll',()=>{
+    sdots.classList.toggle('visible',scrollY>innerHeight*.5);
+  },{passive:true});
+
+  /* Active section tracking */
+  const secObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const id=e.target.id;
+      const idx=sections.indexOf(id);
+      dotBtns.forEach((b,i)=>b.classList.toggle('active',i===idx));
+      navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+id));
+    });
+  },{threshold:.35,rootMargin:'-10% 0px -10% 0px'});
+
+  sections.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)secObs.observe(el);
+  });
+})();
+
+/* ─────────────────────────────── TERMINAL TYPEWRITER ─── */
+(()=>{
+  const el=document.getElementById('term-code');
+  if(!el)return;
+
+  const lines=[
+    {t:'cmt',v:'// Testarossa · discord-bot.js'},
+    {t:'gap'},
+    {t:'kw',v:'const ',a:'fn',b:'{ Client, Events }',c:'kw2',d:' = require(',e:'str',f:"'discord.js'",g:')'},
+    {t:'gap'},
+    {t:'kw',v:'const ',a:'id',b:'client',c:'op',d:' = new ',e:'fn',f:'Client',g:'()'},
+    {t:'gap'},
+    {t:'fn',v:'client',a:'op',b:'.on(',c:'str',d:"Events.Ready",e:'op',f:', () => {'},
+    {t:'ind',v:"  console.log("},
+    {t:'ind2',v:"    '✓ Bot en ligne'"},
+    {t:'ind',v:"  )"},
+    {t:'ind',v:'}'},
+    {t:'gap'},
+    {t:'fn',v:'client',a:'op',b:'.on(',c:'str',d:'Events.MessageCreate'},
+    {t:'ind',v:'  async msg => {'},
+    {t:'ind2',v:"    if (msg.author.bot) return"},
+    {t:'ind2',v:"    await msg.reply('Bonjour 👋')"},
+    {t:'ind',v:'  }'},
+    {t:'ind',v:'}'},
+    {t:'gap'},
+    {t:'fn',v:'client',a:'op',b:'.login(',c:'str',d:'process.env.TOKEN',e:'op',f:')'},
+  ];
+
+  /* Build as syntax-highlighted HTML, then type it character by character */
+  const html=lines.map(l=>{
+    if(l.t==='gap')return'\n';
+    if(l.t==='cmt')return`<span class="t-cmt">${l.v}</span>\n`;
+    if(l.t==='ind')return`  ${l.v}\n`;
+    if(l.t==='ind2')return`    ${l.v}\n`;
+    if(l.t==='kw')return`<span class="t-kw">${l.v}</span><span class="t-dim">${l.b||''}</span><span class="t-kw">${l.d||''}</span><span class="t-str">${l.f||''}</span>${l.g||''}\n`;
+    if(l.t==='fn')return`<span class="t-fn">${l.v}</span><span class="t-dim">${l.b||''}</span><span class="t-str">${l.d||''}</span><span class="t-dim">${l.f||''}</span>\n`;
+    return l.v+'\n';
+  }).join('');
+
+  /* Strip HTML to get plain chars, build char→html map */
+  const tmpDiv=document.createElement('div');
+  tmpDiv.innerHTML=html;
+  const plainText=tmpDiv.textContent;
+  const totalChars=plainText.length;
+  let started=false;
+
+  function startTyping(){
+    if(started)return;started=true;
+    let i=0;
+    el.innerHTML='<span class="t-cursor"></span>';
+    const cursor=el.querySelector('.t-cursor');
+    /* Type character by character with variable speed */
+    function type(){
+      if(i>=totalChars){cursor.remove();return;}
+      i++;
+      /* Re-render up to i chars of plain text with syntax HTML */
+      const partial=plainText.slice(0,i);
+      /* Simple approach: show html but clipped to i visible chars */
+      el.innerHTML=clipHTML(html,i)+'<span class="t-cursor"></span>';
+      setTimeout(type,Math.random()*22+8);
+    }
+    type();
+  }
+
+  /* Clip HTML to n visible characters */
+  function clipHTML(source,n){
+    let count=0;let out='';let inTag=false;
+    for(let i=0;i<source.length;i++){
+      const c=source[i];
+      if(c==='<'){inTag=true;out+=c;continue;}
+      if(c==='>'){inTag=false;out+=c;continue;}
+      if(!inTag){
+        if(count>=n)break;
+        out+=c;count++;
+      } else {
+        out+=c;
+      }
+    }
+    /* Close any open tags */
+    return out;
+  }
+
+  /* Start when scrolled into view */
+  const termObs=new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting){startTyping();termObs.disconnect();}
+  },{threshold:.3});
+  const termCard=el.closest('.terminal-card');
+  if(termCard)termObs.observe(termCard);
+})();
+
+/* ─────────────────────────────── HERO ENTRANCE SEQUENCE ─── */
+(()=>{
+  /* Elements to animate in after loader */
+  const tag=document.querySelector('.hero-tag');
+  const sub=document.querySelector('.hero-sub');
+  const btns=document.querySelector('.hero-btns');
+  const bottom=document.querySelector('.hero-bottom');
+  [tag,sub,btns,bottom].forEach(el=>{if(el){el.style.opacity='0';el.style.transform='translateY(20px)';}});
+
+  window._heroEntrance=function(){
+    const seq=[
+      [tag,0],
+      [sub,900],   /* after scramble finishes (~1100ms) */
+      [btns,1050],
+      [bottom,1200],
+    ];
+    seq.forEach(([el,delay])=>{
+      if(!el)return;
+      setTimeout(()=>{
+        el.style.transition='opacity .7s ease, transform .7s ease';
+        el.style.opacity='1';
+        el.style.transform='none';
+      },delay);
+    });
+  };
+})();
+
 /* ─────────────────────────────── LOADER ─── */
 (()=>{
   const loader=document.getElementById('loader');
@@ -892,14 +1128,13 @@ document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
     curtain.classList.add('wipe-out');
   },1420);
 
-  /* Step 4 — remove loader, trigger scramble */
+  /* Step 4 — remove loader, trigger scramble + entrance */
   setTimeout(()=>{
     loader.classList.add('out');
     setTimeout(()=>{loader.remove();},400);
-    /* Kick off hero scramble */
     scrambleHero();
-    /* Kick off split-word reveal for hero title too */
     document.getElementById('spotlight').classList.add('active');
+    if(window._heroEntrance)window._heroEntrance();
   },1800);
 })();
 
