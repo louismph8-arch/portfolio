@@ -3,7 +3,7 @@
 //  Strategy: Cache-first for page, network-first
 //  for navigation, skip CDN & API requests.
 // ═══════════════════════════════════════════════
-const CACHE = 'testarossa-v1';
+const CACHE = 'testarossa-v3';
 const SHELL = [
   '/portfolio/',
   '/portfolio/index.html',
