@@ -261,6 +261,17 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 /* ── SECTION NUMBERS ── */
 .sec-num{font-family:var(--fh);font-size:clamp(8rem,18vw,16rem);font-weight:900;color:rgba(255,255,255,.025);position:absolute;top:-20px;right:-20px;line-height:1;pointer-events:none;user-select:none;z-index:0;letter-spacing:-.05em}
 
+/* ── 3D ICONS ── */
+.icon3d{width:72px;height:72px;border-radius:18px;object-fit:contain;margin-bottom:28px;filter:drop-shadow(0 10px 28px rgba(0,0,0,.7));transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.scard:hover .icon3d{transform:translateY(-6px) rotate(-6deg) scale(1.08)}
+.tcard-icon3d{width:56px;height:56px;border-radius:14px;object-fit:contain;margin-bottom:20px;filter:drop-shadow(0 6px 18px rgba(0,0,0,.6));transition:transform .3s ease}
+.tcard:hover .tcard-icon3d{transform:translateY(-4px) scale(1.1)}
+/* Hero floating 3D element */
+.hero-float{position:absolute;right:7%;top:50%;transform:translateY(-50%);z-index:1;width:clamp(180px,22vw,340px);pointer-events:none;opacity:.7;animation:float3d 5s ease-in-out infinite;filter:drop-shadow(0 0 60px rgba(230,57,70,.18))}
+@keyframes float3d{0%,100%{transform:translateY(-50%)}50%{transform:translateY(calc(-50% - 18px))}}
+/* About section 3D illustration */
+.about-3d{width:100%;height:100%;object-fit:cover;border-radius:10px}
+
 /* ── LOADER ── */
 #loader{position:fixed;inset:0;z-index:10000;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .4s}
 #loader.out{opacity:0;pointer-events:none}
@@ -404,6 +415,8 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
       <a href="#contact" class="btn btn-ghost btn-mag">Me contacter</a>
     </div>
   </div>
+  <!-- Hero floating 3D orb -->
+  <img class="hero-float" src="https://d2pas86kykpvmq.cloudfront.net/uploads/rotating_glass_2_de68aa1e02.avif" alt="" loading="lazy">
   <div class="hero-bottom">
     <div class="hero-badge"><span class="dot" id="hbadge-dot"></span><span id="hbadge-txt">Louis · Développeur</span></div>
     <div class="scroll-hint">Scroll Down <div class="scroll-circle">↓</div></div>
@@ -494,27 +507,21 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 
       <div class="scard tilt rev">
         <div class="tilt-shine"></div>
-        <div class="scard-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
+        <img class="icon3d" src="https://img.icons8.com/3d-fluency/96/discord.png" alt="Discord" loading="lazy">
         <div class="scard-title">Bots Discord</div>
         <p class="scard-desc">Bots Discord avancés avec commandes slash, systèmes de modération automatique, intégrations API, systèmes de tickets, musique et bien plus encore.</p>
       </div>
 
       <div class="scard tilt rev d1">
         <div class="tilt-shine"></div>
-        <div class="scard-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2" stroke-linecap="round"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-linecap="round"/></svg>
-        </div>
+        <img class="icon3d" src="https://img.icons8.com/3d-fluency/96/smartphone-tablet.png" alt="Mobile" loading="lazy">
         <div class="scard-title">Apps Mobiles</div>
         <p class="scard-desc">Applications React Native cross-platform pour iOS et Android. Interface moderne, performances optimisées et expérience utilisateur soignée.</p>
       </div>
 
       <div class="scard tilt rev d2">
         <div class="tilt-shine"></div>
-        <div class="scard-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6" stroke-linecap="round" stroke-linejoin="round"/><polyline points="8 6 2 12 8 18" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
+        <img class="icon3d" src="https://img.icons8.com/3d-fluency/96/web.png" alt="Web" loading="lazy">
         <div class="scard-title">Sites Web</div>
         <p class="scard-desc">Sites web sur mesure, portfolios, landing pages et applications web modernes. Rapide, responsive, optimisé SEO et livré clé en main.</p>
       </div>
@@ -534,6 +541,7 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 
       <div class="tcard tilt rev">
         <div class="tilt-shine"></div>
+        <img class="tcard-icon3d" src="https://img.icons8.com/3d-fluency/96/rocket.png" alt="Starter" loading="lazy">
         <div class="tcard-label">STARTER</div>
         <div class="tcard-price">
           <span class="tcard-amount">99</span><span class="tcard-curr">€</span>
@@ -551,6 +559,7 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 
       <div class="tcard tcard-featured tilt rev d1">
         <div class="tilt-shine"></div>
+        <img class="tcard-icon3d" src="https://img.icons8.com/3d-fluency/96/lightning-bolt.png" alt="Pro" loading="lazy">
         <div class="tcard-badge">POPULAIRE</div>
         <div class="tcard-label">PRO</div>
         <div class="tcard-price">
@@ -569,6 +578,7 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 
       <div class="tcard tilt rev d2">
         <div class="tilt-shine"></div>
+        <img class="tcard-icon3d" src="https://img.icons8.com/3d-fluency/96/diamond.png" alt="Premium" loading="lazy">
         <div class="tcard-label">PREMIUM</div>
         <div class="tcard-price" style="margin-bottom:12px">
           <span class="tcard-amount" style="font-size:2.8rem;letter-spacing:-.02em">Sur devis</span>
