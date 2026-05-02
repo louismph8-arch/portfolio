@@ -9,7 +9,7 @@
 <link rel="icon" href="icons/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -29,17 +29,20 @@ html{scroll-behavior:smooth}
   --pill:100px;
   --card:14px;
   --max:1160px;
-  --fh:'Barlow Condensed',sans-serif;
-  --fb:'Barlow',sans-serif;
+  --fh:'Archivo Black','Archivo',sans-serif;
+  --fb:'Space Grotesk',sans-serif;
 }
 body{background:var(--black);color:var(--white);font-family:var(--fb);font-size:16px;line-height:1.6;overflow-x:hidden;cursor:none}
 a{color:inherit;text-decoration:none}
 button{font-family:var(--fb)}
 
 /* ── CURSOR RING ── */
-#cur{position:fixed;width:36px;height:36px;border:1.5px solid rgba(255,255,255,.55);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .25s cubic-bezier(.23,1,.32,1),height .25s cubic-bezier(.23,1,.32,1),border-color .25s,background .25s}
-#cur.big{width:60px;height:60px;border-color:var(--accent);background:rgba(230,57,70,.06)}
-#cur-dot{position:fixed;width:4px;height:4px;background:#fff;border-radius:50%;pointer-events:none;z-index:10000;transform:translate(-50%,-50%);transition:opacity .2s}
+#cur{position:fixed;width:36px;height:36px;border:1.5px solid rgba(255,255,255,.55);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .25s cubic-bezier(.23,1,.32,1),height .25s cubic-bezier(.23,1,.32,1),border-color .25s,background .25s,opacity .2s}
+#cur.big{width:64px;height:64px;border-color:var(--accent);background:rgba(230,57,70,.07);box-shadow:0 0 20px rgba(230,57,70,.25)}
+#cur.clicking{transform:translate(-50%,-50%) scale(.8);background:rgba(230,57,70,.15)}
+#cur-dot{position:fixed;width:5px;height:5px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:10000;transform:translate(-50%,-50%);transition:opacity .2s;box-shadow:0 0 6px rgba(230,57,70,.8)}
+/* Cursor trail dots */
+.cur-trail{position:fixed;width:5px;height:5px;border-radius:50%;background:rgba(230,57,70,.4);pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:opacity .5s}
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:3px}
@@ -132,6 +135,26 @@ h2.big{font-family:var(--fh);font-weight:900;font-size:clamp(2.8rem,7.5vw,7.2rem
 #hero{position:relative;height:100vh;min-height:680px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 #hero-cv{position:absolute;inset:0;width:100%;height:100%}
 .hero-gradient{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,rgba(0,0,0,.05) 0%,rgba(0,0,0,.55) 80%,rgba(0,0,0,.85) 100%);z-index:1;pointer-events:none}
+
+/* ── AURORA ORBS ── */
+.aurora{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.18;animation:orb-drift 18s ease-in-out infinite}
+.orb1{width:700px;height:700px;background:radial-gradient(circle,#e63946 0%,transparent 70%);top:-20%;left:-15%;animation-delay:0s;animation-duration:20s}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,#9b1d26 0%,transparent 70%);top:40%;right:-10%;animation-delay:-7s;animation-duration:17s}
+.orb3{width:400px;height:400px;background:radial-gradient(circle,#c0292e 0%,transparent 70%);bottom:-10%;left:40%;animation-delay:-13s;animation-duration:23s}
+@keyframes orb-drift{
+  0%,100%{transform:translate(0,0) scale(1)}
+  25%{transform:translate(60px,-40px) scale(1.08)}
+  50%{transform:translate(-40px,60px) scale(.95)}
+  75%{transform:translate(30px,30px) scale(1.05)}
+}
+
+/* ── HERO GRID PATTERN ── */
+.hero-grid{position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse at 50% 50%,black 30%,transparent 80%)
+}
 .hero-content{position:relative;z-index:2;text-align:center;display:flex;flex-direction:column;align-items:center;padding:0 40px;padding-top:90px;width:100%}
 .hero-tag{display:inline-flex;align-items:center;gap:9px;padding:7px 18px;border-radius:var(--pill);border:1px solid rgba(255,255,255,.15);font-size:12px;font-weight:500;color:var(--dim);margin-bottom:36px}
 .hero-title{font-family:var(--fh);font-weight:900;font-size:clamp(4.2rem,9.5vw,10rem);line-height:.88;letter-spacing:-.01em;text-transform:uppercase;margin-bottom:28px;max-width:1100px}
@@ -158,6 +181,24 @@ h2.big{font-family:var(--fh);font-weight:900;font-size:clamp(2.8rem,7.5vw,7.2rem
 .about-img-inner{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.08);display:block}
 .about-img-placeholder{font-family:var(--fh);font-size:5rem;font-weight:900;color:rgba(255,255,255,.04);letter-spacing:.1em}
 
+/* ── SKILLS ── */
+#skills{padding:120px 0;border-top:1px solid var(--border)}
+.skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;margin-top:64px}
+.skill-item{margin-bottom:32px}
+.skill-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.skill-name{font-size:13.5px;font-weight:600;letter-spacing:.04em}
+.skill-pct{font-family:var(--fh);font-size:1rem;font-weight:700;color:var(--accent)}
+.skill-track{height:3px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;position:relative}
+.skill-bar{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent),#ff6b7a);border-radius:3px;width:0%;transition:width 1.4s cubic-bezier(.16,1,.3,1);box-shadow:0 0 12px rgba(230,57,70,.5)}
+.skill-item.animate .skill-bar{width:var(--pct)}
+.skills-right{padding-top:16px}
+.skills-right-title{font-family:var(--fh);font-size:clamp(1.4rem,2.5vw,2rem);font-weight:900;margin-bottom:20px;line-height:1.2}
+.skills-right-desc{font-size:15px;color:var(--dim);line-height:1.85;margin-bottom:36px}
+.skill-tags{display:flex;flex-wrap:wrap;gap:8px}
+.skill-tag{padding:7px 16px;border-radius:var(--pill);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--dim);transition:border-color .2s,color .2s}
+.skill-tag:hover{border-color:var(--accent);color:#fff}
+@media(max-width:900px){.skills-grid{grid-template-columns:1fr;gap:48px}}
+
 /* ── TECH STRIP ── */
 .strip{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:22px 0;overflow:hidden}
 .strip-track{display:flex;gap:0;animation:marquee 28s linear infinite;width:max-content}
@@ -171,8 +212,10 @@ h2.big{font-family:var(--fh);font-weight:900;font-size:clamp(2.8rem,7.5vw,7.2rem
 .services-head{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end;margin-bottom:56px}
 .services-desc{font-size:15px;color:var(--dim);line-height:1.8;max-width:420px}
 .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.scard{border:1px solid var(--border);border-radius:var(--card);padding:36px 30px 40px;background:var(--surface);transition:border-color .2s,transform .25s;cursor:default}
-.scard:hover{border-color:var(--border2);transform:translateY(-5px)}
+.scard{border:1px solid var(--border);border-radius:var(--card);padding:36px 30px 40px;background:var(--surface);transition:border-color .3s,transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;cursor:default;position:relative;overflow:hidden}
+.scard::after{content:'';position:absolute;inset:0;border-radius:var(--card);background:radial-gradient(circle at 50% 0%,rgba(230,57,70,.08),transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none}
+.scard:hover{border-color:rgba(230,57,70,.4);transform:translateY(-8px);box-shadow:0 20px 60px rgba(230,57,70,.12),0 0 0 1px rgba(230,57,70,.15)}
+.scard:hover::after{opacity:1}
 .scard-icon{width:50px;height:50px;border:1px solid var(--border);border-radius:13px;display:flex;align-items:center;justify-content:center;margin-bottom:44px}
 .scard-title{font-family:var(--fh);font-size:1.9rem;font-weight:700;margin-bottom:14px}
 .scard-desc{font-size:14px;color:var(--dim);line-height:1.8}
@@ -194,10 +237,22 @@ h2.big{font-family:var(--fh);font-weight:900;font-size:clamp(2.8rem,7.5vw,7.2rem
 .pcard .proj-name{font-size:1.25rem}
 
 /* ── CONTACT ── */
-#contact{padding:140px 0;border-top:1px solid var(--border);text-align:center}
-.contact-inner{max-width:680px;margin:0 auto;padding:0 48px}
-.contact-sub{font-size:15.5px;color:var(--dim);line-height:1.8;margin:22px 0 48px}
-.contact-btns{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+#contact{padding:140px 0;border-top:1px solid var(--border)}
+.contact-wrap{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.contact-left{}
+.contact-sub{font-size:15.5px;color:var(--dim);line-height:1.85;margin:22px 0 44px;max-width:480px}
+.contact-btns{display:flex;gap:14px;flex-wrap:wrap}
+.contact-cards{display:flex;flex-direction:column;gap:12px}
+.ccard{display:flex;align-items:center;gap:18px;padding:20px 24px;border:1px solid var(--border);border-radius:var(--card);background:var(--surface);transition:border-color .25s,transform .25s,box-shadow .25s;cursor:pointer;text-decoration:none;color:inherit}
+.ccard:hover{border-color:rgba(230,57,70,.4);transform:translateX(6px);box-shadow:0 8px 32px rgba(230,57,70,.1)}
+.ccard-icon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);border:1px solid var(--border);flex-shrink:0;transition:background .25s,border-color .25s}
+.ccard:hover .ccard-icon{background:rgba(230,57,70,.12);border-color:rgba(230,57,70,.3)}
+.ccard-info{}
+.ccard-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dimmer);margin-bottom:3px}
+.ccard-value{font-size:14px;font-weight:600;color:#fff}
+.ccard-arr{margin-left:auto;color:var(--dimmer);font-size:18px;transition:transform .25s,color .25s}
+.ccard:hover .ccard-arr{transform:translateX(4px);color:var(--accent)}
+@media(max-width:900px){.contact-wrap{grid-template-columns:1fr;gap:48px}}
 
 /* ── FOOTER ── */
 footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--dimmer)}
@@ -236,6 +291,25 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 
 /* ── MAGNETIC BTN ── */
 .btn-mag{transition:transform .25s cubic-bezier(.23,1,.32,1)}
+
+/* ── PROCESS ── */
+#process{padding:120px 0;border-top:1px solid var(--border)}
+.process-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:64px;position:relative}
+.process-grid::before{content:'';position:absolute;top:36px;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--border2) 20%,var(--border2) 80%,transparent);z-index:0;pointer-events:none}
+.pstep{padding:36px 28px 40px;position:relative;z-index:1}
+.pstep-num{font-family:var(--fh);font-size:3.5rem;font-weight:900;color:rgba(255,255,255,.06);line-height:1;margin-bottom:24px;letter-spacing:-.04em;transition:color .3s}
+.pstep:hover .pstep-num{color:var(--accent)}
+.pstep-dot{width:10px;height:10px;border-radius:50%;background:var(--border2);border:2px solid var(--surface);position:absolute;top:32px;left:28px;transition:background .3s,box-shadow .3s}
+.pstep:hover .pstep-dot{background:var(--accent);box-shadow:0 0 12px rgba(230,57,70,.6)}
+.pstep-icon{width:48px;height:48px;border-radius:12px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin-bottom:24px;background:var(--surface);transition:border-color .3s,background .3s}
+.pstep:hover .pstep-icon{border-color:var(--accent);background:rgba(230,57,70,.08)}
+.pstep-title{font-family:var(--fh);font-size:1.3rem;font-weight:900;margin-bottom:12px;letter-spacing:.01em}
+.pstep-desc{font-size:13.5px;color:var(--dim);line-height:1.8}
+@media(max-width:900px){
+  .process-grid{grid-template-columns:1fr 1fr;gap:0}
+  .process-grid::before{display:none}
+}
+@media(max-width:580px){.process-grid{grid-template-columns:1fr}}
 
 /* ── TARIFS ── */
 #tarifs{padding:120px 0;border-top:1px solid var(--border)}
@@ -380,7 +454,9 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 <!-- SECTION DOTS -->
 <nav id="sdots" aria-label="Sections">
   <button class="sdot" data-label="À propos" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})"></button>
+  <button class="sdot" data-label="Skills" onclick="document.getElementById('skills').scrollIntoView({behavior:'smooth'})"></button>
   <button class="sdot" data-label="Services" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})"></button>
+  <button class="sdot" data-label="Processus" onclick="document.getElementById('process').scrollIntoView({behavior:'smooth'})"></button>
   <button class="sdot" data-label="Tarifs" onclick="document.getElementById('tarifs').scrollIntoView({behavior:'smooth'})"></button>
   <button class="sdot" data-label="Projets" onclick="document.getElementById('projects').scrollIntoView({behavior:'smooth'})"></button>
   <button class="sdot" data-label="Contact" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})"></button>
@@ -391,6 +467,7 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
   <span class="nav-logo">Testarossa</span>
   <ul class="nav-links">
     <li><a href="#about">À propos</a></li>
+    <li><a href="#skills">Skills</a></li>
     <li><a href="#services">Services</a></li>
     <li><a href="#tarifs">Tarifs</a></li>
     <li><a href="#projects">Projets</a></li>
@@ -405,6 +482,8 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 <!-- HERO -->
 <section id="hero">
   <canvas id="hero-cv"></canvas>
+  <div class="aurora"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+  <div class="hero-grid"></div>
   <div class="hero-gradient"></div>
   <div class="hero-content">
     <div class="hero-tag"><span class="dot" id="htag-dot"></span><span id="htag-txt">Disponible · Montréal &amp; Remote</span></div>
@@ -488,6 +567,60 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
   </div>
 </section>
 
+<!-- SKILLS -->
+<section id="skills">
+  <div class="wrap">
+    <span class="lbl rev">Compétences</span>
+    <h2 class="big rev">MON STACK<br>TECHNIQUE</h2>
+    <div class="skills-grid">
+      <div class="skills-left rev" id="skills-bars">
+        <div class="skill-item" style="--pct:96%">
+          <div class="skill-head"><span class="skill-name">Discord.js &amp; Bots</span><span class="skill-pct">96%</span></div>
+          <div class="skill-track"><div class="skill-bar"></div></div>
+        </div>
+        <div class="skill-item" style="--pct:92%">
+          <div class="skill-head"><span class="skill-name">Node.js / Express</span><span class="skill-pct">92%</span></div>
+          <div class="skill-track"><div class="skill-bar"></div></div>
+        </div>
+        <div class="skill-item" style="--pct:90%">
+          <div class="skill-head"><span class="skill-name">React &amp; Next.js</span><span class="skill-pct">90%</span></div>
+          <div class="skill-track"><div class="skill-bar"></div></div>
+        </div>
+        <div class="skill-item" style="--pct:88%">
+          <div class="skill-head"><span class="skill-name">TypeScript</span><span class="skill-pct">88%</span></div>
+          <div class="skill-track"><div class="skill-bar"></div></div>
+        </div>
+        <div class="skill-item" style="--pct:85%">
+          <div class="skill-head"><span class="skill-name">React Native</span><span class="skill-pct">85%</span></div>
+          <div class="skill-track"><div class="skill-bar"></div></div>
+        </div>
+        <div class="skill-item" style="--pct:80%">
+          <div class="skill-head"><span class="skill-name">Python &amp; APIs</span><span class="skill-pct">80%</span></div>
+          <div class="skill-track"><div class="skill-bar"></div></div>
+        </div>
+        <div class="skill-item" style="--pct:78%">
+          <div class="skill-head"><span class="skill-name">MongoDB &amp; PostgreSQL</span><span class="skill-pct">78%</span></div>
+          <div class="skill-track"><div class="skill-bar"></div></div>
+        </div>
+      </div>
+      <div class="skills-right rev d1">
+        <p class="skills-right-title">Des outils maîtrisés,<br>des résultats concrets.</p>
+        <p class="skills-right-desc">Chaque technologie est choisie pour sa performance et sa pertinence. Je construis des solutions robustes, scalables et maintenables — de l'idée au déploiement.</p>
+        <div class="skill-tags">
+          <span class="skill-tag">Git & GitHub</span>
+          <span class="skill-tag">Docker</span>
+          <span class="skill-tag">Firebase</span>
+          <span class="skill-tag">REST &amp; GraphQL</span>
+          <span class="skill-tag">JWT / OAuth</span>
+          <span class="skill-tag">Tailwind CSS</span>
+          <span class="skill-tag">WebSockets</span>
+          <span class="skill-tag">Linux / VPS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- TECH STRIP -->
 <div class="strip">
   <div class="strip-track" id="strip-track"></div>
@@ -524,6 +657,53 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
         <img class="icon3d" src="https://img.icons8.com/3d-fluency/96/web.png" alt="Web" loading="lazy">
         <div class="scard-title">Sites Web</div>
         <p class="scard-desc">Sites web sur mesure, portfolios, landing pages et applications web modernes. Rapide, responsive, optimisé SEO et livré clé en main.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="wrap">
+    <span class="lbl rev">Comment je travaille</span>
+    <h2 class="big rev">MON<br>PROCESSUS</h2>
+    <div class="process-grid">
+
+      <div class="pstep rev">
+        <div class="pstep-num">01</div>
+        <div class="pstep-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
+        <div class="pstep-title">Découverte</div>
+        <p class="pstep-desc">Analyse de vos besoins, définition du périmètre et planification des fonctionnalités clés.</p>
+      </div>
+
+      <div class="pstep rev d1">
+        <div class="pstep-num">02</div>
+        <div class="pstep-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <div class="pstep-title">Architecture</div>
+        <p class="pstep-desc">Choix du stack technique, conception de l'architecture et mise en place de l'environnement.</p>
+      </div>
+
+      <div class="pstep rev d2">
+        <div class="pstep-num">03</div>
+        <div class="pstep-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <div class="pstep-title">Développement</div>
+        <p class="pstep-desc">Écriture du code, intégrations, tests unitaires et révisions itératives avec vous.</p>
+      </div>
+
+      <div class="pstep rev d3">
+        <div class="pstep-num">04</div>
+        <div class="pstep-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="pstep-title">Livraison</div>
+        <p class="pstep-desc">Déploiement sur vos serveurs, documentation, formation et support post-lancement.</p>
       </div>
 
     </div>
@@ -614,14 +794,59 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 
 <!-- CONTACT -->
 <section id="contact">
-  <div class="contact-inner">
-    <span class="lbl" style="justify-content:center">Contact</span>
-    <h2 class="big rev">TRAVAILLONS<br>ENSEMBLE</h2>
-    <p class="contact-sub rev">Disponible pour des missions freelance à Montréal et à distance. Bots Discord, apps mobiles, sites web — parlons de votre projet.</p>
-    <div class="contact-btns rev">
-      <a href="mailto:louis@Testarossa.dev" class="btn btn-red">Envoyer un email</a>
-      <a href="https://github.com/Testarossa" target="_blank" rel="noopener" class="btn btn-ghost">GitHub</a>
-      <a href="https://discord.com/users/Testarossa" target="_blank" rel="noopener" class="btn btn-ghost">Discord</a>
+  <div class="wrap">
+    <div class="contact-wrap">
+      <div class="contact-left">
+        <span class="lbl rev">Contact</span>
+        <h2 class="big rev">TRAVAILLONS<br>ENSEMBLE</h2>
+        <p class="contact-sub rev">Disponible pour des missions freelance à Montréal et à distance. Bots Discord, apps mobiles, sites web — parlons de votre projet.</p>
+        <div class="contact-btns rev">
+          <a href="mailto:louis@testarossa.dev" class="btn btn-red btn-mag">Envoyer un email</a>
+          <a href="#" class="btn btn-ghost btn-mag">Voir le CV</a>
+        </div>
+      </div>
+      <div class="contact-cards rev d1">
+        <a href="mailto:louis@testarossa.dev" class="ccard">
+          <div class="ccard-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div class="ccard-info">
+            <div class="ccard-label">Email</div>
+            <div class="ccard-value">louis@testarossa.dev</div>
+          </div>
+          <span class="ccard-arr">→</span>
+        </a>
+        <a href="https://github.com/louismph8-arch" target="_blank" rel="noopener" class="ccard">
+          <div class="ccard-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+          </div>
+          <div class="ccard-info">
+            <div class="ccard-label">GitHub</div>
+            <div class="ccard-value">louismph8-arch</div>
+          </div>
+          <span class="ccard-arr">→</span>
+        </a>
+        <a href="https://discord.com/users/testarossa" target="_blank" rel="noopener" class="ccard">
+          <div class="ccard-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.09 14.09 0 001.226-1.994.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
+          </div>
+          <div class="ccard-info">
+            <div class="ccard-label">Discord</div>
+            <div class="ccard-value">Testarossa#0000</div>
+          </div>
+          <span class="ccard-arr">→</span>
+        </a>
+        <a href="https://www.linkedin.com/in/testarossa" target="_blank" rel="noopener" class="ccard">
+          <div class="ccard-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </div>
+          <div class="ccard-info">
+            <div class="ccard-label">LinkedIn</div>
+            <div class="ccard-value">Testarossa · Dev</div>
+          </div>
+          <span class="ccard-arr">→</span>
+        </a>
+      </div>
     </div>
   </div>
 </section>
@@ -639,27 +864,48 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 <script>
-/* ─────────────────────────────── CURSOR RING (lerp) ─── */
+/* ─────────────────────────────── CURSOR RING (lerp + trail) ─── */
 (()=>{
   const ring=document.getElementById('cur');
   const dot=document.getElementById('cur-dot');
   let cx=window.innerWidth/2,cy=window.innerHeight/2;
   let tx=cx,ty=cy;
 
+  /* Trail dots */
+  const TRAIL=6;
+  const trail=Array.from({length:TRAIL},(_,i)=>{
+    const d=document.createElement('div');
+    d.className='cur-trail';
+    d.style.opacity=((TRAIL-i)/TRAIL*.35).toFixed(2);
+    d.style.width=d.style.height=Math.max(2,(5-i*.6))+'px';
+    document.body.appendChild(d);
+    return{el:d,x:cx,y:cy};
+  });
+
   document.addEventListener('mousemove',e=>{
     tx=e.clientX;ty=e.clientY;
     if(dot){dot.style.left=tx+'px';dot.style.top=ty+'px';}
   },{passive:true});
 
+  document.addEventListener('mousedown',()=>ring.classList.add('clicking'));
+  document.addEventListener('mouseup',()=>ring.classList.remove('clicking'));
+
   (function tick(){
     cx+=(tx-cx)*.11;
     cy+=(ty-cy)*.11;
-    ring.style.left=cx+'px';
-    ring.style.top=cy+'px';
+    ring.style.left=cx+'px';ring.style.top=cy+'px';
+    /* Update trail with lag */
+    let px=tx,py=ty;
+    trail.forEach((t,i)=>{
+      t.x+=(px-t.x)*.18;
+      t.y+=(py-t.y)*.18;
+      t.el.style.left=t.x+'px';t.el.style.top=t.y+'px';
+      px=t.x;py=t.y;
+    });
     requestAnimationFrame(tick);
   })();
 
-  document.querySelectorAll('a,button,.scard,.proj-hero,.pcard,.tcard').forEach(el=>{
+  document.querySelectorAll('a,button,.scard,.proj-hero,.pcard,.tcard,.pstep,.skill-tag').forEach(el=>{
     el.addEventListener('mouseenter',()=>ring.classList.add('big'));
     el.addEventListener('mouseleave',()=>ring.classList.remove('big'));
   });
@@ -960,11 +1206,17 @@ const TECHS=[
   document.querySelectorAll('.btn-mag').forEach(btn=>{
     btn.addEventListener('mousemove',e=>{
       const r=btn.getBoundingClientRect();
-      const x=(e.clientX-r.left-r.width/2)*.35;
-      const y=(e.clientY-r.top-r.height/2)*.35;
-      btn.style.transform=`translate(${x}px,${y}px)`;
+      const x=(e.clientX-r.left-r.width/2)*.45;
+      const y=(e.clientY-r.top-r.height/2)*.45;
+      const rx=-(y/r.height)*8;
+      const ry=(x/r.width)*8;
+      btn.style.transform=`translate(${x}px,${y}px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+      btn.style.transition='transform .1s ease';
     });
-    btn.addEventListener('mouseleave',()=>{btn.style.transform='';});
+    btn.addEventListener('mouseleave',()=>{
+      btn.style.transform='';
+      btn.style.transition='transform .5s cubic-bezier(.23,1,.32,1)';
+    });
   });
 })();
 
@@ -979,7 +1231,7 @@ document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
   const sdots=document.getElementById('sdots');
   const dotBtns=document.querySelectorAll('.sdot');
   const navLinks=document.querySelectorAll('.nav-links a');
-  const sections=['about','services','tarifs','projects','contact'];
+  const sections=['about','skills','services','process','tarifs','projects','contact'];
 
   /* Show dots after hero scroll */
   window.addEventListener('scroll',()=>{
@@ -1285,6 +1537,21 @@ function scrambleHero(){
   const mutObs=new MutationObserver(()=>initHScroll(document.getElementById('projs-wrap')));
   const pw=document.getElementById('projs-wrap');
   if(pw)mutObs.observe(pw,{childList:true});
+})();
+
+/* ─────────────────────────────── SKILLS BARS ─── */
+(()=>{
+  const skillObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      e.target.querySelectorAll('.skill-item').forEach((item,i)=>{
+        setTimeout(()=>item.classList.add('animate'),i*120);
+      });
+      skillObs.unobserve(e.target);
+    });
+  },{threshold:.2});
+  const sb=document.getElementById('skills-bars');
+  if(sb)skillObs.observe(sb);
 })();
 
 /* ─────────────────────────────── GITHUB CONTRIBUTIONS HEATMAP ─── */
