@@ -1,14 +1,14 @@
-# DataPulse — Analytics SaaS Platform
+# Veltrix — Analytics SaaS Platform
 
 > Real-time analytics dashboard built as a portfolio project. Interactive charts, live data simulation, CSV exports, and a polished dark-mode UI with 3D globe animation.
 
-![DataPulse Preview](https://img.shields.io/badge/Status-Live%20Demo-10b981?style=flat-square) ![HTML](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white) ![CSS](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) ![Three.js](https://img.shields.io/badge/Three.js-000000?style=flat-square&logo=three.js&logoColor=white) ![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=flat-square&logo=chart.js&logoColor=white)
+![Veltrix Preview](https://img.shields.io/badge/Status-Live%20Demo-10b981?style=flat-square) ![HTML](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white) ![CSS](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) ![Three.js](https://img.shields.io/badge/Three.js-000000?style=flat-square&logo=three.js&logoColor=white) ![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=flat-square&logo=chart.js&logoColor=white)
 
 ---
 
 ## Live Demo
 
-**[datapulse-analytics.netlify.app](https://datapulse-analytics.netlify.app)** ← replace with your URL
+**[veltrix-analytics.netlify.app](https://veltrix-analytics.netlify.app)** ← replace with your URL
 
 ---
 
@@ -45,7 +45,7 @@
 ## Project Structure
 
 ```
-datapulse/
+veltrix/
 ├── index.html      # Landing page — globe 3D, features, pricing, CTA
 └── dashboard.html  # SaaS dashboard — auth, KPIs, charts, exports
 ```
@@ -56,8 +56,8 @@ datapulse/
 
 ```bash
 # Clone
-git clone https://github.com/YOUR_USERNAME/datapulse-analytics.git
-cd datapulse-analytics
+git clone https://github.com/YOUR_USERNAME/veltrix-analytics.git
+cd veltrix-analytics
 
 # Open directly (no build step needed)
 open index.html

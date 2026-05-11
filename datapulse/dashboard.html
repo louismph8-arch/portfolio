@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DataPulse — Dashboard</title>
-  <meta name="description" content="Dashboard analytics temps réel — DataPulse" />
+  <title>Veltrix — Dashboard</title>
+  <meta name="description" content="Dashboard analytics temps réel — Veltrix" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -873,7 +873,7 @@
           </linearGradient>
         </defs>
       </svg>
-      DataPulse
+      Veltrix
     </div>
 
     <div class="auth-tabs" role="tablist">
@@ -945,7 +945,7 @@
         </linearGradient>
       </defs>
     </svg>
-    DataPulse
+    Veltrix
   </a>
 
   <div class="sidebar-section">
@@ -1373,7 +1373,7 @@ function handleLogin() {
   setTimeout(() => {
     document.getElementById('auth-overlay').style.display = 'none';
     initDashboard();
-    showToast('Bienvenue !', 'Vous êtes connecté à DataPulse. Les données se chargent.', 'green');
+    showToast('Bienvenue !', 'Vous êtes connecté à Veltrix. Les données se chargent.', 'green');
   }, 1200);
 }
 
@@ -1717,15 +1717,15 @@ function exportCSV(type) {
   if (type === 'revenue') {
     csv = 'Mois,Revenus ($),Sessions\n' +
       months.map((m, i) => `${m} 2025,${revenueData[i]},${sessionsData[i]}`).join('\n');
-    filename = 'datapulse_revenus.csv';
+    filename = 'veltrix_revenus.csv';
   } else if (type === 'users') {
     csv = 'Mois,Nouveaux Utilisateurs,Utilisateurs Retour\n' +
       months.map((m, i) => `${m} 2025,${newUsersData[i]},${returnUsersData[i]}`).join('\n');
-    filename = 'datapulse_utilisateurs.csv';
+    filename = 'veltrix_utilisateurs.csv';
   } else if (type === 'accounts') {
     csv = 'Compte,Pays,Plan,MRR,Statut\n' +
       accounts.map(a => `"${a.name}",${a.country.replace(/ /g,'')},${a.plan},"${a.mrr}",${a.status}`).join('\n');
-    filename = 'datapulse_comptes.csv';
+    filename = 'veltrix_comptes.csv';
   }
 
   downloadCSV(csv, filename);
