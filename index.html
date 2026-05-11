@@ -422,9 +422,29 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
   footer{flex-direction:column;gap:14px;text-align:center}
 }
 @media(max-width:580px){
-  .projs-small{grid-template-columns:1fr}
   .contact-btns{flex-direction:column;align-items:center}
 }
+
+/* === SECTION PROJETS === */
+.projects-section{padding:120px 0;border-top:1px solid var(--border)}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:2rem;margin-top:3rem}
+.project-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;transition:transform .3s ease,border-color .3s,box-shadow .3s;display:flex;flex-direction:column;opacity:0;transform:translateY(28px)}
+.project-card.on{opacity:1;transform:translateY(0);transition:opacity .7s ease,transform .7s ease,border-color .3s,box-shadow .3s}
+.project-card:hover{transform:translateY(-8px)!important;border-color:rgba(230,57,70,.35);box-shadow:0 20px 60px rgba(230,57,70,.12)}
+.project-image{height:180px;background:linear-gradient(135deg,rgba(230,57,70,.1),rgba(100,50,200,.1));display:flex;align-items:center;justify-content:center}
+.project-image img{width:96px;height:96px;object-fit:contain;filter:drop-shadow(0 8px 24px rgba(0,0,0,.5));transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.project-card:hover .project-image img{transform:translateY(-6px) scale(1.08)}
+.project-content{padding:1.5rem;display:flex;flex-direction:column;flex:1}
+.project-title{font-family:var(--fh);font-size:1.25rem;font-weight:900;margin-bottom:.75rem;color:#fff;letter-spacing:.01em}
+.project-description{color:rgba(255,255,255,.65);font-size:.93rem;line-height:1.7;margin-bottom:1rem;flex:1}
+.project-tags{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.project-tag{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:.25rem .75rem;border-radius:20px;font-size:.78rem;font-weight:600;color:rgba(255,255,255,.8);transition:border-color .2s,background .2s}
+.project-card:hover .project-tag{border-color:rgba(230,57,70,.3);background:rgba(230,57,70,.06)}
+.project-links{display:flex;gap:1rem;margin-top:auto}
+.project-link{color:var(--accent);text-decoration:none;font-weight:700;font-size:.88rem;transition:color .2s,letter-spacing .2s}
+.project-link:hover{color:#fff;letter-spacing:.04em}
+.project-link.demo{color:#4dd0e1}
+@media(max-width:600px){.projects-grid{grid-template-columns:1fr;gap:1.5rem}}
 </style>
 </head>
 <body>
@@ -779,16 +799,11 @@ footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-i
 </section>
 
 <!-- PROJECTS -->
-<section id="projects">
+<section id="projects" class="projects-section">
   <div class="wrap">
     <span class="lbl rev">Mes projets</span>
-    <h2 class="big rev" style="margin-bottom:48px">MES PROJETS</h2>
-    <div class="proj-hscroll" id="projs-wrap">
-      <div class="proj-hero rev" style="min-height:300px;align-items:center;justify-content:center;min-width:min(700px,82vw)">
-        <div class="proj-bg-text">…</div>
-        <div style="position:relative;z-index:2;color:var(--dim);font-size:14px">Chargement des projets…</div>
-      </div>
-    </div>
+    <h2 class="big rev">MES <span style="color:var(--accent)">RÉALISATIONS</span></h2>
+    <div class="projects-grid" id="projects-grid"></div>
   </div>
 </section>
 
@@ -1056,70 +1071,71 @@ const TECHS=[
   }catch(e){}
 })();
 
-/* ─────────────────────────────── GITHUB ─── */
-(async()=>{
-  const wrap=document.getElementById('projs-wrap');
-  if(!wrap)return;
+/* ─────────────────────────────── PROJETS TESTAROSSA ─── */
+(()=>{
+  const PROJECTS=[
+    {title:'Bot Discord Modération Pro',description:'Bot complet avec auto-modération, système de tickets, logs avancés et dashboard web. Utilisé sur 15+ serveurs.',tags:['Discord.js','Node.js','MongoDB'],image:'https://img.icons8.com/3d-fluency/200/discord.png',link:'https://github.com/louismph8-arch',demo:null},
+    {title:'Site Vitrine Restaurant',description:'Site moderne pour un restaurant montréalais avec réservation en ligne, menu dynamique et SEO optimisé.',tags:['Next.js','Tailwind','Vercel'],image:'https://img.icons8.com/3d-fluency/200/restaurant.png',link:'https://github.com/louismph8-arch',demo:null},
+    {title:'App Mobile Fitness Tracker',description:'Application React Native cross-platform avec authentification, suivi d\'entraînement et statistiques personnalisées.',tags:['React Native','Firebase','TypeScript'],image:'https://img.icons8.com/3d-fluency/200/dumbbell.png',link:'https://github.com/louismph8-arch',demo:null},
+    {title:'Dashboard Analytics SaaS',description:'Plateforme web pour visualiser des données en temps réel. Graphiques interactifs, exports CSV, authentification.',tags:['React','Express','PostgreSQL'],image:'https://img.icons8.com/3d-fluency/200/dashboard.png',link:'https://github.com/louismph8-arch',demo:null},
+    {title:'Bot Discord Musique Premium',description:'Bot musical haute qualité avec playlists, lyrics, file d\'attente et intégration Spotify/YouTube.',tags:['Discord.js','Lavalink','API'],image:'https://img.icons8.com/3d-fluency/200/musical-notes.png',link:'https://github.com/louismph8-arch',demo:null},
+    {title:'Landing Page Coach Sportif',description:'Landing page haute conversion avec formulaire de contact, témoignages clients et intégration Calendly.',tags:['HTML/CSS','JavaScript','Formspree'],image:'https://img.icons8.com/3d-fluency/200/personal-trainer.png',link:'https://github.com/louismph8-arch',demo:null},
+  ];
 
+  function renderProjects(){
+    const grid=document.getElementById('projects-grid');
+    if(!grid)return;
+    grid.innerHTML=PROJECTS.map((p,i)=>`
+      <article class="project-card tilt rev" style="transition-delay:${i*80}ms">
+        <div class="tilt-shine"></div>
+        <div class="project-image"><img src="${p.image}" alt="${p.title}" loading="lazy"></div>
+        <div class="project-content">
+          <h3 class="project-title">${p.title}</h3>
+          <p class="project-description">${p.description}</p>
+          <div class="project-tags">${p.tags.map(t=>`<span class="project-tag">${t}</span>`).join('')}</div>
+          <div class="project-links">
+            ${p.link?`<a href="${p.link}" target="_blank" rel="noopener" class="project-link">Code →</a>`:''}
+            ${p.demo?`<a href="${p.demo}" target="_blank" rel="noopener" class="project-link demo">Démo →</a>`:''}
+          </div>
+        </div>
+      </article>`).join('');
+    /* Re-apply reveal + tilt observers on new cards */
+    grid.querySelectorAll('.rev').forEach(el=>obs.observe(el));
+    grid.querySelectorAll('.tilt').forEach(el=>{
+      const shine=el.querySelector('.tilt-shine');
+      el.addEventListener('mousemove',e=>{
+        const r=el.getBoundingClientRect();
+        const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+        el.style.transform=`perspective(700px) rotateY(${x*14}deg) rotateX(${-y*10}deg) translateZ(10px) translateY(-8px)`;
+        if(shine)shine.style.background=`radial-gradient(circle at ${(x+.5)*100}% ${(y+.5)*100}%,rgba(255,255,255,.10) 0%,transparent 60%)`;
+      });
+      el.addEventListener('mouseleave',()=>{el.style.transform='';if(shine)shine.style.background='';});
+    });
+    /* Update cursor hover targets */
+    grid.querySelectorAll('.project-card').forEach(el=>{
+      el.addEventListener('mouseenter',()=>document.getElementById('cur')?.classList.add('big'));
+      el.addEventListener('mouseleave',()=>document.getElementById('cur')?.classList.remove('big'));
+    });
+  }
+
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',renderProjects);}
+  else{renderProjects();}
+})();
+
+/* ─────────────────────────────── GITHUB (STATS SEULEMENT) ─── */
+(async()=>{
   const LANG_TAGS={
     JavaScript:'JS',TypeScript:'TS',Python:'Python',
     'C#':'C#',Java:'Java',CSS:'CSS',HTML:'HTML',Go:'Go',Rust:'Rust'
   };
 
-  function buildCard(repo,hero){
-    const name=repo.name.replace(/-/g,' ');
-    const tags=[repo.language&&(LANG_TAGS[repo.language]||repo.language),'GitHub',repo.stargazers_count>0&&'★ '+repo.stargazers_count].filter(Boolean);
-    const tagsHtml=tags.map(t=>`<span class="ptag">${t}</span>`).join('');
-    const desc=repo.description?`<div class="proj-desc">${repo.description}</div>`:'';
-    if(hero){
-      return`<a href="${repo.html_url}" target="_blank" rel="noopener" class="proj-hero rev">
-        <div class="proj-bg-text">${repo.name.toUpperCase().slice(0,10)}</div>
-        <div class="proj-info">
-          <div><div class="proj-name">${name}</div>${desc}</div>
-          <div class="proj-tags">${tagsHtml}</div>
-        </div>
-      </a>`;
-    }
-    return`<a href="${repo.html_url}" target="_blank" rel="noopener" class="pcard rev">
-      <div class="proj-bg-text">${repo.name.slice(0,4).toUpperCase()}</div>
-      <div class="proj-name">${name}</div>
-      <div class="proj-tags" style="margin-top:10px">${tagsHtml}</div>
-    </a>`;
-  }
-
-  function placeholders(){
-    const items=[
-      {name:'discord-bot',description:'Bot Discord avancé avec modération, commandes slash et intégrations tierces.',language:'JavaScript',stargazers_count:0,html_url:'#'},
-      {name:'react-native-app',description:'Application mobile cross-platform iOS & Android avec UI fluide.',language:'TypeScript',stargazers_count:0,html_url:'#'},
-      {name:'portfolio',description:'Portfolio web moderne avec animations Three.js et effets 3D.',language:'JavaScript',stargazers_count:0,html_url:'#'},
-      {name:'api-backend',description:'API RESTful avec Node.js, MongoDB et authentification JWT.',language:'JavaScript',stargazers_count:0,html_url:'#'},
-      {name:'landing-page',description:'Landing page animée haute conversion.',language:'CSS',stargazers_count:0,html_url:'#'},
-      {name:'python-tool',description:'Outil CLI Python pour automatiser des tâches répétitives.',language:'Python',stargazers_count:0,html_url:'#'},
-    ];
-    render(items);
-  }
-
-  function render(repos){
-    const filtered=repos.filter(r=>!r.fork).slice(0,6);
-    if(!filtered.length){placeholders();return;}
-    /* All cards in a single horizontal row */
-    let html=buildCard(filtered[0],true);
-    filtered.slice(1).forEach(r=>{html+=buildCard(r,false);});
-    wrap.innerHTML=html;
-    wrap.querySelectorAll('.rev').forEach(el=>obs.observe(el));
-    const sr=document.getElementById('stat-repos');
-    if(sr)sr.textContent=repos.length+'+'
-  }
-
   try{
-    const r=await fetch('https://api.github.com/users/destinylouis/repos?sort=updated&per_page=20');
+    const r=await fetch('https://api.github.com/users/louismph8-arch/repos?per_page=100');
     if(!r.ok)throw 0;
     const data=await r.json();
-    const desc=data.filter(r=>r.description);
-    render(desc.length?desc:data);
-  }catch{
-    placeholders();
-  }
+    const sr=document.getElementById('stat-repos');
+    if(sr)sr.textContent=data.length+'+';
+  }catch{}
 })();
 
 /* ─────────────────────────────── FLOATING PARTICLES ─── */
